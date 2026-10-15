@@ -112,6 +112,12 @@ body.tracker .clocks .clk b{font-size:15px}
 .dur{position:absolute;top:50%;height:5px;transform:translateY(-50%);background:var(--ice);opacity:.28}
 .dur.liveb{opacity:.9;animation:pulse 1.6s ease-in-out infinite}
 .lane[data-act]{cursor:pointer}
+.lane.enter .nm{color:var(--good)}
+.entertag{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--on);background:var(--good);padding:1px 6px;margin-left:8px}
+.lane.enter .cd{color:var(--good)}
+.dur.enterw{background:var(--good);opacity:1;height:7px;animation:pulse 1.2s ease-in-out infinite}
+.enterbanner{margin-bottom:14px;padding:8px 14px;border-left:3px solid var(--good);background:var(--panel2);font-size:13px;text-align:left;width:100%}
+.enterbanner b{color:var(--good);text-transform:uppercase;letter-spacing:.1em;font-size:11px;margin-right:6px}
 .lane.pinned .nm{color:var(--gold)}
 .lane.pinned .nm::before{content:"";display:inline-block;width:7px;height:7px;transform:rotate(45deg);background:var(--gold);margin-right:8px}
 .lane:hover .nm{color:var(--gold)}
@@ -370,9 +376,9 @@ const TASKS = [
 /* ---------- events (UTC based; server time = UTC+9 on Global) ---------- */
 const ALL_HOURS = Array.from({length:24},(_,i)=>i);
 const EVENTS = [
-  {id:'shugo',   key:'shugo',   name:'Shugo Festival',       hours:ALL_HOURS, minutes:[0],  dur:13, tip:'Every hour at :00, 3 min lobby. Main Menu > Shugo Festival.'},
-  {id:'dim',     key:'dim',     name:'Dimensional Invasion', hours:ALL_HOURS, minutes:[30], dur:15, tip:'Every hour at :30.'},
-  {id:'rift',    key:'rift',    name:'Spacetime Rift',       hours:[0,3,6,9,12,15,18,21], minutes:[0], dur:10, tip:'Opens every 3 hours (00:00 UTC = 02:00 CEST). The entrance stays open about 10 minutes.'},
+  {id:'shugo',   key:'shugo',   name:'Shugo Festival',       hours:ALL_HOURS, minutes:[0],  dur:13, enter:3, tip:'Every hour at :00. You can join during the 3 minute lobby (Main Menu > Shugo Festival).'},
+  {id:'dim',     key:'dim',     name:'Dimensional Invasion', hours:ALL_HOURS, minutes:[30], dur:15, enter:3, tip:'Every hour at :30. Entry is open for about 3 minutes (timer icon next to your minimap).'},
+  {id:'rift',    key:'rift',    name:'Spacetime Rift',       hours:[0,3,6,9,12,15,18,21], minutes:[0], dur:10, enter:10, tip:'Opens every 3 hours (00:00 UTC = 02:00 CEST). The entrance stays open about 10 minutes.'},
   {id:'siege',   key:'siege',   name:'Artifact Siege',       days:[1,4,6], hours:[21], berlin:true, minutes:[0], dur:60, tip:'Mon, Thu, Sat 21:00 server time (Berlin time on Europe, unconfirmed).'},
   {id:'nahma',   key:'nahma',   name:'Guardian Lord Nahma',  days:[5,0],   hours:[21], berlin:true, minutes:[0], dur:60, tip:'Fri and Sun 21:00 server time (Berlin time on Europe, unconfirmed).'},
   {id:'exec',    key:'nahma',   name:'Abyss Executors',      days:[1,4,6], hours:[21], berlin:true, minutes:[30], dur:30, tip:'Mon, Thu, Sat 21:30 server time in Lower and Middle Reshanta (unconfirmed for Europe).'},
@@ -744,17 +750,18 @@ function fmtCd(ms, big){
   return p(m) + ':' + p(sec);
 }
 function laneState(lane, now, winMs){
-  let next = null, active = null, marks = [];
+  let next = null, active = null, entering = null, marks = [];
   lane.evs.forEach(id=>{
     const ev = evById(id), st = eventState(ev, now);
     if (st.next && (next == null || st.next < next.t)) next = {t:st.next, ev:ev};
     if (st.active != null) active = {t:st.active, ev:ev};
+    if (st.active != null && ev.enter && now < st.active + ev.enter*6e4) entering = {t:st.active, ev:ev, end:st.active + ev.enter*6e4};
     occurrences(ev, now - 6*36e5, now + winMs).forEach(t=>{
       if (t + ev.dur*6e4 > now && t < now + winMs) marks.push({t:t, ev:ev});
     });
   });
   marks.sort((a,b)=>a.t - b.t);
-  return {next:next, active:active, marks:marks};
+  return {next:next, active:active, entering:entering, marks:marks};
 }
 function heroHtml(now){
   const hrs = S.settings.tlHours || 12, win = hrs*36e5;
@@ -763,7 +770,8 @@ function heroHtml(now){
   const pinId = S.settings.pinnedLane || '';
   const pinned = states.filter(s=>s.lane.id === pinId && s.next)[0];
   const up = pinned || states.filter(s=>!s.lane.reset && s.next).sort((a,b)=>a.next.t - b.next.t)[0];
-  const liveNames = states.filter(s=>s.active && !s.lane.reset).map(s=>s.lane.name);
+  const liveNames = states.filter(s=>s.active && !s.entering && !s.lane.reset).map(s=>s.lane.name);
+  const enterBanner = states.filter(s=>s.entering).map(s=>'<div class="enterbanner"><b>Active to enter</b> ' + esc(s.lane.name) + ', <span data-cd="' + s.entering.end + '"></span> left to join</div>').join('');
   let ring = '';
   if (up){
     const occ = occurrences(up.next.ev, now - 8*864e5, now + 8*864e5);
@@ -790,23 +798,24 @@ function heroHtml(now){
     grid += '<i class="gl" style="left:' + x + '%"></i>';
   }
   const lanes = states.map(s=>{
-    const live = !!s.active, soon = !live && s.next && (s.next.t - now) < 5*6e4;
+    const live = !!s.active && !s.entering, soon = !live && !s.entering && s.next && (s.next.t - now) < 5*6e4;
     let tr = '<div class="track">' + grid + '<i class="nowline"></i>';
     s.marks.forEach(m=>{
       const x0 = Math.max(0, (m.t - now)/win*100), x1 = Math.min(100, (m.t + m.ev.dur*6e4 - now)/win*100);
       const isLive = m.t <= now;
       if (m.ev.dur > 1) tr += '<i class="dur' + (isLive ? ' liveb' : '') + '" style="left:' + x0 + '%;width:' + Math.max(0.5, x1 - x0) + '%"></i>';
+      if (isLive && m.ev.enter && now < m.t + m.ev.enter*6e4) tr += '<i class="dur enterw" style="left:0;width:' + Math.max(0.6, Math.min(100, (m.t + m.ev.enter*6e4 - now)/win*100)) + '%"></i>';
       if (!isLive) tr += '<i class="mk' + (s.lane.reset ? ' reset' : '') + (s.next && m.t === s.next.t && m.ev === s.next.ev ? ' first' : '') + '" style="left:' + x0 + '%" title="' + esc(m.ev.name + ', ' + fmtLocal(m.t)) + '"></i>';
     });
     tr += '</div>';
     const bellOn = s.lane.keys.some(k=>S.settings.alertsOn[k]);
-    const cd = live ? '<span class="cd">live</span>' : (s.next ? '<span class="cd" data-cd="' + s.next.t + '"></span>' : '<span class="cd"></span>');
-    return '<div class="lane' + (live ? ' live' : soon ? ' soon' : '') + (pinned && pinned.lane.id === s.lane.id ? ' pinned' : '') + '" data-act="pinlane" data-lane-id="' + s.lane.id + '" title="Click to show this timer in the big clock"><span class="nm">' + esc(s.lane.name) + '</span>' + tr + cd +
+    const cd = s.entering ? '<span class="cd entercd" data-cd="' + s.entering.end + '"></span>' : live ? '<span class="cd">live</span>' : (s.next ? '<span class="cd" data-cd="' + s.next.t + '"></span>' : '<span class="cd"></span>');
+    return '<div class="lane' + (s.entering ? ' enter' : live ? ' live' : soon ? ' soon' : '') + (pinned && pinned.lane.id === s.lane.id ? ' pinned' : '') + '" data-act="pinlane" data-lane-id="' + s.lane.id + '" title="Click to show this timer in the big clock"><span class="nm">' + esc(s.lane.name) + (s.entering ? '<em class="entertag">enter now</em>' : '') + '</span>' + tr + cd +
       '<button class="bell' + (bellOn ? ' on' : '') + '" data-act="bell" data-key="' + s.lane.keys.join(',') + '" title="' + (bellOn ? 'Alert on' : 'Alert off') + '">' + BELL + '</button></div>';
   }).join('');
   const wbtn = [6, 12, 24].map(h=>'<button data-act="tlwin" data-h="' + h + '" class="' + (h === hrs ? 'cur' : '') + '">' + h + 'h</button>').join('') + '<button data-act="lanes" title="Choose which timers you see">choose timers</button>';
   const nextAll = Math.min.apply(null, states.map(s=>s.next ? s.next.t : Infinity));
-  return clocks + '<div class="hero-l">' + ring + (liveNames.length ? '<div class="livenow">live now: ' + esc(liveNames.join(', ')) + '</div>' : '') + '</div>' +
+  return clocks + '<div class="hero-l">' + enterBanner + ring + (liveNames.length ? '<div class="livenow">live now: ' + esc(liveNames.join(', ')) + '</div>' : '') + '</div>' +
     '<div class="hero-r" data-next="' + nextAll + '"><div class="hr-head"><h3 class="sech">Timeline<small>your local time</small></h3><div class="win">' + wbtn + '</div></div>' +
     '<div class="axis"><span></span><div class="ticks">' + ticks + '</div><span></span><span></span></div>' +
     '<div>' + (lanes || '<div class="empty">No timers selected. Use choose timers to bring some back.</div>') + '</div></div>';
