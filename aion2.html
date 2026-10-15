@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aion 2 Daily Board</title>
+<style>
+/* Themes. Aion = steel and gold, flat, no glow. Others share the same structure. */
+:root, html[data-theme="aion"]{
+  --bg:#0a0e17; --panel:#0f1522; --panel2:#161d2e; --line:rgba(205,176,112,.30); --line2:rgba(255,255,255,.07);
+  --text:#e6e2d6; --muted:#8590a3; --gold:#cdb070; --ice:#8dc3e8; --good:#8fcfb0; --warn:#e5b567; --bad:#e08a8a; --on:#0a0e17;
+  --hfont:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif; --font:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --bgimg:radial-gradient(1100px 380px at 50% -12%,rgba(141,195,232,.07),transparent 70%);
+}
+html[data-theme="paper"]{
+  --bg:#e8dcc0; --panel:#faf4e4; --panel2:#f0e6cc; --line:rgba(140,100,50,.38); --line2:rgba(90,70,40,.13);
+  --text:#3a2f22; --muted:#7a6b53; --gold:#8c3a2b; --ice:#8c3a2b; --good:#4a6741; --warn:#9a6b1f; --bad:#8c3a2b; --on:#faf4e4;
+  --hfont:Georgia,"Iowan Old Style",Palatino,serif; --font:Georgia,"Iowan Old Style",Palatino,serif;
+  --bgimg:radial-gradient(ellipse at top left,rgba(255,255,255,.25),transparent 60%);
+}
+html[data-theme="lamp"]{
+  --bg:#1c1712; --panel:#2a231b; --panel2:#33291f; --line:rgba(217,173,98,.30); --line2:rgba(255,255,255,.07);
+  --text:#e9dcc4; --muted:#a8967a; --gold:#d9ad62; --ice:#e0916f; --good:#7fae72; --warn:#d9ad62; --bad:#e08268; --on:#1c1712;
+  --hfont:Georgia,"Iowan Old Style",Palatino,serif; --font:Georgia,"Iowan Old Style",Palatino,serif; --bgimg:none;
+}
+html[data-theme="slate"]{
+  --bg:#13151c; --panel:#1a1d26; --panel2:#222633; --line:rgba(143,160,217,.25); --line2:rgba(255,255,255,.06);
+  --text:#d9dce8; --muted:#8a90a4; --gold:#8fa0d9; --ice:#8fa0d9; --good:#7fb59a; --warn:#d4b483; --bad:#c98a8a; --on:#13151c;
+  --hfont:system-ui,"Segoe UI",sans-serif; --font:system-ui,"Segoe UI",sans-serif; --bgimg:none;
+}
+html[data-theme="mist"]{
+  --bg:#eceef2; --panel:#fbfbfd; --panel2:#e6e9ef; --line:rgba(79,106,181,.30); --line2:rgba(0,0,0,.07);
+  --text:#272b36; --muted:#7a8091; --gold:#4f6ab5; --ice:#4f6ab5; --good:#4a8a6a; --warn:#a07f45; --bad:#a65f5f; --on:#fbfbfd;
+  --hfont:system-ui,"Segoe UI",sans-serif; --font:system-ui,"Segoe UI",sans-serif; --bgimg:none;
+}
+:root{ --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; --accent:var(--gold); --r:2px; --rl:2px; }
+
+*{box-sizing:border-box}
+html,body{margin:0;background-color:var(--bg);background-image:var(--bgimg);background-repeat:no-repeat;color:var(--text);font:14px/1.55 var(--font)}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font:inherit;color:var(--muted);background:none;border:0;padding:0;cursor:pointer}
+button:hover{color:var(--text)}
+input,textarea{font:inherit;color:var(--text);background:transparent;border:0;border-bottom:1px solid var(--line);padding:2px 2px;border-radius:0}
+input:focus,textarea:focus{outline:none;border-bottom-color:var(--gold)}
+textarea{width:100%;resize:vertical;min-height:44px;border:1px solid var(--line2);padding:4px 6px;font-size:12px}
+.hidden{display:none!important}
+.app{max-width:1560px;margin:0 auto;padding:0 32px 40px}
+
+/* header */
+.top{display:flex;align-items:baseline;gap:24px;padding:26px 0 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.title{font-family:var(--hfont);font-size:28px;color:var(--gold);letter-spacing:.01em;line-height:1}
+.title small{font-family:var(--font);font-size:12px;color:var(--muted);margin-left:14px;letter-spacing:0}
+.spacer{flex:1}
+.nav{display:flex;gap:22px;align-items:baseline;flex-wrap:wrap}
+.nav a,.nav button,.nav summary{color:var(--muted);font-size:13px;cursor:pointer;border-bottom:1px solid transparent;list-style:none;padding-bottom:1px}
+.nav summary::-webkit-details-marker{display:none}
+.nav a:hover,.nav button:hover,.nav summary:hover{color:var(--text);border-bottom-color:var(--gold);text-decoration:none}
+.menu{position:relative}
+.menu-pop{position:absolute;right:0;top:28px;z-index:60;background:var(--panel);border:1px solid var(--line);padding:10px 14px;min-width:190px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.themes{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px}
+.themes>span{width:100%;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.themes button.cur{color:var(--gold);border-bottom:1px solid var(--gold)}
+
+/* section heading: serif, ruled line */
+.sech{display:flex;align-items:center;gap:12px;font-family:var(--hfont);font-size:15px;color:var(--gold);margin:0 0 6px;font-weight:400}
+.sech::after{content:"";flex:1;height:1px;background:var(--line)}
+.sech small{font-family:var(--font);font-size:11px;color:var(--muted);order:2}
+
+/* HERO / timers */
+.hero{display:grid;grid-template-columns:250px 1fr;gap:12px 56px;padding:30px 0 26px;border-bottom:1px solid var(--line)}
+.hero-l{display:flex;flex-direction:column;align-items:center}
+.ringbox{position:relative;width:210px;height:210px}
+.ringbox svg{position:absolute;inset:0;width:100%;height:100%}
+.ringtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.ringtxt .lbl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.ringtxt .big{font-family:var(--mono);font-size:32px;font-weight:300;color:var(--ice);letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.nextname{font-family:var(--hfont);font-size:20px;margin-top:14px;text-align:center}
+.nextat{color:var(--muted);font-size:12px;text-align:center}
+.livenow{margin-top:8px;font-size:12px;color:var(--good);text-align:center}
+.clocks{margin-top:22px;width:100%;border-top:1px solid var(--line2)}
+.clk{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line2);font-size:12px;color:var(--muted)}
+.clk b{font-family:var(--mono);font-weight:400;font-size:15px;color:var(--text);font-variant-numeric:tabular-nums}
+.clk small{display:block;font-size:10px}
+
+.hero-r{min-width:0}
+.hr-head{display:flex;align-items:center;gap:14px}
+.hr-head .sech{flex:1}
+.win{display:flex;gap:10px;font-size:12px;order:3}
+.win button.cur{color:var(--gold);border-bottom:1px solid var(--gold)}
+.axis,.lane{display:grid;grid-template-columns:150px 1fr 82px 22px;align-items:center}
+.axis{height:22px;color:var(--muted);font-family:var(--mono);font-size:10px}
+.axis .ticks{position:relative;height:100%}
+.axis .ticks span{position:absolute;top:4px;transform:translateX(-50%)}
+.lane{height:34px;border-top:1px solid var(--line2)}
+.lane .nm{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px}
+.lane.live .nm{color:var(--good)}
+.track{position:relative;height:100%}
+.gl{position:absolute;top:0;bottom:0;width:1px;background:var(--line2)}
+.nowline{position:absolute;left:0;top:-1px;bottom:-1px;width:2px;background:var(--gold)}
+.mk{position:absolute;top:50%;width:9px;height:9px;transform:translate(-50%,-50%) rotate(45deg);border:1.5px solid var(--ice);background:transparent}
+.mk.first{background:var(--ice)}
+.mk.reset{border-color:var(--gold)}
+.mk.reset.first{background:var(--gold)}
+.dur{position:absolute;top:50%;height:5px;transform:translateY(-50%);background:var(--ice);opacity:.28}
+.dur.liveb{opacity:.9;animation:pulse 1.6s ease-in-out infinite}
+.lane .cd{font-family:var(--mono);font-size:13px;text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+.lane.soon .cd{color:var(--warn)}
+.lane.live .cd{color:var(--good)}
+.bell{display:inline-flex;justify-content:center;opacity:.35}
+.bell.on{opacity:1;color:var(--gold)}
+.bell svg{width:13px;height:13px;fill:currentColor}
+@keyframes pulse{50%{opacity:.35}}
+
+/* MAIN: server-wide aside + character matrix */
+.cols{display:grid;grid-template-columns:290px 1fr;gap:56px;padding-top:30px;align-items:start}
+.server .srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)}
+.server .srow.full .l{color:var(--muted)}
+.l{font-size:13px}
+.l small,.lab small{color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-left:6px}
+.sgroup{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:18px 0 2px}
+.addl{margin-top:16px;font-size:12px;display:flex;gap:14px}
+.mwrap{overflow-x:auto;min-width:0}
+.matrix{display:grid;grid-template-columns:minmax(200px,230px) repeat(var(--n),minmax(150px,1fr));min-width:max-content}
+.matrix>div{padding:8px 12px 8px 0;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:8px;min-height:40px}
+.matrix>.gh{grid-column:1/-1;border-bottom:1px solid var(--line);font-family:var(--hfont);color:var(--gold);font-size:15px;padding:22px 0 6px;min-height:0;align-items:flex-end}
+.matrix>.gh:first-of-type{padding-top:0}
+.chead{flex-direction:column;align-items:flex-start!important;gap:2px!important;padding-bottom:12px!important}
+.cname{font-family:var(--hfont);font-size:19px;line-height:1.15;display:flex;align-items:baseline;gap:8px;cursor:pointer}
+.cname i{display:inline-block;width:8px;height:8px;transform:rotate(45deg);background:var(--c)}
+.crole{font-family:var(--font);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.crole.m{color:var(--gold)}
+.cprog{display:flex;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.cact{display:flex;gap:10px;font-size:11px;opacity:0;transition:opacity .2s}
+.chead:hover .cact,.chead:focus-within .cact{opacity:1}
+.lab{font-size:13px}
+.na{color:var(--muted);opacity:.4;justify-content:flex-start}
+.full .pips,.full .num{opacity:.55}
+.pips{display:inline-flex;gap:8px}
+.pip{width:11px;height:11px;transform:rotate(45deg);border:1.5px solid var(--muted);background:transparent;padding:0}
+.pip:hover{border-color:var(--gold)}
+.pip.on{background:var(--gold);border-color:var(--gold)}
+.pips.neg .pip.on{background:var(--bad);border-color:var(--bad)}
+.num{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;user-select:none}
+.num b{color:var(--text);font-weight:400}
+.nbar{width:54px;height:3px;background:var(--line2);position:relative}
+.nbar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold)}
+.num.neg .nbar i{background:var(--bad)}
+.num.neg.warn b{color:var(--warn)}
+.res{flex-direction:column;align-items:flex-start!important;gap:3px!important}
+.res .row1{display:flex;align-items:center;gap:10px}
+.res .sub{font-size:11px;color:var(--muted)}
+.res input[type=number]{width:62px;font-family:var(--mono);font-size:12px}
+.btn{font-size:12px;color:var(--gold);border-bottom:1px solid var(--line)}
+.btn:hover{color:var(--text);border-bottom-color:var(--gold)}
+.warn{color:var(--warn)!important}
+.gauge{width:100px;height:3px;background:var(--line2);position:relative}
+.gauge i{position:absolute;left:0;top:0;bottom:0;background:var(--ice)}
+.foot{color:var(--muted);font-size:11px;margin-top:44px;max-width:900px;border-top:1px solid var(--line2);padding-top:12px}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(5,7,12,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--panel);border:1px solid var(--line);max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:24px 26px}
+.modal.wide{max-width:940px}
+.modal h2{margin:0 0 14px;font-family:var(--hfont);font-weight:400;font-size:22px;color:var(--gold)}
+.grid2{display:grid;grid-template-columns:1fr 110px;gap:8px 14px;align-items:center}
+.sec-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.sub{color:var(--muted);font-size:12px}
+.tip{color:var(--muted);font-size:12px}
+.gg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px 32px;margin:10px 0 18px}
+.gbox{border-top:1px solid var(--line);padding-top:8px}
+.gbox h4{margin:0 0 6px;font-family:var(--hfont);font-weight:400;font-size:15px;color:var(--gold)}
+.gbox.bad h4{color:var(--bad)}.gbox.good h4{color:var(--good)}
+.gbox ul{margin:0;padding-left:16px}.gbox li{margin:3px 0}
+.gtable{width:100%;border-collapse:collapse;font-size:13px}
+.gtable th,.gtable td{text-align:left;padding:5px 10px 5px 0;border-bottom:1px solid var(--line2)}
+.gtable th{color:var(--muted);font-weight:400;font-size:10px;text-transform:uppercase;letter-spacing:.14em}
+.callout{border-left:2px solid var(--bad);padding:6px 14px;margin:14px 0}
+.callout b{color:var(--bad)}
+.links a{margin-right:14px;white-space:nowrap}
+.toast{position:fixed;right:24px;bottom:24px;z-index:200;background:var(--panel2);border-left:2px solid var(--gold);padding:10px 16px;max-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+
+/* tracker-only window */
+body.tracker .app{padding:0 16px 20px}
+body.tracker .top{padding:14px 0 8px;gap:10px}
+body.tracker .title{font-size:19px}
+body.tracker .title small,body.tracker .nav,body.tracker .cols,body.tracker .foot{display:none}
+body.tracker .hero{grid-template-columns:1fr;padding:16px 0;gap:14px}
+body.tracker .ringbox{width:150px;height:150px}
+body.tracker .ringtxt .big{font-size:23px}
+body.tracker .axis,body.tracker .lane{grid-template-columns:96px 1fr 62px 18px}
+body.tracker .lane .nm{font-size:11px}
+body.tracker .lane .cd{font-size:12px}
+.tpane{display:none}
+body.tracker .tpane{display:block}
+.prog{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--line2);color:var(--muted)}
+.prog b{font-family:var(--mono);font-weight:400;color:var(--text)}
+@media (max-width:1000px){.hero{grid-template-columns:1fr}.cols{grid-template-columns:1fr;gap:30px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="title">Aion 2 <small id="srv"></small></div>
+    <span class="spacer"></span>
+    <nav class="nav">
+      <a href="index.html">Switch game</a>
+      <button id="btnAddChar">Add character</button>
+      <button id="btnGuide">Alt guide</button>
+      <button id="btnPop" title="Open the timers as a small window for your second screen">Pop out timers</button>
+      <details class="menu" id="moreMenu"><summary>More</summary>
+        <div class="menu-pop">
+          <button id="btnHideDone">Hide done</button>
+          <div class="themes" id="themePick"><span>Theme</span><button data-theme-pick="aion">Aion</button><button data-theme-pick="paper">Paper</button><button data-theme-pick="lamp">Lamp</button><button data-theme-pick="slate">Slate</button><button data-theme-pick="mist">Mist</button></div>
+          <button id="btnExport">Export backup</button>
+          <button id="btnImport">Import backup</button>
+          <button id="btnSettings">Settings</button>
+        </div>
+      </details>
+    </nav>
+    <input type="file" id="importFile" accept="application/json" class="hidden">
+  </header>
+
+  <section class="hero" id="hero"></section>
+  <div class="cols" id="board"></div>
+  <div class="tpane" id="trackerPane"></div>
+
+  <div class="foot">
+    Limits and event times come from community guides for the Global launch and can change with patches.
+    Set up for Global Europe (Yustiel): resets at 07:00 UTC, which is 09:00 CEST now and probably 08:00 CET after October 25.
+    Siege, Abyss boss and Arena times are assumed to follow Berlin server time and are not confirmed for Europe. Check the in-game countdowns.
+    Data lives only in this browser. Use Export for a backup.
+  </div>
+</div>
+<div id="modalHost"></div>
+<div id="toastHost"></div>
+
+<script>
+'use strict';
+const LS_KEY = 'aion2_state';
+const LS_FIRED = 'aion2_fired';
+try{ document.documentElement.dataset.theme = (JSON.parse(localStorage.getItem('aion2_state'))||{}).settings.theme || 'aion'; }catch(e){ document.documentElement.dataset.theme = 'aion'; }
+const TRACKER_MODE = new URLSearchParams(location.search).get('mode') === 'tracker';
+if (TRACKER_MODE) document.body.classList.add('tracker');
+
+/* ---------- task definitions ---------- */
+/* scope 'account': shared server-wide, do once (on main). scope 'char': per character.
+   mainOnly: only worth doing on the main (hidden on alts unless enabled in Settings). */
+const TASKS = [
+  // account daily
+  {id:'duty',    scope:'account', period:'daily',  label:'Duty Missions',            max:5, tip:'Counted per server: 5 a day pay out (50,000 bound Kinah and 1,000 Abyss Points each). Alts add nothing, leave these for your main.'},
+  {id:'dungeon', scope:'account', period:'weekly', label:'Daily Dungeon entries (Unknown Fissure)', max:14, tip:'14 entries a WEEK, refilled on Wednesday, shared by the daily dungeons and counted per server. Pace: 2 a day. Unused entries are lost at the reset. Leave for your main.'},
+
+  {id:'attend',  scope:'account', period:'daily',  label:'Attendance check-in',      max:1, tip:'Daily reward in the Attendance menu.'},
+  // account weekly
+  {id:'pve',     scope:'account', period:'weekly', label:'Weekly PvE quests',        max:1, tip:'Server-wide. Tick when all are done.'},
+  {id:'pvp',     scope:'account', period:'weekly', label:'Weekly PvP quests',        max:1, tip:'Server-wide. Tick when all are done.'},
+  {id:'daevapass',scope:'account', period:'weekly', label:'Daeva Pass weekly EXP',   max:1, tip:'Reach the weekly pass EXP limit (50,000 on the Season 1 pass) before the reset.'},
+  {id:'skipcube', scope:'account', period:'weekly', label:'Cubes skipped (limit 10)', max:10, neg:true, tip:'Per server. Leaving a Conquest or Transcendence run WITHOUT taking the cube still counts. At 10 you are locked out of those dungeons until Wednesday. Never skip the cube.'},
+  // char daily
+
+  {id:'transc', scope:'char', period:'daily',  label:'Transcendence rewards',      max:1, mainOnly:true, tip:'2 claims a day per dungeon (Deus Research Base, Shattered Arkanis), storing up to 4 each. Needs item level 1600. 28 final boss kills a week.'},
+  {id:'gather',  scope:'char', period:'daily',  label:'Gather on the way',          max:1, tip:'No counter on gathering. Materials can be sent to your main.'},
+  {id:'rift',    scope:'char', period:'daily',  label:'Spacetime Rift run',         max:1, tip:'Rifts respawn on a 3 hour cycle. Optional filler.'},
+  // char weekly
+  {id:'ascend',  scope:'char', period:'weekly', label:'Ascension Trial',            max:3, tip:'Solo, per character, 3 entries a week from item level 1000. Good on alts too.'},
+  {id:'conqw',   scope:'char', period:'weekly', hidden:true, label:'Conquest cubes (40 Odyle each)', max:21, tip:'21 cubes a week per character (about 120 Odyle Energy a day). Kina per cube depends on item level, see the Kina line on the card.'},
+  {id:'subj',    scope:'char', period:'weekly', label:'Subjugation tickets',        max:3, mainOnly:true, tip:'3 tickets a week for the 4-player Subjugation dungeons.'},
+  {id:'ludra',   scope:'char', period:'weekly', label:'Sanctuary: Abyssal Forge Ludra',          max:1, mainOnly:true, tip:'1 final boss kill a week, 4 attempts. One guide reports the raid as disabled since Oct 5, the game files still list it. Check in game.'},
+  {id:'corr',    scope:'char', period:'weekly', label:'Sanctuary: Corroded Decontamination',     max:2, mainOnly:true, tip:'2 final boss kills a week, 4 attempts.'},
+  {id:'chalice', scope:'char', period:'weekly', label:'Sanctuary: Chalice of Muspel',            max:2, mainOnly:true, tip:'2 final boss kills per week.'},
+  {id:'abyslow', scope:'char', period:'weekly', label:'Abyss hours: Chaotic Lower Reshanta',     max:7, tip:'7 hours per zone per week, per character.'},
+  {id:'abysmid', scope:'char', period:'weekly', label:'Abyss hours: Chaotic Middle Reshanta',    max:7, tip:'7 hours per zone per week, per character.'},
+  {id:'abysup',  scope:'char', period:'weekly', label:'Abyss hours: Upper Reshanta',             max:7, tip:'7 hours per zone per week, per character.'},
+  {id:'explore', scope:'char', period:'weekly', label:'Exploration claims (6 dungeons x 7)', max:42, tip:'7 reward claims a week per Expedition dungeon (Krao Cave, Urugugu Canyon, Fire Temple, Draupnir, Vakron Sky Island, Ferocious Horn Den), per character. Cube cost: 20 Odyle (Krao, Urugugu), 30 (Fire Temple), 40 (the rest).'},
+  {id:'bf',      scope:'char', period:'weekly', label:'Battlefield victory rewards',max:1, tip:'Per character weekly reward.'},
+  {id:'arenaw',  scope:'char', period:'weekly', label:'Arena wins for rewards (single, 30)', max:30, mainOnly:true, tip:'Rewards for the first 30 wins and 10 matches joined each week in single matches (team: also 30 and 10, strategy: 3 and 3).'},
+  {id:'morph',   scope:'char', period:'weekly', label:'Substance Morph Odyle crafts',max:20, maxAlt:4, tip:'20 per week on main, 4 per alt.'},
+  {id:'shop',    scope:'char', period:'weekly', label:'Subscriber Shop purchases',  max:20, mainOnly:true, tip:'20 uses on main (membership).'}
+];
+
+/* ---------- events (UTC based; server time = UTC+9 on Global) ---------- */
+const ALL_HOURS = Array.from({length:24},(_,i)=>i);
+const EVENTS = [
+  {id:'shugo',   key:'shugo',   name:'Shugo Festival',       hours:ALL_HOURS, minutes:[0],  dur:13, tip:'Every hour at :00, 3 min lobby. Main Menu > Shugo Festival.'},
+  {id:'dim',     key:'dim',     name:'Dimensional Invasion', hours:ALL_HOURS, minutes:[30], dur:15, tip:'Every hour at :30.'},
+  {id:'rift',    key:'rift',    name:'Spacetime Rift',       hours:[0,3,6,9,12,15,18,21], minutes:[0], dur:10, tip:'Opens every 3 hours (00:00 UTC = 02:00 CEST). The entrance stays open about 10 minutes.'},
+  {id:'siege',   key:'siege',   name:'Artifact Siege',       days:[1,4,6], hours:[21], berlin:true, minutes:[0], dur:60, tip:'Mon, Thu, Sat 21:00 server time (Berlin time on Europe, unconfirmed).'},
+  {id:'nahma',   key:'nahma',   name:'Guardian Lord Nahma',  days:[5,0],   hours:[21], berlin:true, minutes:[0], dur:60, tip:'Fri and Sun 21:00 server time (Berlin time on Europe, unconfirmed).'},
+  {id:'exec',    key:'nahma',   name:'Abyss Executors',      days:[1,4,6], hours:[21], berlin:true, minutes:[30], dur:30, tip:'Mon, Thu, Sat 21:30 server time in Lower and Middle Reshanta (unconfirmed for Europe).'},
+  {id:'arenaA',  key:'arena',   name:'Arena of Tactics',     hours:[11], berlin:true, minutes:[0], dur:180, tip:'11:00-14:00 server time (unconfirmed for Europe).'},
+  {id:'arenaB',  key:'arena',   name:'Arena of Tactics',     hours:[19], berlin:true, minutes:[0], dur:120, tip:'19:00-21:00 server time (unconfirmed for Europe).'},
+  {id:'dreset',  key:'dreset',  name:'Daily reset',          hours:()=>[S.settings.resetHourUTC], minutes:[0], dur:1, tip:'Daily tasks refresh.'},
+  {id:'wreset',  key:'wreset',  name:'Weekly reset',         days:[3], hours:()=>[S.settings.resetHourUTC], minutes:[0], dur:1, tip:'Wednesday. Weekly tasks refresh.'}
+];
+const ALERT_KEYS = [
+  {key:'shugo',name:'Shugo Festival'},{key:'dim',name:'Dimensional Invasion'},{key:'rift',name:'Spacetime Rift'},
+  {key:'siege',name:'Artifact Siege'},{key:'nahma',name:'Abyss bosses (Nahma, Executors)'},{key:'arena',name:'Arena of Tactics'},
+  {key:'dreset',name:'Daily reset'},{key:'wreset',name:'Weekly reset'}
+];
+
+/* ---------- state ---------- */
+const COLORS = ['#7c8cff','#4ade80','#f472b6','#fbbf24','#22d3ee','#fb923c','#c084fc','#f87171'];
+function uid(){ return 'c' + Math.random().toString(36).slice(2,9); }
+function defaultSettings(){
+  return {resetHourUTC:7, serverOffset:9, shugoPerDay:3, shugoCap:12, shugoCharPerDay:4, shugoCharCap:28, dimPerDay:1, dimCap:7, nightmarePerDay:2, nightmareCap:14,
+          odyleCap:560, alertLead:2, sound:true, hideDone:false, showMainOnlyOnAlts:false, theme:'aion', themeV:4, tlHours:12, serverName:'Yustiel (Europe)',
+          alertsOn:{shugo:true,dim:false,rift:false,siege:true,nahma:false,arena:false,dreset:false,wreset:false}};
+}
+function newChar(name, main, idx){
+  return {id:uid(), name:name, main:!!main, color:COLORS[idx % COLORS.length], notes:'', checks:{},
+          nightmare:{val:2}, shugo:{val:4}, odyle:{val:0, ts:Date.now()}};
+}
+function load(){
+  let s = null;
+  try{ s = JSON.parse(localStorage.getItem(LS_KEY)); }catch(e){}
+  if (!s || typeof s !== 'object') s = {};
+  const d = defaultSettings();
+  s.settings = Object.assign(d, s.settings || {});
+  s.settings.alertsOn = Object.assign(d.alertsOn, (s.settings||{}).alertsOn || {});
+  if (s.settings.themeV !== 4){ s.settings.theme = 'aion'; s.settings.themeV = 4; }
+  s.account = s.account || {};
+  s.account.checks = s.account.checks || {};
+  s.account.shugo = s.account.shugo || {val:s.settings.shugoPerDay};
+  s.account.dim = s.account.dim || {val:1};
+  s.custom = Array.isArray(s.custom) ? s.custom : [];
+  s.chars = Array.isArray(s.chars) ? s.chars : [];
+  if (!s.chars.length) s.chars.push(newChar('Main', true, 0));
+  if (!s.chars.some(c=>c.main)) s.chars[0].main = true;
+  s.chars.forEach(c=>{ c.checks=c.checks||{}; c.nightmare=c.nightmare||{val:0}; c.odyle=c.odyle||{val:0,ts:Date.now()}; c.notes=c.notes||''; c.shugo=c.shugo||{val:4}; });
+  return s;
+}
+let S = load();
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- reset logic ---------- */
+function dayKey(now){ return Math.floor((now - S.settings.resetHourUTC*3600e3) / 864e5); }
+function weekKey(now){ return Math.floor((dayKey(now) + 1) / 7); }
+function clearPeriod(period){
+  const ids = allTasks().filter(t=>t.period===period).map(t=>t.id);
+  [S.account].concat(S.chars).forEach(o=>ids.forEach(id=>{ delete o.checks[id]; }));
+}
+function applyResets(now){
+  now = now || Date.now();
+  const dk = dayKey(now), wk = weekKey(now);
+  let changed = false;
+  if (S.dayKey == null || S.weekKey == null){ S.dayKey = dk; S.weekKey = wk; changed = true; }
+  if (dk !== S.dayKey){
+    const diff = Math.max(1, dk - S.dayKey);
+    clearPeriod('daily');
+    S.chars.forEach(c=>{ c.nightmare.val = Math.min(S.settings.nightmareCap, (c.nightmare.val||0) + S.settings.nightmarePerDay*diff); });
+    S.account.shugo.val = Math.min(S.settings.shugoCap, (S.account.shugo.val||0) + S.settings.shugoPerDay*diff);
+    S.account.dim.val = Math.min(S.settings.dimCap, (S.account.dim.val||0) + S.settings.dimPerDay*diff);
+    S.chars.forEach(c=>{ c.shugo.val = Math.min(S.settings.shugoCharCap, (c.shugo.val||0) + S.settings.shugoCharPerDay*diff); });
+    S.dayKey = dk; changed = true;
+  }
+  if (wk !== S.weekKey){ clearPeriod('weekly'); S.weekKey = wk; changed = true; }
+  if (changed) save();
+  return changed;
+}
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function allTasks(){
+  return TASKS.concat(S.custom.map(c=>({id:c.id, scope:c.scope, period:c.period, label:c.label, max:c.max||1, custom:true, tip:'Custom task'})));
+}
+function taskMax(t, ch){ return (ch && !ch.main && t.maxAlt != null) ? t.maxAlt : t.max; }
+function fmtDur(ms){
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms/1000), d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), sec = s%60;
+  const p2 = n=>String(n).padStart(2,'0');
+  if (d > 0) return d + 'd ' + h + 'h';
+  if (h > 0) return h + 'h ' + p2(m) + 'm';
+  return p2(m) + ':' + p2(sec);
+}
+function fmtLocal(t){
+  const d = new Date(t), now = new Date();
+  const same = d.toDateString() === now.toDateString();
+  const time = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  return same ? time : d.toLocaleDateString([], {weekday:'short'}) + ' ' + time;
+}
+function serverTimeStr(now){
+  try{ return new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/Berlin', hour:'2-digit', minute:'2-digit', hourCycle:'h23'}).format(now); }
+  catch(e){ return ''; }
+}
+
+/* ---------- event scheduling ---------- */
+function berlinOffsetH(ms){
+  try{
+    const h = parseInt(new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/Berlin', hour:'2-digit', hourCycle:'h23'}).format(ms), 10);
+    let off = h - new Date(ms).getUTCHours();
+    if (off < -12) off += 24; if (off > 12) off -= 24;
+    return off;
+  }catch(e){ return 1; }
+}
+function occurrences(ev, from, to){
+  const out = [];
+  const hours = typeof ev.hours === 'function' ? ev.hours() : ev.hours;
+  for (let d = Math.floor(from/864e5); d <= Math.floor(to/864e5); d++){
+    const wd = (d + 4) % 7; // 0 = Sunday, 1970-01-01 was Thursday
+    if (ev.days && ev.days.indexOf(wd) < 0) continue;
+    const off = ev.berlin ? berlinOffsetH(d*864e5 + 12*36e5) : 0;
+    hours.forEach(h=>ev.minutes.forEach(m=>{ out.push(d*864e5 + (h - off)*36e5 + m*6e4); }));
+  }
+  return out.sort((a,b)=>a-b);
+}
+function eventState(ev, now){
+  const occ = occurrences(ev, now - 864e5, now + 8*864e5);
+  const active = occ.find(t=>t <= now && now < t + ev.dur*6e4);
+  const next = occ.find(t=>t > now);
+  return {active:active, next:next};
+}
+function eventRows(now){
+  return EVENTS.map(ev=>Object.assign({ev:ev}, eventState(ev, now)));
+}
+
+/* ---------- alerts ---------- */
+function getFired(){ try{ return JSON.parse(localStorage.getItem(LS_FIRED)) || {}; }catch(e){ return {}; } }
+function setFired(f){ try{ localStorage.setItem(LS_FIRED, JSON.stringify(f)); }catch(e){} }
+let audioCtx = null;
+function beep(){
+  if (!S.settings.sound) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.3].forEach(off=>{
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.15, audioCtx.currentTime + off);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + off + 0.25);
+      o.start(audioCtx.currentTime + off); o.stop(audioCtx.currentTime + off + 0.25);
+    });
+  }catch(e){}
+}
+function toast(msg){
+  const host = document.getElementById('toastHost');
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  host.appendChild(el);
+  setTimeout(()=>el.remove(), 8000);
+}
+let titleFlash = null;
+function fireAlert(ev, t){
+  const mins = Math.max(0, Math.round((t - Date.now())/6e4));
+  const msg = ev.name + (mins <= 0 ? ' starts now' : ' starts in ' + mins + ' min');
+  toast(msg); beep();
+  if ('Notification' in window && Notification.permission === 'granted'){
+    try{ new Notification('Aion 2: ' + msg); }catch(e){}
+  }
+  const base = document.title; let n = 0;
+  clearInterval(titleFlash);
+  titleFlash = setInterval(()=>{ document.title = (n++ % 2) ? base : '! ' + ev.name; if (n > 10){ clearInterval(titleFlash); document.title = base; } }, 700);
+}
+function checkAlerts(now){
+  const lead = S.settings.alertLead * 6e4;
+  let fired = null;
+  eventRows(now).forEach(r=>{
+    if (!S.settings.alertsOn[r.ev.key] || !r.next) return;
+    if (r.next - now > lead) return;
+    fired = fired || getFired();
+    const k = r.ev.id + '@' + r.next;
+    if (fired[k]) return;
+    fired[k] = now;
+    fireAlert(r.ev, r.next);
+  });
+  if (fired){
+    Object.keys(fired).forEach(k=>{ if (now - fired[k] > 864e5) delete fired[k]; });
+    setFired(fired);
+  }
+}
+
+/* ---------- rendering: checklist matrix ---------- */
+function visibleTasks(period, scope){
+  return allTasks().filter(t=>t.period === period && t.scope === scope && !t.hidden);
+}
+function applicable(t, ch){
+  return !(ch && !ch.main && t.mainOnly && !S.settings.showMainOnlyOnAlts);
+}
+function cubeValue(ilv){ return ilv >= 2100 ? 400000 : ilv >= 1400 ? 300000 : ilv >= 700 ? 200000 : 0; }
+function altMultiplier(ch){
+  if (ch.main) return 1;
+  const idx = S.chars.filter(c=>!c.main).indexOf(ch) + 1;
+  return idx > 3 ? 0.8 : 1;
+}
+function fmtKina(n){ return n >= 1e6 ? (Math.round(n/1e5)/10) + 'M' : n >= 1e3 ? Math.round(n/1e3) + 'k' : String(Math.round(n)); }
+function odyleNow(ch, now){
+  const cap = S.settings.odyleCap, step = 3*3600e3, gain = 15;
+  const ticks = Math.floor((now - ch.odyle.ts) / step);
+  const cur = Math.min(cap, ch.odyle.val + ticks*gain);
+  let toFull = null;
+  if (cur < cap){
+    const left = Math.ceil((cap - cur)/gain);
+    toFull = left*step - ((now - ch.odyle.ts) % step);
+  }
+  return {cur:cur, toFull:toFull};
+}
+function spendCube(ch){
+  const now = Date.now(), step = 3*3600e3, o = odyleNow(ch, now);
+  if (o.cur < 40){ toast('Not enough Odyle Energy for a cube (needs 40).'); return false; }
+  const full = o.cur >= S.settings.odyleCap;
+  const ticks = Math.floor((now - ch.odyle.ts) / step);
+  ch.odyle = {val:o.cur - 40, ts: full ? now : ch.odyle.ts + ticks*step};
+  ch.checks.conqw = Math.min(21, (ch.checks.conqw || 0) + 1);
+  return true;
+}
+function ownerOf(colId){ return colId === 'account' ? S.account : S.chars.find(c=>c.id === colId); }
+
+function ctrlHtml(t, owner, colId, ch){
+  const max = taskMax(t, ch), n = owner.checks[t.id] || 0, neg = t.neg ? ' neg' : '';
+  const at = 'data-col="' + colId + '" data-task="' + t.id + '"';
+  if (max <= 7){
+    let h = '<span class="pips' + neg + '">';
+    for (let i = 1; i <= max; i++) h += '<button class="pip' + (i <= n ? ' on' : '') + '" data-act="setpip" ' + at + ' data-n="' + i + '"></button>';
+    return h + '</span>';
+  }
+  const warn = (t.neg && n >= max - 2) ? ' warn' : '';
+  return '<span class="num' + neg + warn + '" data-act="inc" data-d="1" ' + at + ' title="Click +1, right-click -1"><span class="nbar"><i style="width:' + Math.round(n/max*100) + '%"></i></span><b>' + n + '</b>/' + max + '</span>';
+}
+function progress(period, scope, owner, ch){
+  const ts = visibleTasks(period, scope).filter(t=>!t.neg && applicable(t, ch));
+  let done = 0;
+  ts.forEach(t=>{ if ((owner.checks[t.id] || 0) >= taskMax(t, ch)) done++; });
+  return {done:done, total:ts.length};
+}
+function labelHtml(t){
+  const tag = (t.mainOnly ? '<small>main</small>' : '');
+  const del = t.custom ? ' <button class="btn" data-act="delcustom" data-task="' + t.id + '" title="Remove">x</button>' : '';
+  return esc(t.label) + tag + del;
+}
+function serverHtml(){
+  const sv = S.settings, v = S.account.shugo.val, cap = sv.shugoCap;
+  let h = '<aside class="server"><h3 class="sech">Server-wide<small>leave to your main</small></h3>';
+  h += '<div class="srow" title="Per server pool. +' + sv.shugoPerDay + ' a day at reset, stores up to ' + cap + '."><span class="l">Shugo keys (server)</span><span class="num"><b class="' + (v >= cap ? 'warn' : '') + '">' + v + '</b>/' + cap +
+       ' <button class="btn" data-act="pool" data-pool="shugo" data-d="-1">use</button><button class="btn" data-act="pool" data-pool="shugo" data-d="1">+1</button></span></div>';
+  const dv = S.account.dim.val, dc = sv.dimCap;
+  h += '<div class="srow" title="Per server. +' + sv.dimPerDay + ' a day at reset, stores up to ' + dc + '."><span class="l">Invasion keys</span><span class="num"><b class="' + (dv >= dc ? 'warn' : '') + '">' + dv + '</b>/' + dc +
+       ' <button class="btn" data-act="pool" data-pool="dim" data-d="-1">use</button><button class="btn" data-act="pool" data-pool="dim" data-d="1">+1</button></span></div>';
+  ['daily','weekly'].forEach(p=>{
+    const rows = visibleTasks(p, 'account').map(t=>{
+      const n = S.account.checks[t.id] || 0, full = !t.neg && n >= taskMax(t, null);
+      if (S.settings.hideDone && full) return '';
+      return '<div class="srow' + (full ? ' full' : '') + '" title="' + esc(t.tip || '') + '"><span class="l">' + labelHtml(t) + '</span>' + ctrlHtml(t, S.account, 'account', null) + '</div>';
+    }).join('');
+    h += '<div class="sgroup">' + (p === 'daily' ? 'Daily' : 'Weekly') + '</div>' + rows;
+  });
+  h += '<div class="addl"><button class="btn" data-act="addcustom" data-col="account" data-period="daily">+ daily</button><button class="btn" data-act="addcustom" data-col="account" data-period="weekly">+ weekly</button></div></aside>';
+  return h;
+}
+function matrixRowsFor(period){
+  return visibleTasks(period, 'char').map(t=>{
+    const cells = S.chars.map(ch=>{
+      if (!applicable(t, ch)) return {html:'<div class="na">&middot;</div>', full:true};
+      const full = !t.neg && (ch.checks[t.id] || 0) >= taskMax(t, ch);
+      return {html:'<div class="' + (full ? 'full' : '') + '">' + ctrlHtml(t, ch, ch.id, ch) + '</div>', full:full};
+    });
+    if (S.settings.hideDone && cells.every(c=>c.full)) return '';
+    return '<div class="lab" title="' + esc(t.tip || '') + '">' + labelHtml(t) + '</div>' + cells.map(c=>c.html).join('');
+  }).join('');
+}
+function matrixHtml(now){
+  const n = S.chars.length;
+  const heads = S.chars.map(ch=>{
+    const d = progress('daily', 'char', ch, ch), w = progress('weekly', 'char', ch, ch);
+    return '<div class="chead"><div class="cname" data-act="rename" data-col="' + ch.id + '" title="Rename"><i style="--c:' + ch.color + '"></i>' + esc(ch.name) + '</div>' +
+      '<div><span class="crole' + (ch.main ? ' m' : '') + '">' + (ch.main ? 'main' : 'alt') + '</span></div>' +
+      '<div class="cprog"><span>day ' + d.done + '/' + d.total + '</span><span>week ' + w.done + '/' + w.total + '</span></div>' +
+      '<div class="cact">' + (ch.main ? '' : '<button data-act="makemain" data-col="' + ch.id + '">make main</button>') +
+      '<button data-act="color" data-col="' + ch.id + '">color</button><button data-act="addcustom" data-col="' + ch.id + '">+ task</button><button data-act="delchar" data-col="' + ch.id + '">remove</button></div></div>';
+  }).join('');
+  const res = (label, tip, fn) => '<div class="lab" title="' + esc(tip) + '">' + label + '</div>' + S.chars.map(ch=>'<div class="res">' + fn(ch) + '</div>').join('');
+  let h = '<div class="mwrap"><div class="matrix" style="--n:' + n + '"><div class="chead"></div>' + heads;
+  h += '<div class="gh">Resources</div>';
+  h += res('Item level', 'Used for the Kina estimate.', ch=>'<div class="row1"><input type="number" min="0" data-act="ilv" data-col="' + ch.id + '" value="' + (ch.ilv || '') + '" placeholder="1400" style="width:70px"></div>');
+  h += res('Nightmare tickets', '+' + S.settings.nightmarePerDay + ' a day at reset. An attempt is only used when you win.', ch=>{
+    const v = ch.nightmare.val, cap = S.settings.nightmareCap;
+    return '<div class="row1"><span class="num"><span class="nbar"><i style="width:' + Math.round(v/cap*100) + '%"></i></span><b class="' + (v >= cap ? 'warn' : '') + '">' + v + '</b>/' + cap + '</span>' +
+      '<button class="btn" data-act="pool" data-pool="nightmare" data-col="' + ch.id + '" data-d="-1">use</button><button class="btn" data-act="pool" data-pool="nightmare" data-col="' + ch.id + '" data-d="1">+1</button></div>';
+  });
+  h += res('Shugo keys (own)', 'Per character pool. +' + S.settings.shugoCharPerDay + ' a day at reset, stores up to ' + S.settings.shugoCharCap + ' (32 with membership).', ch=>{
+    const v = ch.shugo.val, cap = S.settings.shugoCharCap;
+    return '<div class="row1"><span class="num"><span class="nbar"><i style="width:' + Math.round(v/cap*100) + '%"></i></span><b class="' + (v >= cap ? 'warn' : '') + '">' + v + '</b>/' + cap + '</span>' +
+      '<button class="btn" data-act="pool" data-pool="shugoc" data-col="' + ch.id + '" data-d="-1">use</button><button class="btn" data-act="pool" data-pool="shugoc" data-col="' + ch.id + '" data-d="1">+1</button></div>';
+  });
+  h += res('Odyle Energy', '+15 every 3 hours. Spend it before it caps.', ch=>{
+    const o = odyleNow(ch, now), cap = S.settings.odyleCap;
+    return '<div class="row1"><span class="num"><span class="nbar"><i style="width:' + Math.round(o.cur/cap*100) + '%"></i></span><b class="' + (o.cur >= cap ? 'warn' : '') + '">' + o.cur + '</b>/' + cap + '</span>' +
+      '<input type="number" min="0" data-act="odyle" data-col="' + ch.id + '" value="' + o.cur + '" title="Type your current energy"></div>' +
+      '<div class="sub">' + (o.toFull != null ? 'full in ' + fmtDur(o.toFull) : '<span class="warn">full, spend it</span>') + '</div>';
+  });
+  h += res('Conquest cubes', '21 a week per character, 40 Odyle Energy each. Never leave a run without the cube.', ch=>{
+    const val = cubeValue(ch.ilv || 0), c = ch.checks.conqw || 0, m = altMultiplier(ch);
+    return '<div class="row1"><span class="num"><span class="nbar"><i style="width:' + Math.round(c/21*100) + '%"></i></span><b>' + c + '</b>/21</span>' +
+      '<button class="btn" data-act="cube" data-col="' + ch.id + '">cube -40</button></div>' +
+      '<div class="sub">' + (val ? 'Kina ' + fmtKina(c*val*m) + ' of ' + fmtKina(21*val*m) + (m < 1 ? ' (alt 4+, ~80%)' : '') : 'set item level for Kina') + '</div>';
+  });
+  h += '<div class="gh">Daily</div>' + matrixRowsFor('daily');
+  h += '<div class="gh">Weekly</div>' + matrixRowsFor('weekly');
+  h += '<div class="gh">Notes</div><div class="lab"></div>' + S.chars.map(ch=>'<div><textarea data-act="notes" data-col="' + ch.id + '" placeholder="Class, gear goals, what to farm">' + esc(ch.notes) + '</textarea></div>').join('');
+  return h + '</div></div>';
+}
+function renderBoard(){
+  const now = Date.now();
+  const board = document.getElementById('board');
+  const wrap = board.querySelector('.mwrap');
+  const sx = wrap ? wrap.scrollLeft : 0;
+  board.innerHTML = serverHtml() + matrixHtml(now);
+  const w2 = board.querySelector('.mwrap'); if (w2) w2.scrollLeft = sx;
+  document.getElementById('btnHideDone').textContent = S.settings.hideDone ? 'Show done' : 'Hide done';
+}
+
+/* ---------- rendering: timers ---------- */
+const LANES = [
+  {id:'shugo', name:'Shugo Festival',       evs:['shugo'],          keys:['shugo']},
+  {id:'dim',   name:'Dimensional Invasion', evs:['dim'],            keys:['dim']},
+  {id:'rift',  name:'Spacetime Rift',       evs:['rift'],           keys:['rift']},
+  {id:'abyss', name:'Abyss bosses',         evs:['nahma','exec'],   keys:['nahma']},
+  {id:'siege', name:'Artifact Siege',       evs:['siege'],          keys:['siege']},
+  {id:'arena', name:'Arena of Tactics',     evs:['arenaA','arenaB'],keys:['arena']},
+  {id:'reset', name:'Resets',               evs:['dreset','wreset'],keys:['dreset','wreset'], reset:true}
+];
+const BELL = '<svg viewBox="0 0 16 16"><path d="M8 1.5a1 1 0 0 1 1 1v.6a4 4 0 0 1 3 3.9v2.4l1.2 1.6H2.8L4 9.4V7a4 4 0 0 1 3-3.9v-.6a1 1 0 0 1 1-1zM6.5 13h3a1.5 1.5 0 0 1-3 0z"/></svg>';
+function evById(id){ return EVENTS.find(e=>e.id === id); }
+function fmtCd(ms, big){
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms/1000), d = Math.floor(s/86400), h = Math.floor(s%86400/3600), m = Math.floor(s%3600/60), sec = s%60, p = n=>String(n).padStart(2,'0');
+  if (d > 0) return d + 'd ' + h + 'h';
+  if (h > 0) return big ? h + ':' + p(m) + ':' + p(sec) : h + 'h ' + p(m) + 'm';
+  return p(m) + ':' + p(sec);
+}
+function laneState(lane, now, winMs){
+  let next = null, active = null, marks = [];
+  lane.evs.forEach(id=>{
+    const ev = evById(id), st = eventState(ev, now);
+    if (st.next && (next == null || st.next < next.t)) next = {t:st.next, ev:ev};
+    if (st.active != null) active = {t:st.active, ev:ev};
+    occurrences(ev, now - 6*36e5, now + winMs).forEach(t=>{
+      if (t + ev.dur*6e4 > now && t < now + winMs) marks.push({t:t, ev:ev});
+    });
+  });
+  marks.sort((a,b)=>a.t - b.t);
+  return {next:next, active:active, marks:marks};
+}
+function heroHtml(now){
+  const hrs = S.settings.tlHours || 12, win = hrs*36e5;
+  const states = LANES.map(l=>Object.assign({lane:l}, laneState(l, now, win)));
+  const up = states.filter(s=>!s.lane.reset && s.next).sort((a,b)=>a.next.t - b.next.t)[0];
+  const liveNames = states.filter(s=>s.active && !s.lane.reset).map(s=>s.lane.name);
+  let ring = '';
+  if (up){
+    const occ = occurrences(up.next.ev, now - 8*864e5, now + 8*864e5);
+    const prev = occ.filter(t=>t <= now).pop() || (up.next.t - 36e5);
+    const W = Math.max(6e4, Math.min(up.next.t - prev, 3*36e5));
+    const C = 2*Math.PI*92;
+    ring = '<div class="ringbox"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="84" fill="none" stroke="var(--line)" stroke-width="5" stroke-dasharray="1 7.8"/>' +
+      '<circle cx="100" cy="100" r="92" fill="none" stroke="var(--line2)" stroke-width="2"/>' +
+      '<circle id="ringp" data-t="' + up.next.t + '" data-w="' + W + '" cx="100" cy="100" r="92" fill="none" stroke="var(--ice)" stroke-width="2" stroke-dasharray="' + C + '" stroke-dashoffset="' + C + '" transform="rotate(-90 100 100)"/></svg>' +
+      '<div class="ringtxt"><span class="lbl">next up</span><span class="big" data-cd="' + up.next.t + '" data-big="1"></span></div></div>' +
+      '<div class="nextname">' + esc(up.lane.name) + '</div><div class="nextat">' + fmtLocal(up.next.t) + ' your time</div>';
+  }
+  const dres = eventState(evById('dreset'), now).next, wres = eventState(evById('wreset'), now).next;
+  const clocks = '<div class="clocks"><div class="clk"><span>Server time<small>' + esc(S.settings.serverName || '') + '</small></span><b id="svclock"></b></div>' +
+    '<div class="clk"><span>Daily reset<small>' + new Date(dres).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + ' your time</small></span><b data-cd="' + dres + '" data-big="1"></b></div>' +
+    '<div class="clk"><span>Weekly reset<small>' + new Date(wres).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'}) + '</small></span><b data-cd="' + wres + '" data-big="1"></b></div></div>';
+  const hourMs = 36e5, firstHour = Math.ceil(now/hourMs)*hourMs;
+  const step = hrs > 12 ? 3 : 1;
+  let ticks = '', grid = '';
+  for (let t = firstHour; t < now + win; t += hourMs){
+    const x = (t - now)/win*100, hr = new Date(t).getHours();
+    if (hr % step === 0) ticks += '<span style="left:' + x + '%">' + String(hr).padStart(2, '0') + '</span>';
+    grid += '<i class="gl" style="left:' + x + '%"></i>';
+  }
+  const lanes = states.map(s=>{
+    const live = !!s.active, soon = !live && s.next && (s.next.t - now) < 5*6e4;
+    let tr = '<div class="track">' + grid + '<i class="nowline"></i>';
+    s.marks.forEach(m=>{
+      const x0 = Math.max(0, (m.t - now)/win*100), x1 = Math.min(100, (m.t + m.ev.dur*6e4 - now)/win*100);
+      const isLive = m.t <= now;
+      if (m.ev.dur > 1) tr += '<i class="dur' + (isLive ? ' liveb' : '') + '" style="left:' + x0 + '%;width:' + Math.max(0.5, x1 - x0) + '%"></i>';
+      if (!isLive) tr += '<i class="mk' + (s.lane.reset ? ' reset' : '') + (s.next && m.t === s.next.t && m.ev === s.next.ev ? ' first' : '') + '" style="left:' + x0 + '%" title="' + esc(m.ev.name + ', ' + fmtLocal(m.t)) + '"></i>';
+    });
+    tr += '</div>';
+    const bellOn = s.lane.keys.some(k=>S.settings.alertsOn[k]);
+    const cd = live ? '<span class="cd">live</span>' : (s.next ? '<span class="cd" data-cd="' + s.next.t + '"></span>' : '<span class="cd"></span>');
+    return '<div class="lane' + (live ? ' live' : soon ? ' soon' : '') + '"><span class="nm">' + esc(s.lane.name) + '</span>' + tr + cd +
+      '<button class="bell' + (bellOn ? ' on' : '') + '" data-act="bell" data-key="' + s.lane.keys.join(',') + '" title="' + (bellOn ? 'Alert on' : 'Alert off') + '">' + BELL + '</button></div>';
+  }).join('');
+  const wbtn = [6, 12, 24].map(h=>'<button data-act="tlwin" data-h="' + h + '" class="' + (h === hrs ? 'cur' : '') + '">' + h + 'h</button>').join('');
+  const nextAll = Math.min.apply(null, states.map(s=>s.next ? s.next.t : Infinity));
+  return '<div class="hero-l">' + ring + (liveNames.length ? '<div class="livenow">live now: ' + esc(liveNames.join(', ')) + '</div>' : '') + clocks + '</div>' +
+    '<div class="hero-r" data-next="' + nextAll + '"><div class="hr-head"><h3 class="sech">Timeline<small>your local time</small></h3><div class="win">' + wbtn + '</div></div>' +
+    '<div class="axis"><span></span><div class="ticks">' + ticks + '</div><span></span><span></span></div>' +
+    '<div>' + lanes + '</div></div>';
+}
+function updateDynamic(now){
+  document.querySelectorAll('[data-cd]').forEach(el=>{ el.textContent = fmtCd(parseInt(el.dataset.cd, 10) - now, !!el.dataset.big); });
+  const rp = document.getElementById('ringp');
+  if (rp){
+    const W = parseFloat(rp.dataset.w), rem = Math.max(0, parseInt(rp.dataset.t, 10) - now), C = 2*Math.PI*92;
+    rp.setAttribute('stroke-dashoffset', String(C*(Math.min(rem, W)/W)));
+  }
+  const sc = document.getElementById('svclock');
+  if (sc){
+    try{ sc.textContent = new Intl.DateTimeFormat('en-GB', {timeZone:'Europe/Berlin', hour:'2-digit', minute:'2-digit', second:'2-digit', hourCycle:'h23'}).format(now); }catch(e){}
+  }
+}
+let lastHeroAt = 0;
+function renderHero(now, force){
+  const hero = document.getElementById('hero');
+  const hr = hero.querySelector('.hero-r');
+  const due = hr && parseInt(hr.dataset.next, 10) <= now;
+  if (force || due || now - lastHeroAt > 10000 || !hr){
+    hero.innerHTML = heroHtml(now); lastHeroAt = now;
+  }
+  updateDynamic(now);
+}
+function renderTrackerPane(){
+  const ad = progress('daily', 'account', S.account, null), aw = progress('weekly', 'account', S.account, null);
+  let h = '<h3 class="sech">Progress</h3><div class="prog"><span>Server-wide</span><b>day ' + ad.done + '/' + ad.total + '  week ' + aw.done + '/' + aw.total + '</b></div>';
+  S.chars.forEach(c=>{
+    const d = progress('daily', 'char', c, c), w = progress('weekly', 'char', c, c);
+    h += '<div class="prog"><span>' + esc(c.name) + '</span><b>day ' + d.done + '/' + d.total + '  week ' + w.done + '/' + w.total + '</b></div>';
+  });
+  h += '<div class="sub" style="margin-top:12px">Bell icons toggle alerts. Allow sound and notifications once under <a href="#" data-act="alertsettings">alert settings</a>.</div>' +
+       '<div style="margin-top:8px"><a href="' + location.href.split('?')[0] + '" target="aion2board">Open full board</a></div>';
+  document.getElementById('trackerPane').innerHTML = h;
+}
+
+/* ---------- modals ---------- */
+function closeModal(){ document.getElementById('modalHost').innerHTML = ''; }
+function openSettings(){
+  const s = S.settings;
+  const num = (id, label, val, hint) => '<label for="' + id + '">' + label + (hint ? ' <small class="tip">' + hint + '</small>' : '') + '</label><input type="number" id="' + id + '" value="' + val + '">';
+  const alerts = ALERT_KEYS.map(a=>'<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-alert="' + a.key + '"' + (s.alertsOn[a.key] ? ' checked' : '') + '>' + a.name + '</label>').join('');
+  document.getElementById('modalHost').innerHTML =
+    '<div class="overlay" id="ov"><div class="modal"><h2>Settings</h2>' +
+    '<div class="grid2">' +
+    num('sReset', 'Reset hour (UTC)', s.resetHourUTC, 'Global resets at 07:00 UTC (09:00 CEST, 08:00 CET after Oct 25, unconfirmed). Check the in-game countdown.') +
+    '<label for="sServer">Server</label><input type="text" id="sServer" value="' + esc(s.serverName || '') + '">' +
+    num('sShugoDay', 'Shugo keys per day (server)', s.shugoPerDay, 'Game files: 3 a day.') +
+    num('sShugoCap', 'Shugo key cap (server)', s.shugoCap, '12, or 21 with membership.') +
+    num('sShugoCDay', 'Shugo keys per day (character)', s.shugoCharPerDay, 'Game files: 4 a day.') +
+    num('sShugoCCap', 'Shugo key cap (character)', s.shugoCharCap, '28, or 32 with membership.') +
+    num('sNmDay', 'Nightmare tickets per day', s.nightmarePerDay) +
+    num('sNmCap', 'Nightmare ticket cap', s.nightmareCap) +
+    num('sOdyle', 'Odyle Energy cap', s.odyleCap, '560, or 840 with membership.') +
+    num('sLead', 'Alert lead time (minutes)', s.alertLead) +
+    '</div>' +
+    '<div style="margin:10px 0;display:flex;flex-direction:column;gap:4px">' +
+    '<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="sSound"' + (s.sound ? ' checked' : '') + '>Play a sound with alerts</label>' +
+    '<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="sMainOnly"' + (s.showMainOnlyOnAlts ? ' checked' : '') + '>Show main-only tasks on alts (dimmed)</label>' +
+    '<button id="sNotif" style="align-self:flex-start">Enable desktop notifications</button></div>' +
+    '<div class="sec-title">Alert for</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">' + alerts + '</div>' +
+    '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button id="sCancel">Cancel</button><button id="sSave" style="border-color:var(--accent)">Save</button></div>' +
+    '</div></div>';
+  document.getElementById('sCancel').onclick = closeModal;
+  document.getElementById('ov').onclick = e=>{ if (e.target.id === 'ov') closeModal(); };
+  document.getElementById('sNotif').onclick = ()=>{
+    if (!('Notification' in window)){ toast('Notifications are not supported in this browser.'); return; }
+    Notification.requestPermission().then(p=>{ toast('Notifications: ' + p); });
+    beep();
+  };
+  document.getElementById('sSave').onclick = ()=>{
+    const g = id => Math.max(0, parseInt(document.getElementById(id).value, 10) || 0);
+    const oldReset = s.resetHourUTC;
+    s.resetHourUTC = Math.min(23, g('sReset'));
+    s.serverName = document.getElementById('sServer').value.trim().slice(0, 40);
+    s.shugoPerDay = g('sShugoDay'); s.shugoCap = g('sShugoCap'); s.shugoCharPerDay = g('sShugoCDay'); s.shugoCharCap = g('sShugoCCap');
+    s.nightmarePerDay = g('sNmDay'); s.nightmareCap = g('sNmCap');
+    s.odyleCap = g('sOdyle') || 560; s.alertLead = g('sLead');
+    s.sound = document.getElementById('sSound').checked;
+    s.showMainOnlyOnAlts = document.getElementById('sMainOnly').checked;
+    document.querySelectorAll('[data-alert]').forEach(cb=>{ s.alertsOn[cb.dataset.alert] = cb.checked; });
+    if (s.resetHourUTC !== oldReset){ S.dayKey = dayKey(Date.now()); S.weekKey = weekKey(Date.now()); }
+    save(); closeModal(); renderAll();
+  };
+}
+
+function openGuide(){
+  const alts = S.chars.filter(c=>!c.main);
+  const tot = S.chars.reduce((sum, c)=>sum + cubeValue(c.ilv||0)*21*altMultiplier(c), 0);
+  const roster = '<div class="gbox"><h4>Your roster</h4>' + S.chars.map(c=>esc(c.name) + (c.main ? ' (main)' : '') + ': ' + (c.ilv ? 'ilv ' + c.ilv + ', up to ' + fmtKina(cubeValue(c.ilv)*21*altMultiplier(c)) + ' Kina a week' : 'set item level on the card')).join('<br>') +
+    '<br><b>Total potential: ' + fmtKina(tot) + ' Kina a week</b>' + (alts.length > 3 ? '<br><span class="warn">You have more than 3 alts, alt 4 and up earn about 80% or less.</span>' : '') + '</div>';
+  document.getElementById('modalHost').innerHTML = '<div class="overlay" id="ov"><div class="modal wide"><h2>Alt guide</h2>' +
+    '<div class="gg">' +
+    '<div class="gbox good"><h4>Shared with your main</h4><ul><li><b>Closet:</b> all your skins plus the collection bonus.</li><li><b>Pets and Genus Insight:</b> alt pets and soul crystals level the same boards.</li><li><b>Monolith levels:</b> sync them on the alt at the monolith.</li><li><b>Membership:</b> covers every character on that server, so it pays for itself with market money making.</li></ul></div>' +
+    '<div class="gbox bad"><h4>Not shared</h4><ul><li><b>Level, skills, stigmas:</b> every alt starts from zero.</li><li><b>Gear:</b> it binds when you equip it.</li><li><b>Odyle Energy:</b> each character has its own bar.</li><li><b>Quna and Daeva Pass:</b> bought for one character only.</li></ul></div>' +
+    '<div class="gbox"><h4>Every day on your alt</h4><ul><li><b>Spend Odyle Energy</b> on Conquest cubes, 40 energy each.</li><li><b>Nightmare x2:</b> a try is only used up when you win.</li><li><b>Gather on the way:</b> materials can go to your main.</li></ul></div>' +
+    '<div class="gbox"><h4>Every week on your alt</h4><ul><li><b>Ascension Trial x3:</b> solo, from item level 1000.</li><li><b>Exploration x7:</b> the easy mode of expedition dungeons.</li><li>Krao Cave and Urugugu Canyon cubes cost only 20 energy, cheap Enhance Stones.</li></ul></div>' +
+    '<div class="gbox"><h4>Leave this for your main</h4><ul><li><b>Duty Missions:</b> 5 a day, per server.</li><li><b>Daily Dungeon:</b> 14 entries a week (weekly reset), per server.</li><li><b>Shugo Festival server keys:</b> 3 a day, cap 12. Every character also has its own pool of 4 a day, cap 28.</li><li><b>Dimensional Invasion key:</b> 1 a day, banks up to 7, per server.</li></ul></div>' +
+    roster + '</div>' +
+    '<div class="gbox"><h4>How much Kina per alt, per week?</h4><div class="sub" style="margin:0 0 6px">Higher item level means more Kina per cube. 21 cubes a week is about 840 Odyle Energy, so roughly 120 energy a day does it.</div>' +
+    '<table class="gtable"><tr><th>Item level</th><th>Kina per week</th><th>Cube value</th><th>Good dungeons</th></tr>' +
+    '<tr><td>700</td><td>4.2M</td><td>200k</td><td>Krao Cave, Draupnir</td></tr>' +
+    '<tr><td>1400</td><td>6.3M</td><td>300k</td><td>Urugugu Canyon, Vakron Sky Island</td></tr>' +
+    '<tr><td>2100</td><td>8.4M</td><td>400k</td><td>Fire Temple, Ferocious Horn Den</td></tr></table>' +
+    '<div class="sub" style="margin:8px 0 0"><b>3 alts max:</b> after the third alt you only get 80% or less.</div></div>' +
+    '<div class="callout"><b>Never skip the cube.</b> Leaving a Conquest or Transcendence run without taking the cube still counts. After 10 skips a week (per server) you are locked out of those dungeons until Wednesday.</div>' +
+    '<div class="gbox"><h4>Caps worth knowing (do not let them overflow)</h4><table class="gtable"><tr><th>Counter</th><th>Refill</th><th>Cap</th><th>Can sit idle</th></tr>' +
+    '<tr><td>Odyle Energy</td><td>15 every 3h</td><td>560 (840 member)</td><td>4d 16h (7d member)</td></tr>' +
+    '<tr><td>Conquest cubes</td><td>1 every 8h</td><td>21</td><td>7 days</td></tr>' +
+    '<tr><td>Transcendence</td><td>1 every 12h</td><td>14</td><td>7 days</td></tr>' +
+    '<tr><td>Nightmare</td><td>2 daily</td><td>14</td><td>7 days</td></tr>' +
+    '<tr><td>Shugo keys (server)</td><td>3 daily</td><td>12 (21 member)</td><td>4 days (7 member)</td></tr>' +
+    '<tr><td>Shugo keys (per character)</td><td>4 daily</td><td>28 (32 member)</td><td>7 days</td></tr>' +
+    '<tr><td>Dimensional Invasion key (server)</td><td>1 daily</td><td>7</td><td>7 days</td></tr>' +
+    '<tr><td>Conquest claims, each dungeon</td><td>2 daily</td><td>14</td><td>7 days</td></tr>' +
+    '<tr><td>Transcendence claims, each dungeon</td><td>2 daily</td><td>4</td><td>2 days</td></tr>' +
+    '<tr><td>Daily Dungeon entries (server)</td><td>14 on Wednesday</td><td>14</td><td>none, use by Wednesday</td></tr>' +
+    '<tr><td>Shop limits marked monthly</td><td>day 16, 16:00 server time</td><td>-</td><td>-</td></tr>' +
+    '<tr><td>Weekly entries</td><td>Wednesday</td><td>same as refill</td><td>none, use by Wednesday</td></tr></table></div>' +
+    '<div class="sub links" style="margin-top:12px">Handy: <a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/events">Events and timers</a><a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/weekly-reset">Weekly reset</a><a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/map">Interactive map</a><a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/hidden-cubes">Hidden cubes</a><a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/dungeons">Dungeons</a><a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/daeva-pass">Daeva Pass</a><a target="_blank" rel="noopener" href="https://metabot.gg/en/aion-2/servers">Servers</a><a target="_blank" rel="noopener" href="https://aion2maps.com">aion2maps.com</a></div>' +
+    '<div style="margin-top:12px;text-align:right"><button id="gClose">Close</button></div></div></div>';
+  document.getElementById('gClose').onclick = closeModal;
+  document.getElementById('ov').onclick = e=>{ if (e.target.id === 'ov') closeModal(); };
+}
+
+/* ---------- actions ---------- */
+function handleAction(el){
+  const act = el.dataset.act, col = el.dataset.col;
+  const owner = col ? ownerOf(col) : null;
+  const ch = (col && col !== 'account') ? owner : null;
+  if (act === 'toggle' && owner){
+    const t = allTasks().find(x=>x.id === el.dataset.task), max = taskMax(t, ch);
+    owner.checks[t.id] = (owner.checks[t.id] || 0) >= max ? 0 : max;
+  } else if (act === 'inc' && owner){
+    const t = allTasks().find(x=>x.id === el.dataset.task), max = taskMax(t, ch);
+    owner.checks[t.id] = Math.max(0, Math.min(max, (owner.checks[t.id] || 0) + parseInt(el.dataset.d, 10)));
+  } else if (act === 'pool'){
+    const d = parseInt(el.dataset.d, 10);
+    if (el.dataset.pool === 'shugo') S.account.shugo.val = Math.max(0, Math.min(S.settings.shugoCap, S.account.shugo.val + d));
+    else if (el.dataset.pool === 'dim') S.account.dim.val = Math.max(0, Math.min(S.settings.dimCap, S.account.dim.val + d));
+    else if (el.dataset.pool === 'shugoc' && ch) ch.shugo.val = Math.max(0, Math.min(S.settings.shugoCharCap, ch.shugo.val + d));
+    else if (ch) ch.nightmare.val = Math.max(0, Math.min(S.settings.nightmareCap, ch.nightmare.val + d));
+  } else if (act === 'setpip' && owner){
+    const t = allTasks().find(x=>x.id === el.dataset.task), k = parseInt(el.dataset.n, 10);
+    owner.checks[t.id] = (owner.checks[t.id] || 0) === k ? k - 1 : k;
+  } else if (act === 'tlwin'){
+    S.settings.tlHours = parseInt(el.dataset.h, 10);
+  } else if (act === 'cube' && ch){
+    if (!spendCube(ch)) return;
+  } else if (act === 'rename' && ch){
+    const n = prompt('Character name', ch.name); if (n && n.trim()) ch.name = n.trim().slice(0, 30);
+  } else if (act === 'color' && ch){
+    ch.color = COLORS[(COLORS.indexOf(ch.color) + 1) % COLORS.length];
+  } else if (act === 'makemain' && ch){
+    S.chars.forEach(c=>{ c.main = false; }); ch.main = true;
+  } else if (act === 'delchar' && ch){
+    if (S.chars.length < 2){ toast('Keep at least one character.'); return; }
+    if (!confirm('Delete ' + ch.name + '?')) return;
+    S.chars = S.chars.filter(c=>c.id !== ch.id);
+    if (!S.chars.some(c=>c.main)) S.chars[0].main = true;
+  } else if (act === 'addcustom'){
+    const label = prompt('Task name'); if (!label || !label.trim()) return;
+    const period = el.dataset.period || (/^w/i.test(prompt('Reset period: daily or weekly?', 'daily') || '') ? 'weekly' : 'daily');
+    const max = Math.max(1, parseInt(prompt('How many times per reset? (1 = checkbox)', '1'), 10) || 1);
+    S.custom.push({id:uid(), label:label.trim().slice(0, 60), period:period, scope:col === 'account' ? 'account' : 'char', max:max});
+  } else if (act === 'delcustom'){
+    S.custom = S.custom.filter(c=>c.id !== el.dataset.task);
+  } else if (act === 'bell'){
+    const keys = el.dataset.key.split(','), on = !keys.some(k=>S.settings.alertsOn[k]);
+    keys.forEach(k=>{ S.settings.alertsOn[k] = on; });
+    if (on && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    beep();
+  } else if (act === 'alertsettings'){
+    openSettings(); return;
+  } else return;
+  save(); renderAll();
+}
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-act]');
+  if (!el || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+  e.preventDefault();
+  handleAction(el);
+});
+document.addEventListener('contextmenu', e=>{
+  const el = e.target.closest('[data-act="inc"]');
+  if (!el) return;
+  e.preventDefault();
+  handleAction({dataset:Object.assign({}, el.dataset, {d:'-1'})});
+});
+document.addEventListener('change', e=>{
+  const el = e.target;
+  if (el.dataset.act === 'odyle'){
+    const ch = ownerOf(el.dataset.col);
+    ch.odyle = {val:Math.max(0, Math.min(S.settings.odyleCap, parseInt(el.value, 10) || 0)), ts:Date.now()};
+    save(); renderAll();
+  } else if (el.dataset.act === 'ilv'){
+    ownerOf(el.dataset.col).ilv = Math.max(0, parseInt(el.value, 10) || 0); save(); renderAll();
+  } else if (el.dataset.act === 'notes'){
+    ownerOf(el.dataset.col).notes = el.value; save();
+  }
+});
+
+/* toolbar */
+document.getElementById('btnAddChar').onclick = ()=>{
+  const n = prompt('Alt name'); if (!n || !n.trim()) return;
+  S.chars.push(newChar(n.trim().slice(0, 30), false, S.chars.length)); save(); renderAll();
+};
+document.getElementById('btnHideDone').onclick = ()=>{ S.settings.hideDone = !S.settings.hideDone; save(); renderAll(); };
+document.getElementById('themePick').addEventListener('click', e=>{ const b = e.target.closest('[data-theme-pick]'); if (!b) return; S.settings.theme = b.dataset.themePick; save(); renderAll(); });
+document.addEventListener('click', e=>{
+  const m = document.getElementById('moreMenu');
+  if (m && m.open && (!m.contains(e.target) || (e.target.closest('.menu-pop button') && !e.target.closest('.themes')))) m.open = false;
+});
+document.getElementById('btnSettings').onclick = openSettings;
+document.getElementById('btnGuide').onclick = openGuide;
+document.getElementById('btnPop').onclick = ()=>{
+  const url = location.href.split('?')[0] + '?mode=tracker';
+  const w = window.open(url, 'aion2tracker', 'popup=yes,width=340,height=620');
+  if (!w) toast('Popup blocked. Allow popups for this page and try again.');
+};
+document.getElementById('btnExport').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(S, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'aion2-board-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+};
+document.getElementById('btnImport').onclick = ()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = e=>{
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const j = JSON.parse(r.result);
+      if (!j || !Array.isArray(j.chars)) throw new Error('bad file');
+      if (!confirm('Replace current data with this backup?')) return;
+      localStorage.setItem(LS_KEY, JSON.stringify(j)); S = load(); applyResets(); save(); renderAll(); toast('Imported.');
+    }catch(err){ toast('That file is not a valid Aion 2 board backup.'); }
+  };
+  r.readAsText(f); e.target.value = '';
+};
+
+/* sync between board and popup */
+window.addEventListener('storage', e=>{
+  if (e.key === LS_KEY){ S = load(); renderAll(); }
+});
+
+/* ---------- main loop ---------- */
+const THEMES = ['aion','paper','lamp','slate','mist'];
+function applyTheme(){
+  if (THEMES.indexOf(S.settings.theme) < 0) S.settings.theme = 'aion';
+  document.documentElement.dataset.theme = S.settings.theme;
+  document.querySelectorAll('[data-theme-pick]').forEach(b=>b.classList.toggle('cur', b.dataset.themePick === S.settings.theme));
+}
+function renderAll(){
+  applyTheme();
+  const now = Date.now();
+  document.getElementById('srv').textContent = S.settings.serverName || '';
+  renderHero(now, true);
+  if (TRACKER_MODE) renderTrackerPane(); else renderBoard();
+}
+function tick(){
+  const now = Date.now();
+  const changed = applyResets(now);
+  if (changed) renderAll(); else renderHero(now, false);
+  checkAlerts(now);
+}
+let minuteCounter = 0;
+setInterval(()=>{
+  tick();
+  if (++minuteCounter % 60 === 0){
+    const a = document.activeElement;
+    if (!a || (a.tagName !== 'INPUT' && a.tagName !== 'TEXTAREA')){ if (TRACKER_MODE) renderTrackerPane(); else renderBoard(); }
+  }
+}, 1000);
+if (TRACKER_MODE) document.title = 'Aion 2 Timers';
+applyResets(); renderAll(); tick();
+</script>
+</body>
+</html>
