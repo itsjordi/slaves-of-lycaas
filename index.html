@@ -22,12 +22,12 @@
   <h1>Game tools</h1>
   <p class="sub">Pick a game. You can switch at any time from inside each tool.</p>
   <div class="cards">
-    <a class="card" href="ffxiv.html" data-game="ffxiv" style="--c:#e0b050">
+    <a class="card" href="ffxiv.html" data-game="ffxiv" data-file="ffxiv.html" style="--c:#e0b050">
       <h2>FFXIV</h2>
       <div>Crafting costs, market profit, watchlist, gil per hour and more.</div>
       <ul><li>Pinned to the Light data center</li><li>Floating windows and presets</li></ul>
     </a>
-    <a class="card" href="aion2.html" data-game="aion2" style="--c:#7c8cff">
+    <a class="card" href="aion2.html" data-game="aion2" data-file="aion2.html" style="--c:#7c8cff">
       <h2>Aion 2</h2>
       <div>Daily and weekly board for your main and alts, plus an event tracker.</div>
       <ul><li>Shugo Festival, rifts and reset alerts</li><li>Pop-out tracker for your second screen</li></ul>
@@ -42,6 +42,15 @@
     });
     if (g) document.getElementById('last').textContent = 'Last opened: ' + (g === 'aion2' ? 'Aion 2' : 'FFXIV');
   }catch(e){}
+</script>
+<script>
+  // Resolve links from the real folder of this page, so they still work when the URL has no trailing slash.
+  (function(){
+    var p = location.pathname;
+    if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(p)) p += '/';
+    var dir = p.replace(/[^\/]*$/, '');
+    document.querySelectorAll('a.card[data-file]').forEach(function(a){ a.href = location.origin + dir + a.getAttribute('data-file'); });
+  })();
 </script>
 </body>
 </html>
