@@ -311,6 +311,18 @@ body.tracker .tpane{display:block}
 .menu-pop .themes>span{margin-bottom:2px}
 .menu-pop .themes button{width:auto;padding:5px 10px;border:1px solid var(--line)}
 .menu-pop .themes button.cur{color:var(--gold);border-color:var(--gold);background:var(--panel2)}
+.blocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 56px;padding-top:26px;align-items:start}
+.blk{min-width:0}
+.bh{display:flex;align-items:center;gap:10px;cursor:grab;padding-bottom:6px}
+.bh:active{cursor:grabbing}
+.bh .sech{flex:1;margin:0}
+.bh .mv{order:0;gap:12px}
+.grip{color:var(--muted);letter-spacing:-3px;font-size:15px;user-select:none}
+.bh:hover .grip{color:var(--gold)}
+.blk.dragging{opacity:.4}
+.blk.dragover{outline:1px dashed var(--gold);outline-offset:8px}
+.blk.collapsed .bh{padding-bottom:0}
+@media (max-width:1000px){.blocks{grid-template-columns:1fr}}
 @media (max-width:1000px){.pcols{grid-template-columns:1fr}}
 @media (max-width:1000px){.hero{grid-template-columns:1fr}.cols{grid-template-columns:1fr;gap:30px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -425,7 +437,7 @@ const COLORS = ['#7c8cff','#4ade80','#f472b6','#fbbf24','#22d3ee','#fb923c','#c0
 function uid(){ return 'c' + Math.random().toString(36).slice(2,9); }
 function defaultSettings(){
   return {resetHourUTC:7, serverOffset:9, shugoPerDay:3, shugoCap:12, shugoCharPerDay:4, shugoCharCap:28, dimPerDay:1, dimCap:7, nightmarePerDay:2, nightmareCap:14,
-          odyleCap:560, alertLead:2, sound:true, hideDone:false, showMainOnlyOnAlts:false, theme:'aion', themeV:4, tlHours:12, doneOpen:false, active:'', hiddenLanes:[], pinnedLane:'', blockOrder:['checklist','todo','notes'], serverName:'Yustiel (Europe)',
+          odyleCap:560, alertLead:2, sound:true, hideDone:false, showMainOnlyOnAlts:false, theme:'aion', themeV:4, tlHours:12, doneOpen:false, active:'', hiddenLanes:[], pinnedLane:'', blockOrder:['daily','weekly','todo','notes'], collapsed:{}, serverName:'Yustiel (Europe)',
           alertsOn:{shugo:true,dim:false,rift:false,siege:true,nahma:false,arena:false,dreset:false,wreset:false}};
 }
 function newChar(name, main, idx){
@@ -670,10 +682,9 @@ function itemHtml(it){
 function listHtml(ch, period){
   const items = viewItems(ch, period);
   const open = items.filter(it=>!isDone(it)), done = items.filter(isDone);
-  let h = '<div class="plist"><h3 class="sech">' + (period === 'daily' ? 'Today' : 'This week') + '<small>' + (open.length ? open.length + ' left' : 'all done') + '</small></h3>';
-  h += open.length ? open.map(itemHtml).join('') : '<div class="empty">Nothing left. Nice and quiet.</div>';
+  let h = open.length ? open.map(itemHtml).join('') : '<div class="empty">Nothing left. Nice and quiet.</div>';
   if (done.length) h += '<details class="donel" data-k="done-' + period + '"' + (S.settings.doneOpen ? ' open' : '') + '><summary>Done (' + done.length + ')</summary>' + done.map(itemHtml).join('') + '</details>';
-  return h + '</div>';
+  return {small: open.length ? open.length + ' left' : 'all done', body: h};
 }
 function leftCount(ch){
   return ['daily', 'weekly'].reduce((sum, p)=>sum + viewItems(ch, p).filter(it=>!isDone(it)).length, 0);
@@ -722,9 +733,39 @@ function todoItemHtml(ch, t){
 }
 function todoHtml(ch){
   const list = ch.todos || [], open = list.filter(t=>!t.done).length;
-  return '<div class="plist todo"><h3 class="sech">My to-do<small>' + (list.length ? open + ' open' : 'no reset, check off when done') + '</small><span class="mv"><button data-act="blockmove" data-d="-1" title="Move this block up">&uarr; up</button><button data-act="blockmove" data-d="1" title="Move this block down">&darr; down</button></span></h3>' +
-    '<div class="todoadd"><input type="text" id="todoInput" data-act="todoinput" data-col="' + ch.id + '" maxlength="120" placeholder="For example: Get Golden crafter ring"><button class="btn" data-act="todoadd" data-col="' + ch.id + '">add</button>' +
-    (list.some(t=>t.done) ? '<button class="btn" data-act="todoclear" data-col="' + ch.id + '">clear done</button>' : '') + '</div>' + list.map(t=>todoItemHtml(ch, t)).join('') + '</div>';
+  const body = '<div class="todoadd"><input type="text" id="todoInput" data-act="todoinput" data-col="' + ch.id + '" maxlength="120" placeholder="For example: Get Golden crafter ring"><button class="btn" data-act="todoadd" data-col="' + ch.id + '">add</button>' +
+    (list.some(t=>t.done) ? '<button class="btn" data-act="todoclear" data-col="' + ch.id + '">clear done</button>' : '') + '</div>' + list.map(t=>todoItemHtml(ch, t)).join('');
+  return {small: list.length ? open + ' open' : 'no reset, check off when done', body: body};
+}
+const BLOCK_TITLES = {daily:'Today', weekly:'This week', todo:'My to-do', notes:'Notes'};
+function normalizedOrder(){
+  const order = [];
+  (S.settings.blockOrder || []).forEach(k=>{
+    if (k === 'checklist'){ ['daily','weekly'].forEach(x=>{ if (order.indexOf(x) < 0) order.push(x); }); }
+    else if (BLOCK_TITLES[k] && order.indexOf(k) < 0) order.push(k);
+  });
+  Object.keys(BLOCK_TITLES).forEach(k=>{ if (order.indexOf(k) < 0) order.push(k); });
+  return order;
+}
+function isCollapsed(key, ch){
+  const c = (S.settings.collapsed || {})[key];
+  if (c != null) return c;
+  return key === 'notes' && !ch.notes;
+}
+function blockWrap(key, ch, small, body){
+  const col = isCollapsed(key, ch);
+  const mv = (d, label)=>'<button data-act="blkmove" data-b="' + key + '" data-d="' + d + '" title="Move this block ' + (d < 0 ? 'earlier' : 'later') + '">' + label + '</button>';
+  return '<section class="blk' + (col ? ' collapsed' : '') + '" data-blk="' + key + '"><div class="bh" draggable="true" title="Drag to move this block"><span class="grip">&#8942;&#8942;</span>' +
+    '<h3 class="sech">' + BLOCK_TITLES[key] + '<small>' + small + '</small></h3>' +
+    '<span class="mv">' + mv(-1, '&uarr;') + mv(1, '&darr;') + '<button data-act="blktoggle" data-b="' + key + '">' + (col ? 'expand' : 'collapse') + '</button></span></div>' +
+    (col ? '' : '<div class="bb">' + body + '</div>') + '</section>';
+}
+function moveBlockTo(from, to){
+  if (from === to) return;
+  const order = normalizedOrder(), i = order.indexOf(from), j = order.indexOf(to);
+  if (i < 0 || j < 0) return;
+  order.splice(i, 1); order.splice(j, 0, from);
+  S.settings.blockOrder = order; save(); renderBoard();
 }
 function boardHtml(now){
   const ch = activeChar();
@@ -737,14 +778,14 @@ function boardHtml(now){
     '<button data-act="color" data-col="' + ch.id + '">color</button><button data-act="addcustom" data-col="' + ch.id + '">+ task</button>' +
     (ch.main ? '<button data-act="addcustom" data-col="account" data-period="daily">+ server daily</button><button data-act="addcustom" data-col="account" data-period="weekly">+ server weekly</button>' : '') +
     '<button data-act="delchar" data-col="' + ch.id + '">remove</button></span></div>';
+  const d = listHtml(ch, 'daily'), w = listHtml(ch, 'weekly'), t = todoHtml(ch);
   const blocks = {
-    checklist: '<div class="pcols">' + listHtml(ch, 'daily') + listHtml(ch, 'weekly') + '</div>',
-    todo: todoHtml(ch),
-    notes: '<details class="notes2" data-k="notes"' + (ch.notes ? ' open' : '') + '><summary>Notes</summary><textarea data-act="notes" data-col="' + ch.id + '" placeholder="Class, gear goals, what to farm">' + esc(ch.notes) + '</textarea></details>'
+    daily: blockWrap('daily', ch, d.small, d.body),
+    weekly: blockWrap('weekly', ch, w.small, w.body),
+    todo: blockWrap('todo', ch, t.small, t.body),
+    notes: blockWrap('notes', ch, ch.notes ? 'saved' : 'empty', '<textarea data-act="notes" data-col="' + ch.id + '" placeholder="Class, gear goals, what to farm">' + esc(ch.notes) + '</textarea>')
   };
-  const order = (S.settings.blockOrder || []).filter(k=>blocks[k]);
-  Object.keys(blocks).forEach(k=>{ if (order.indexOf(k) < 0) order.push(k); });
-  return '<div class="tabs">' + tabs + '</div>' + head + order.map(k=>blocks[k]).join('');
+  return '<div class="tabs">' + tabs + '</div>' + head + '<div class="blocks">' + normalizedOrder().map(k=>blocks[k]).join('') + '</div>';
 }
 function renderBoard(){
   const now = Date.now();
@@ -1015,10 +1056,13 @@ function handleAction(el){
     const inp = document.getElementById('todoInput'), txt = inp ? inp.value.trim() : '';
     if (!txt) return;
     ch.todos.push({id:uid(), text:txt.slice(0, 120), done:false});
-  } else if (act === 'blockmove'){
-    const order = (S.settings.blockOrder || ['checklist','todo','notes']).slice(), i = order.indexOf('todo'), j = i + parseInt(el.dataset.d, 10);
+  } else if (act === 'blkmove'){
+    const order = normalizedOrder(), i = order.indexOf(el.dataset.b), j = i + parseInt(el.dataset.d, 10);
     if (i < 0 || j < 0 || j >= order.length) return;
-    order.splice(i, 1); order.splice(j, 0, 'todo'); S.settings.blockOrder = order;
+    order.splice(i, 1); order.splice(j, 0, el.dataset.b); S.settings.blockOrder = order;
+  } else if (act === 'blktoggle'){
+    const cur = isCollapsed(el.dataset.b, activeChar());
+    S.settings.collapsed = Object.assign({}, S.settings.collapsed, {[el.dataset.b]: !cur});
   } else if (act === 'todomove' && ch){
     const i = ch.todos.findIndex(x=>x.id === el.dataset.id), j = i + parseInt(el.dataset.d, 10);
     if (i < 0 || j < 0 || j >= ch.todos.length) return;
@@ -1104,6 +1148,28 @@ document.addEventListener('keydown', e=>{
   } else if (e.key === 'Escape' && d.act === 'subinput'){
     subOpen = null; renderBoard();
   }
+});
+let dragKey = null;
+document.addEventListener('dragstart', e=>{
+  const bh = e.target.closest && e.target.closest('.bh'); if (!bh) return;
+  const blk = bh.closest('.blk'); dragKey = blk.dataset.blk; blk.classList.add('dragging');
+  if (e.dataTransfer){ e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('text/plain', dragKey); }catch(x){} }
+});
+document.addEventListener('dragover', e=>{
+  if (!dragKey) return;
+  const blk = e.target.closest && e.target.closest('.blk'); if (!blk) return;
+  e.preventDefault();
+  document.querySelectorAll('.blk.dragover').forEach(x=>x.classList.remove('dragover'));
+  if (blk.dataset.blk !== dragKey) blk.classList.add('dragover');
+});
+document.addEventListener('drop', e=>{
+  if (!dragKey) return;
+  const blk = e.target.closest && e.target.closest('.blk');
+  if (blk){ e.preventDefault(); const k = dragKey; dragKey = null; moveBlockTo(k, blk.dataset.blk); }
+});
+document.addEventListener('dragend', ()=>{
+  dragKey = null;
+  document.querySelectorAll('.blk.dragging,.blk.dragover').forEach(x=>x.classList.remove('dragging', 'dragover'));
 });
 document.addEventListener('contextmenu', e=>{
   const el = e.target.closest('[data-act="inc"]');
