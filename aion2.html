@@ -79,7 +79,13 @@ body.tracker .hero{border-bottom:0}
 .nextname{font-family:var(--hfont);font-size:20px;margin-top:14px;text-align:center}
 .nextat{color:var(--muted);font-size:12px;text-align:center}
 .livenow{margin-top:8px;font-size:12px;color:var(--good);text-align:center}
-.clocks{margin-top:22px;width:100%;border-top:1px solid var(--line2)}
+.clocks{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:0 56px;margin-bottom:10px}
+.clocks .clk{padding:4px 0 14px;border-bottom:0;align-items:flex-end}
+.clocks .clk b{font-size:24px}
+@media (max-width:760px){.clocks{grid-template-columns:1fr}}
+body.tracker .clocks{grid-template-columns:1fr;gap:0}
+body.tracker .clocks .clk{padding:6px 0;border-bottom:1px solid var(--line2)}
+body.tracker .clocks .clk b{font-size:15px}
 .clk{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line2);font-size:12px;color:var(--muted)}
 .clk b{font-family:var(--mono);font-weight:400;font-size:15px;color:var(--text);font-variant-numeric:tabular-nums}
 .clk small{display:block;font-size:10px}
@@ -245,6 +251,13 @@ body.tracker .tpane{display:block}
 .item:hover .itemmv,.item:focus-within .itemmv{opacity:1}
 .todoadd{display:flex;gap:16px;align-items:center;margin:4px 0 10px}
 .todoadd input{flex:1;font-size:14px;padding:6px 2px}
+.titem .subs{margin-left:36px}
+.item.sub{padding:7px 4px}
+.item.sub .ck{flex:0 0 18px;width:18px;height:18px}
+.item.sub .il{font-size:13.5px}
+.subcount{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.subadd{display:flex;gap:16px;align-items:center;padding:6px 4px}
+.subadd input{flex:1;font-size:13.5px}
 .notes2{margin-top:30px}
 .notes2 summary{cursor:pointer;color:var(--muted);font-size:12px;margin-bottom:6px}
 
@@ -659,12 +672,26 @@ function stripHtml(ch, now){
   }
   return h + '</div>';
 }
+let subOpen = null;
+function todoItemHtml(ch, t){
+  const subs = t.subs || [], sd = subs.filter(x=>x.done).length;
+  const at = 'data-col="' + ch.id + '" data-id="' + t.id + '"';
+  let h = '<div class="titem"><div class="item' + (t.done ? ' isdone' : '') + '"><button class="ck" data-act="todotoggle" ' + at + ' aria-label="Done"></button><span class="il">' + esc(t.text) + '</span>' +
+    (subs.length ? '<span class="subcount">' + sd + '/' + subs.length + '</span>' : '') +
+    '<span class="mv itemmv"><button data-act="subopen" ' + at + ' title="Add a sub-task">+ sub</button><button data-act="todomove" ' + at + ' data-d="-1" title="Move up">&uarr;</button><button data-act="todomove" ' + at + ' data-d="1" title="Move down">&darr;</button></span>' +
+    '<button class="btn" data-act="tododel" ' + at + ' title="Remove">x</button></div>';
+  if (subs.length || subOpen === t.id){
+    h += '<div class="subs">' + subs.map(x=>'<div class="item sub' + (x.done ? ' isdone' : '') + '"><button class="ck" data-act="subtoggle" ' + at + ' data-sid="' + x.id + '" aria-label="Done"></button><span class="il">' + esc(x.text) + '</span><button class="btn" data-act="subdel" ' + at + ' data-sid="' + x.id + '" title="Remove">x</button></div>').join('');
+    if (subOpen === t.id) h += '<div class="subadd"><input type="text" id="subInput" data-act="subinput" ' + at + ' maxlength="120" placeholder="Sub-task, press Enter"><button class="btn" data-act="subadd" ' + at + '>add</button><button class="btn" data-act="subclose">done</button></div>';
+    h += '</div>';
+  }
+  return h + '</div>';
+}
 function todoHtml(ch){
   const list = ch.todos || [], open = list.filter(t=>!t.done).length;
-  const items = list.map(t=>'<div class="item' + (t.done ? ' isdone' : '') + '"><button class="ck" data-act="todotoggle" data-col="' + ch.id + '" data-id="' + t.id + '" aria-label="Done"></button><span class="il">' + esc(t.text) + '</span><span class="mv itemmv"><button data-act="todomove" data-col="' + ch.id + '" data-id="' + t.id + '" data-d="-1" title="Move up">&uarr;</button><button data-act="todomove" data-col="' + ch.id + '" data-id="' + t.id + '" data-d="1" title="Move down">&darr;</button></span><button class="btn" data-act="tododel" data-col="' + ch.id + '" data-id="' + t.id + '" title="Remove">x</button></div>').join('');
   return '<div class="plist todo"><h3 class="sech">My to-do<small>' + (list.length ? open + ' open' : 'no reset, check off when done') + '</small><span class="mv"><button data-act="blockmove" data-d="-1" title="Move this block up">&uarr; up</button><button data-act="blockmove" data-d="1" title="Move this block down">&darr; down</button></span></h3>' +
     '<div class="todoadd"><input type="text" id="todoInput" data-act="todoinput" data-col="' + ch.id + '" maxlength="120" placeholder="For example: Get Golden crafter ring"><button class="btn" data-act="todoadd" data-col="' + ch.id + '">add</button>' +
-    (list.some(t=>t.done) ? '<button class="btn" data-act="todoclear" data-col="' + ch.id + '">clear done</button>' : '') + '</div>' + items + '</div>';
+    (list.some(t=>t.done) ? '<button class="btn" data-act="todoclear" data-col="' + ch.id + '">clear done</button>' : '') + '</div>' + list.map(t=>todoItemHtml(ch, t)).join('') + '</div>';
 }
 function boardHtml(now){
   const ch = activeChar();
@@ -694,6 +721,7 @@ function renderBoard(){
   board.innerHTML = boardHtml(now);
   board.querySelectorAll('details[data-k]').forEach(d=>{ if (was[d.dataset.k] != null) d.open = was[d.dataset.k]; });
   document.getElementById('btnHideDone').textContent = S.settings.doneOpen ? 'Collapse done' : 'Expand done';
+  const si = document.getElementById('subInput'); if (si) si.focus();
 }
 
 /* ---------- rendering: timers ---------- */
@@ -778,7 +806,7 @@ function heroHtml(now){
   }).join('');
   const wbtn = [6, 12, 24].map(h=>'<button data-act="tlwin" data-h="' + h + '" class="' + (h === hrs ? 'cur' : '') + '">' + h + 'h</button>').join('') + '<button data-act="lanes" title="Choose which timers you see">choose timers</button>';
   const nextAll = Math.min.apply(null, states.map(s=>s.next ? s.next.t : Infinity));
-  return '<div class="hero-l">' + ring + (liveNames.length ? '<div class="livenow">live now: ' + esc(liveNames.join(', ')) + '</div>' : '') + clocks + '</div>' +
+  return clocks + '<div class="hero-l">' + ring + (liveNames.length ? '<div class="livenow">live now: ' + esc(liveNames.join(', ')) + '</div>' : '') + '</div>' +
     '<div class="hero-r" data-next="' + nextAll + '"><div class="hr-head"><h3 class="sech">Timeline<small>your local time</small></h3><div class="win">' + wbtn + '</div></div>' +
     '<div class="axis"><span></span><div class="ticks">' + ticks + '</div><span></span><span></span></div>' +
     '<div>' + (lanes || '<div class="empty">No timers selected. Use choose timers to bring some back.</div>') + '</div></div>';
@@ -950,8 +978,22 @@ function handleAction(el){
     const i = ch.todos.findIndex(x=>x.id === el.dataset.id), j = i + parseInt(el.dataset.d, 10);
     if (i < 0 || j < 0 || j >= ch.todos.length) return;
     const it = ch.todos.splice(i, 1)[0]; ch.todos.splice(j, 0, it);
+  } else if (act === 'subopen' && ch){
+    subOpen = el.dataset.id;
+  } else if (act === 'subclose'){
+    subOpen = null;
+  } else if (act === 'subadd' && ch){
+    const inp = document.getElementById('subInput'), txt = inp ? inp.value.trim() : '', t = ch.todos.find(x=>x.id === el.dataset.id);
+    if (!t || !txt) return;
+    t.subs = t.subs || []; t.subs.push({id:uid(), text:txt.slice(0, 120), done:false}); t.done = false;
+  } else if (act === 'subtoggle' && ch){
+    const t = ch.todos.find(x=>x.id === el.dataset.id), x = t && (t.subs || []).find(y=>y.id === el.dataset.sid);
+    if (x){ x.done = !x.done; t.done = t.subs.length > 0 && t.subs.every(y=>y.done); }
+  } else if (act === 'subdel' && ch){
+    const t = ch.todos.find(x=>x.id === el.dataset.id);
+    if (t){ t.subs = (t.subs || []).filter(y=>y.id !== el.dataset.sid); if (!t.subs.length) subOpen = subOpen === t.id ? null : subOpen; }
   } else if (act === 'todotoggle' && ch){
-    const t = ch.todos.find(x=>x.id === el.dataset.id); if (t) t.done = !t.done;
+    const t = ch.todos.find(x=>x.id === el.dataset.id); if (t){ t.done = !t.done; (t.subs || []).forEach(x=>{ x.done = t.done; }); }
   } else if (act === 'tododel' && ch){
     ch.todos = ch.todos.filter(x=>x.id !== el.dataset.id);
   } else if (act === 'todoclear' && ch){
@@ -1006,9 +1048,16 @@ document.addEventListener('click', e=>{
   handleAction(el);
 });
 document.addEventListener('keydown', e=>{
-  if (e.key === 'Enter' && e.target && e.target.dataset && e.target.dataset.act === 'todoinput'){
+  const d = e.target && e.target.dataset;
+  if (!d) return;
+  if (e.key === 'Enter' && d.act === 'todoinput'){
     e.preventDefault();
-    handleAction({dataset:{act:'todoadd', col:e.target.dataset.col}});
+    handleAction({dataset:{act:'todoadd', col:d.col}});
+  } else if (e.key === 'Enter' && d.act === 'subinput'){
+    e.preventDefault();
+    handleAction({dataset:{act:'subadd', col:d.col, id:d.id}});
+  } else if (e.key === 'Escape' && d.act === 'subinput'){
+    subOpen = null; renderBoard();
   }
 });
 document.addEventListener('contextmenu', e=>{
