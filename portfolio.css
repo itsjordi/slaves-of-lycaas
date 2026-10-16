@@ -477,3 +477,28 @@ footer .fine{margin:0;max-width:70ch;font-size:var(--type-small);color:var(--mut
 .player figcaption .lv{color:var(--muted)}
 @media(min-width:768px){.p-hero .player{position:absolute;right:var(--gutter);top:clamp(3.5rem,10vh,7rem);width:clamp(220px,22vw,340px);margin:0}}
 @media(min-width:768px) and (max-width:1100px){.p-hero .intro,.p-hero .philo,.p-hero .now{max-width:calc(100% - clamp(220px,22vw,340px) - 2rem)}.p-hero .now{display:block}}
+
+/* ================= calm layout: nothing flies, everything sits on the same grid ================= */
+.rv,.rv.in{opacity:1!important;transform:none!important;transition:none!important}
+.card-p:hover,.tile:hover,.card4:hover,.player .shot:hover,.player .shot:focus-visible{transform:none}
+.card-p .art .sprite,.card-p:hover .art .sprite,.quest li.here .ico .sprite,.stop.here .node .sprite{animation:none;transform:none}
+.tile:hover .ico .sprite,.next:hover .ico .sprite,.next:hover .arr,.cab:hover .sprite{transform:none}
+.says li:hover h3{transform:none}
+.dive[open] .body{animation:none}
+.btn:hover::after,.tlink:hover::after,.tile:hover .go::after{transform:none}
+.player .shot{transition:none}
+/* inner page heroes line up with the section headings and the home hero */
+@media(min-width:768px){
+  .pg-hero .wrap > *{margin-left:var(--label)}
+  .pg-hero .wrap > .xp{margin-left:var(--label)}
+}
+
+/* project cards: same art height, and on wide screens every row (art, meta, title, text, chips, links) lines up across the three cards */
+.card-p .art{aspect-ratio:auto;height:150px}
+@media(min-width:900px){
+  @supports (grid-template-rows:subgrid){
+    .projects{grid-template-rows:none}
+    .card-p{display:grid;grid-template-rows:subgrid;grid-row:span 8;row-gap:.9rem}
+    .card-p .specs{margin-top:0}
+  }
+}
