@@ -447,3 +447,11 @@ section.dark-band h2 small{color:var(--accent)}
 .card-p .metarow{border-top:0;padding-top:0}
 .card-p .acts{margin-top:.2rem;padding-top:1rem;border-top:1px solid var(--hairline)}
 @media(max-width:899px){.projects{gap:2rem}}
+
+/* hard size limits so an icon can never fill its container, even if styles load out of order */
+.ico .sprite,.node .sprite{width:100%}
+.ico .sprite svg,.node .sprite svg{width:100%;max-width:100%;height:auto}
+.card4 .ico{width:36px}
+.stop .node .sprite{width:100%;max-width:36px}
+.next .ico{width:40px}
+.tile{padding-top:1.4rem}
