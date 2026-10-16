@@ -89,13 +89,31 @@
   .hand .arm{position:absolute;left:12px;top:70px;width:46px;bottom:0;background:#2a2140;border-radius:10px 10px 0 0}
   .hand .fist{position:absolute;left:4px;top:18px;width:62px;height:66px;background:#d9a77a;border-radius:24px 24px 14px 14px;box-shadow:inset -8px -6px 0 rgba(0,0,0,.14)}
   .hand .thumb{position:absolute;left:0;top:2px;width:22px;height:30px;background:#d9a77a;border-radius:12px;transform:rotate(-24deg);box-shadow:inset -4px -3px 0 rgba(0,0,0,.14)}
-  .hand .hcoin{position:absolute;left:19px;top:-6px;width:32px;height:32px;border-radius:50%;background:#e8b030;box-shadow:inset -5px -5px 0 rgba(0,0,0,.2);z-index:2}
+  .hand .hcoin{position:absolute;left:19px;top:-6px;width:32px;height:32px;z-index:2}
+  .hand .hcoin svg,#toss svg{display:block;width:100%;height:100%;image-rendering:pixelated}
   .stage.ins .hand{animation:handin 1.1s ease-in-out forwards}
   .stage.ins .hand .hcoin{animation:coingone 1.1s steps(1) forwards}
   @keyframes handin{0%{transform:translateY(420px) scale(var(--hs,1))}38%{transform:translateY(-6px) scale(var(--hs,1))}60%{transform:translateY(-14px) scale(var(--hs,1))}100%{transform:translateY(420px) scale(var(--hs,1))}}
   @keyframes coingone{0%,56%{opacity:1}57%,100%{opacity:0}}
   .stage.go{animation:suck 1.3s cubic-bezier(.55,0,.85,.35) forwards}
   @keyframes suck{0%{transform:none}100%{transform:scale(var(--suck,3))}}
+  /* first-person coin toss: a pixel coin flips up from below the screen and comes back down into your hand */
+  #toss{position:fixed;left:50%;bottom:0;width:0;height:0;z-index:30;pointer-events:none;display:none}
+  body.tossing #toss{display:block}
+  #toss .arc{position:absolute;left:-48px;bottom:-96px;width:96px;height:96px;animation:tossarc 1.7s linear forwards}
+  #toss .spin{width:100%;height:100%;animation:tossflip 1.7s steps(1) forwards}
+  @keyframes tossarc{
+    0%{transform:translate(8vw,10vh) scale(.7)}
+    14%{transform:translate(5vw,-24vh) scale(1.05);animation-timing-function:cubic-bezier(.2,.7,.3,1)}
+    50%{transform:translate(0,-62vh) scale(1.7);animation-timing-function:cubic-bezier(.7,0,.8,.4)}
+    86%{transform:translate(-2vw,-16vh) scale(1.1)}
+    100%{transform:translate(0,8vh) scale(.8)}}
+  @keyframes tossflip{
+    0%{transform:scaleX(1)}6%{transform:scaleX(.5)}12%{transform:scaleX(.12)}18%{transform:scaleX(.5)}24%{transform:scaleX(1)}
+    30%{transform:scaleX(.5)}36%{transform:scaleX(.12)}42%{transform:scaleX(.5)}48%{transform:scaleX(1)}
+    54%{transform:scaleX(.5)}60%{transform:scaleX(.12)}66%{transform:scaleX(.5)}72%{transform:scaleX(1)}
+    78%{transform:scaleX(.5)}84%{transform:scaleX(.12)}90%{transform:scaleX(.5)}100%{transform:scaleX(1)}}
+  body.compact #toss .arc{width:72px;height:72px;left:-36px;bottom:-72px}
   #flash{position:fixed;inset:0;z-index:20;pointer-events:none;background:#080e20;opacity:0}
   body.leaving #flash{animation:flashin .55s .8s forwards}
   @keyframes flashin{to{opacity:1}}
@@ -181,9 +199,10 @@
         </div>
       </div>
       <button class="coinzone ready" id="coinBtn" type="button" aria-label="Insert coin" data-ia="coin"></button>
-      <div class="hand"><div class="arm"></div><div class="fist"></div><div class="thumb"></div><div class="hcoin"></div></div>
+      <div class="hand"><div class="arm"></div><div class="fist"></div><div class="thumb"></div><div class="hcoin"><svg class="" viewBox="0 0 8 8" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="0" width="1" height="1" fill="#7a4a00"/><rect x="3" y="0" width="1" height="1" fill="#7a4a00"/><rect x="4" y="0" width="1" height="1" fill="#7a4a00"/><rect x="5" y="0" width="1" height="1" fill="#7a4a00"/><rect x="1" y="1" width="1" height="1" fill="#7a4a00"/><rect x="2" y="1" width="1" height="1" fill="#ffd24f"/><rect x="3" y="1" width="1" height="1" fill="#ffd24f"/><rect x="4" y="1" width="1" height="1" fill="#fff2a8"/><rect x="5" y="1" width="1" height="1" fill="#ffd24f"/><rect x="6" y="1" width="1" height="1" fill="#7a4a00"/><rect x="0" y="2" width="1" height="1" fill="#7a4a00"/><rect x="1" y="2" width="1" height="1" fill="#ffd24f"/><rect x="2" y="2" width="1" height="1" fill="#ffd24f"/><rect x="3" y="2" width="1" height="1" fill="#fff2a8"/><rect x="4" y="2" width="1" height="1" fill="#ffd24f"/><rect x="5" y="2" width="1" height="1" fill="#ffd24f"/><rect x="6" y="2" width="1" height="1" fill="#e8b030"/><rect x="7" y="2" width="1" height="1" fill="#7a4a00"/><rect x="0" y="3" width="1" height="1" fill="#7a4a00"/><rect x="1" y="3" width="1" height="1" fill="#ffd24f"/><rect x="2" y="3" width="1" height="1" fill="#ffd24f"/><rect x="3" y="3" width="1" height="1" fill="#ffd24f"/><rect x="4" y="3" width="1" height="1" fill="#ffd24f"/><rect x="5" y="3" width="1" height="1" fill="#ffd24f"/><rect x="6" y="3" width="1" height="1" fill="#e8b030"/><rect x="7" y="3" width="1" height="1" fill="#7a4a00"/><rect x="0" y="4" width="1" height="1" fill="#7a4a00"/><rect x="1" y="4" width="1" height="1" fill="#ffd24f"/><rect x="2" y="4" width="1" height="1" fill="#ffd24f"/><rect x="3" y="4" width="1" height="1" fill="#ffd24f"/><rect x="4" y="4" width="1" height="1" fill="#ffd24f"/><rect x="5" y="4" width="1" height="1" fill="#e8b030"/><rect x="6" y="4" width="1" height="1" fill="#e8b030"/><rect x="7" y="4" width="1" height="1" fill="#7a4a00"/><rect x="0" y="5" width="1" height="1" fill="#7a4a00"/><rect x="1" y="5" width="1" height="1" fill="#ffd24f"/><rect x="2" y="5" width="1" height="1" fill="#ffd24f"/><rect x="3" y="5" width="1" height="1" fill="#ffd24f"/><rect x="4" y="5" width="1" height="1" fill="#ffd24f"/><rect x="5" y="5" width="1" height="1" fill="#e8b030"/><rect x="6" y="5" width="1" height="1" fill="#e8b030"/><rect x="7" y="5" width="1" height="1" fill="#7a4a00"/><rect x="1" y="6" width="1" height="1" fill="#7a4a00"/><rect x="2" y="6" width="1" height="1" fill="#e8b030"/><rect x="3" y="6" width="1" height="1" fill="#e8b030"/><rect x="4" y="6" width="1" height="1" fill="#e8b030"/><rect x="5" y="6" width="1" height="1" fill="#e8b030"/><rect x="6" y="6" width="1" height="1" fill="#7a4a00"/><rect x="2" y="7" width="1" height="1" fill="#7a4a00"/><rect x="3" y="7" width="1" height="1" fill="#7a4a00"/><rect x="4" y="7" width="1" height="1" fill="#7a4a00"/><rect x="5" y="7" width="1" height="1" fill="#7a4a00"/></svg></div></div>
     </div>
   </div>
+  <div id="toss" aria-hidden="true"><div class="arc"><div class="spin"><svg class="" viewBox="0 0 8 8" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="0" width="1" height="1" fill="#7a4a00"/><rect x="3" y="0" width="1" height="1" fill="#7a4a00"/><rect x="4" y="0" width="1" height="1" fill="#7a4a00"/><rect x="5" y="0" width="1" height="1" fill="#7a4a00"/><rect x="1" y="1" width="1" height="1" fill="#7a4a00"/><rect x="2" y="1" width="1" height="1" fill="#ffd24f"/><rect x="3" y="1" width="1" height="1" fill="#ffd24f"/><rect x="4" y="1" width="1" height="1" fill="#fff2a8"/><rect x="5" y="1" width="1" height="1" fill="#ffd24f"/><rect x="6" y="1" width="1" height="1" fill="#7a4a00"/><rect x="0" y="2" width="1" height="1" fill="#7a4a00"/><rect x="1" y="2" width="1" height="1" fill="#ffd24f"/><rect x="2" y="2" width="1" height="1" fill="#ffd24f"/><rect x="3" y="2" width="1" height="1" fill="#fff2a8"/><rect x="4" y="2" width="1" height="1" fill="#ffd24f"/><rect x="5" y="2" width="1" height="1" fill="#ffd24f"/><rect x="6" y="2" width="1" height="1" fill="#e8b030"/><rect x="7" y="2" width="1" height="1" fill="#7a4a00"/><rect x="0" y="3" width="1" height="1" fill="#7a4a00"/><rect x="1" y="3" width="1" height="1" fill="#ffd24f"/><rect x="2" y="3" width="1" height="1" fill="#ffd24f"/><rect x="3" y="3" width="1" height="1" fill="#ffd24f"/><rect x="4" y="3" width="1" height="1" fill="#ffd24f"/><rect x="5" y="3" width="1" height="1" fill="#ffd24f"/><rect x="6" y="3" width="1" height="1" fill="#e8b030"/><rect x="7" y="3" width="1" height="1" fill="#7a4a00"/><rect x="0" y="4" width="1" height="1" fill="#7a4a00"/><rect x="1" y="4" width="1" height="1" fill="#ffd24f"/><rect x="2" y="4" width="1" height="1" fill="#ffd24f"/><rect x="3" y="4" width="1" height="1" fill="#ffd24f"/><rect x="4" y="4" width="1" height="1" fill="#ffd24f"/><rect x="5" y="4" width="1" height="1" fill="#e8b030"/><rect x="6" y="4" width="1" height="1" fill="#e8b030"/><rect x="7" y="4" width="1" height="1" fill="#7a4a00"/><rect x="0" y="5" width="1" height="1" fill="#7a4a00"/><rect x="1" y="5" width="1" height="1" fill="#ffd24f"/><rect x="2" y="5" width="1" height="1" fill="#ffd24f"/><rect x="3" y="5" width="1" height="1" fill="#ffd24f"/><rect x="4" y="5" width="1" height="1" fill="#ffd24f"/><rect x="5" y="5" width="1" height="1" fill="#e8b030"/><rect x="6" y="5" width="1" height="1" fill="#e8b030"/><rect x="7" y="5" width="1" height="1" fill="#7a4a00"/><rect x="1" y="6" width="1" height="1" fill="#7a4a00"/><rect x="2" y="6" width="1" height="1" fill="#e8b030"/><rect x="3" y="6" width="1" height="1" fill="#e8b030"/><rect x="4" y="6" width="1" height="1" fill="#e8b030"/><rect x="5" y="6" width="1" height="1" fill="#e8b030"/><rect x="6" y="6" width="1" height="1" fill="#7a4a00"/><rect x="2" y="7" width="1" height="1" fill="#7a4a00"/><rect x="3" y="7" width="1" height="1" fill="#7a4a00"/><rect x="4" y="7" width="1" height="1" fill="#7a4a00"/><rect x="5" y="7" width="1" height="1" fill="#7a4a00"/></svg></div></div></div>
   <div id="flash"></div>
 
   <div id="soon" role="dialog" aria-label="Coming soon"><div class="in"><h2 data-i="soon">Coming soon<br>to your local<br>arcade hall</h2><p data-i="anykey">PRESS ANY KEY</p></div></div>
@@ -230,6 +249,7 @@
     var IW = 1672, IH = 941;
     var P = [[835,502],[838,485],[837,472]];      // centre of the two machines in each picture
     var RS = [1, 2.15, 3.58];                     // how much bigger the machines are than in picture 1
+    var SMAX = 7.4;                               // end zoom: well past picture 3, so you really walk up to the machines
     var vw, vh, cs, ox, oy;
     function sm(a, b, x){ var t = Math.max(0, Math.min(1, (x - a)/(b - a))); return t*t*(3 - 2*t); }
     function layout(){
@@ -244,13 +264,13 @@
     addEventListener('resize', function(){ draw(last.cam, last.f, last.bob); });
     function draw(cam, f, bob){
       last = { cam: cam, f: f, bob: bob };
-      var T = END - 1.3, p = Math.max(0, Math.min(1, cam/T)), S = Math.pow(RS[2], p), e = sm(0, 1, p);
+      var T = END - 1.3, p = Math.max(0, Math.min(1, cam/T)), S = Math.pow(SMAX, p), e = sm(0, 1, p);
       var c0x = ox + P[0][0]*cs, c0y = oy + P[0][1]*cs;
       var cx = c0x + (vw/2 - c0x)*e, cy = c0y + (vh*0.5 - c0y)*e + bob*1.5;
       imgs.forEach(function(im, i){
         var s = S/RS[i], tx = cx - (ox + P[i][0]*cs), ty = cy - (oy + P[i][1]*cs);
         im.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(4) + ')';
-        var op = i === 0 ? 1 : sm(RS[i]*0.9, RS[i]*0.985, S);
+        var op = i === 0 ? 1 : (i === 1 ? sm(1.6, 2.7, S) : sm(3.9, 5.5, S));
         im.style.opacity = op.toFixed(3);
       });
     }
@@ -283,7 +303,7 @@
     function walkIn(){
       if (state !== 'hall') return;
       state = 'walking'; body.classList.add('walking');
-      walk(TARGET, 8500, function(){
+      walk(TARGET, 12500, function(){
         state = 'arrived'; body.classList.remove('walking'); body.classList.add('arrived'); paint(0); resetMachine(); setTimeout(function(){ if (state === 'arrived') insertCoin(); }, 1400);
       });
     }
@@ -314,12 +334,15 @@
     var powered = false, inserting = false, scr = document.getElementById('scr'), mEl = document.getElementById('m'), coinBtn = document.getElementById('coinBtn'), boot = document.getElementById('bootlog');
     var lastTagged = false;
     function resetMachine(){
-      powered = false; inserting = false;
+      powered = false; inserting = false; body.classList.remove('tossing');
       scr.classList.remove('on', 'boot'); mEl.classList.remove('ins', 'go'); body.classList.remove('leaving'); coinBtn.classList.add('ready'); coinBtn.classList.remove('used'); boot.textContent = '';
     }
     function insertCoin(){
       if (powered || inserting) return;
-      inserting = true; coinBtn.classList.remove('ready'); coinBtn.classList.add('used'); mEl.classList.add('ins');
+      inserting = true; coinBtn.classList.remove('ready'); coinBtn.classList.add('used');
+      var tossMs = still ? 0 : 1750;
+      if (tossMs) body.classList.add('tossing');
+      setTimeout(function(){ body.classList.remove('tossing'); mEl.classList.add('ins'); }, tossMs);
       setTimeout(function(){
         scr.classList.add('boot');
         var lines = I18N[LANG].boot, i = 0;
@@ -329,7 +352,7 @@
             scr.classList.remove('boot'); scr.classList.add('on'); powered = true; select(startIndex());
           }, 350);
         })();
-      }, 700);
+      }, tossMs + 700);
     }
     coinBtn.addEventListener('click', insertCoin);
     function startIndex(){
