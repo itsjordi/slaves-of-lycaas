@@ -33,6 +33,12 @@ html[data-theme="mist"]{
   --text:#1d212b; --muted:#555b6e; --gold:#3b55a0; --ice:#3b55a0; --good:#2f6f50; --warn:#7d5f28; --bad:#8c4545; --on:#fbfbfd;
   --hfont:system-ui,"Segoe UI",sans-serif; --font:system-ui,"Segoe UI",sans-serif; --bgimg:none;
 }
+html[data-theme="pixel"]{
+  --bg:#0b0a1e; --panel:#15122e; --panel2:#201b4a; --line:#7a68e8; --line2:#2f2a74;
+  --text:#f2edff; --muted:#aaa2dc; --gold:#ffd24f; --ice:#4fe6ff; --good:#5bff9a; --warn:#ffb23f; --bad:#ff6b8b; --on:#0b0a1e;
+  --hfont:ui-monospace,"SF Mono",Menlo,Consolas,monospace; --font:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --bgimg:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 4px,transparent 4px 8px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 4px,transparent 4px 8px);
+}
 :root{ --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; --accent:var(--gold); --r:2px; --rl:2px; }
 
 *{box-sizing:border-box}
@@ -326,6 +332,31 @@ body.tracker .tpane{display:block}
 @media (max-width:1000px){.pcols{grid-template-columns:1fr}}
 @media (max-width:1000px){.hero{grid-template-columns:1fr}.cols{grid-template-columns:1fr;gap:30px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Pixel theme: hard edges, stepped shadows, blocky type */
+html[data-theme="pixel"] *{border-radius:0!important}
+html[data-theme="pixel"] body{background-repeat:repeat;image-rendering:pixelated}
+html[data-theme="pixel"] .title{font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-shadow:3px 3px 0 #6b2bd2}
+html[data-theme="pixel"] .title small{text-shadow:none;text-transform:none;letter-spacing:.02em}
+html[data-theme="pixel"] .top{border-bottom:4px solid var(--line)}
+html[data-theme="pixel"] .nav a,html[data-theme="pixel"] .nav button,html[data-theme="pixel"] .nav summary{border:3px solid var(--line);background:var(--panel);box-shadow:4px 4px 0 #000;font-weight:700}
+html[data-theme="pixel"] .nav a:hover,html[data-theme="pixel"] .nav button:hover,html[data-theme="pixel"] .nav summary:hover,html[data-theme="pixel"] .menu[open]>summary{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+html[data-theme="pixel"] .hero{border-bottom:4px solid var(--line)}
+html[data-theme="pixel"] .tab{border:3px solid var(--line2);border-bottom:0;background:var(--panel);margin-right:4px;font-weight:700}
+html[data-theme="pixel"] .tab.cur{background:var(--panel2);border-color:var(--gold);color:var(--gold)}
+html[data-theme="pixel"] .tabs{border-bottom:4px solid var(--line)}
+html[data-theme="pixel"] .blk{background:var(--panel);border:3px solid var(--line);box-shadow:6px 6px 0 #000;padding:0 0 10px}
+html[data-theme="pixel"] .blk .bh{background:var(--panel2);border-bottom:3px solid var(--line);padding:8px 12px}
+html[data-theme="pixel"] .blk .bb{padding:6px 14px 0}
+html[data-theme="pixel"] .sech{text-transform:uppercase;letter-spacing:.1em;color:var(--gold)}
+html[data-theme="pixel"] .item:hover{background:var(--panel2)}
+html[data-theme="pixel"] .pip{transform:none;border:3px solid var(--muted);width:14px;height:14px}
+html[data-theme="pixel"] .pip.on{box-shadow:inset 0 0 0 2px var(--panel)}
+html[data-theme="pixel"] .modal{border:4px solid var(--line);box-shadow:8px 8px 0 #000}
+html[data-theme="pixel"] .toast{border:3px solid var(--gold);box-shadow:5px 5px 0 #000}
+html[data-theme="pixel"] .menu-pop{border:3px solid var(--line);box-shadow:5px 5px 0 #000}
+html[data-theme="pixel"] input,html[data-theme="pixel"] textarea{border-bottom:3px solid var(--line)}
+html[data-theme="pixel"] textarea{border:3px solid var(--line2)}
 </style>
 </head>
 <body>
@@ -344,7 +375,7 @@ body.tracker .tpane{display:block}
       <details class="menu" id="moreMenu"><summary>More</summary>
         <div class="menu-pop">
           <button id="btnHideDone">Hide done</button>
-          <div class="themes" id="themePick"><span>Theme</span><button data-theme-pick="aion">Aion</button><button data-theme-pick="paper">Paper</button><button data-theme-pick="lamp">Lamp</button><button data-theme-pick="slate">Slate</button><button data-theme-pick="mist">Mist</button></div>
+          <div class="themes" id="themePick"><span>Theme</span><button data-theme-pick="aion">Aion</button><button data-theme-pick="paper">Paper</button><button data-theme-pick="lamp">Lamp</button><button data-theme-pick="slate">Slate</button><button data-theme-pick="mist">Mist</button><button data-theme-pick="pixel">Pixel</button></div>
           <button id="btnExport">Export backup</button>
           <button id="btnImport">Import backup</button>
           <button id="btnSettings">Settings</button>
@@ -1235,7 +1266,7 @@ window.addEventListener('storage', e=>{
 });
 
 /* ---------- main loop ---------- */
-const THEMES = ['aion','paper','lamp','slate','mist'];
+const THEMES = ['aion','paper','lamp','slate','mist','pixel'];
 function applyTheme(){
   if (THEMES.indexOf(S.settings.theme) < 0) S.settings.theme = 'aion';
   document.documentElement.dataset.theme = S.settings.theme;
@@ -1264,6 +1295,18 @@ setInterval(()=>{
 }, 1000);
 if (TRACKER_MODE) document.title = 'Aion 2 Timers';
 applyResets(); renderAll(); tick();
+</script>
+<script>
+// Arrived from the arcade: fade in from the dark screen colour.
+try{
+  if (sessionStorage.getItem('arcade_in')){
+    sessionStorage.removeItem('arcade_in');
+    var __d = document.createElement('div');
+    __d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#080e20;pointer-events:none;transition:opacity .8s ease';
+    document.body.appendChild(__d);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ __d.style.opacity = '0'; setTimeout(function(){ __d.remove(); }, 900); }); });
+  }
+}catch(e){}
 </script>
 </body>
 </html>
