@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aion 2 Daily Board - a checklist and timer page for a second screen</title>
+<meta name="description" content="A single-file daily and weekly checklist with live event timers for an Aion 2 main and alts, built for a second screen. A case study by the builder.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Aion 2 Daily Board - a checklist and timer page for a second screen">
+<meta property="og:description" content="A single-file daily and weekly checklist with live event timers for an Aion 2 main and alts, built for a second screen. A case study by the builder.">
+<meta property="og:image" content="https://jordimutsaers.nl/public/images/aion2-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<script>
+  try{
+    var __l = localStorage.getItem('clubbie_lang') || ((navigator.language || '').toLowerCase().indexOf('nl') === 0 ? 'nl' : 'en');
+    if (__l === 'nl') document.documentElement.lang = 'nl';
+  }catch(e){}
+</script>
+<style>
+  :root{
+    --bg:#15171A; --bg2:#1c1f24; --line:#2c3038; --text:#EFEEE8; --muted:#a9acb3;
+    --blue:#2358E6; --blueSoft:#8fb0ff; --accent:#8fb0ff;
+    --display:"Anton",Impact,"Arial Narrow Bold",sans-serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:60px}
+  body{margin:0;background:var(--bg);color:var(--text);font:17px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-underline-offset:3px}
+  a:hover{color:#fff}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:2px}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  .narrow{max-width:700px}
+  .skip{position:absolute;left:-999px;top:8px;background:var(--blue);color:#fff;padding:8px 14px;z-index:10}
+  .skip:focus{left:8px}
+
+  /* hero */
+  .hero{padding:72px 0 56px;border-bottom:1px solid var(--line);background:radial-gradient(900px 340px at 20% -10%,rgba(35,88,230,.28),transparent 70%)}
+  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(56px,11vw,120px);line-height:.95;letter-spacing:.01em;text-transform:uppercase;margin:0}
+  .pitch{font-size:clamp(19px,2.6vw,25px);line-height:1.45;max-width:640px;margin:20px 0 28px;color:#dfe4ee}
+  .meta{display:flex;flex-wrap:wrap;gap:12px 40px;margin:0 0 26px;padding:0}
+  .meta div{min-width:120px}
+  .meta dt{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .meta dd{margin:2px 0 0;font-size:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 30px;list-style:none}
+  .chips li{font-size:13px;border:1px solid var(--line);background:var(--bg2);padding:4px 12px;border-radius:999px;color:#d6dbe6}
+  .btn{display:inline-block;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:13px 24px;border-radius:4px;transition:transform .15s,background .15s}
+  .btn:hover{background:#fff;color:#15171A;transform:translateY(-2px)}
+
+  /* sections */
+  section{padding:72px 0;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,52px);letter-spacing:.02em;text-transform:uppercase;margin:0 0 20px;line-height:1.05}
+  h2 small{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.18em;color:var(--accent);margin-bottom:8px}
+  h3{font-size:22px;line-height:1.25;margin:0 0 8px}
+  p{margin:0 0 16px}
+  .lead{font-size:19px;color:#e4e3dc}
+  .muted{color:var(--muted)}
+  ul.tight{padding-left:20px;margin:0 0 16px}
+  ul.tight li{margin:6px 0}
+  code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--bg2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
+
+  /* chapters */
+  .chapter{padding:36px 0;border-top:1px solid var(--line)}
+  .chapter:first-of-type{border-top:0;padding-top:12px}
+  .chapter .num{font-family:var(--display);color:var(--accent);font-size:18px;letter-spacing:.1em}
+  .chapter p{max-width:700px}
+
+  /* figures */
+  figure{margin:0}
+  figcaption{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.45}
+  .frame{position:relative;background:#101215;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .frame .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:12px ui-monospace,Menlo,Consolas,monospace;color:#5d6572}
+  .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .phone .frame{aspect-ratio:9/19.5}
+  .wide .frame{aspect-ratio:16/10}
+  .strip{display:flex;gap:18px;overflow-x:auto;padding:6px 2px 18px;margin:18px 0 0;scroll-snap-type:x proximity;scrollbar-color:#3a4050 transparent}
+  .strip figure{flex:0 0 clamp(190px,24vw,236px);scroll-snap-align:start}
+  .strip::-webkit-scrollbar{height:8px}
+  .strip::-webkit-scrollbar-thumb{background:#3a4050;border-radius:4px}
+  .wide{margin-top:24px}
+
+  /* stories */
+  .stories{display:grid;gap:18px;margin-top:24px}
+  @media(min-width:760px){.stories{grid-template-columns:1fr 1fr}}
+  .story{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+  .story h3{font-size:19px;color:#fff}
+  .story p{margin:0 0 10px;color:#d3d8e2}
+  .story p:last-child{margin:0;color:var(--blueSoft)}
+  .pair{display:grid;gap:24px;margin-top:20px}
+  @media(min-width:760px){.pair{grid-template-columns:1fr 1fr}}
+  .box{border-left:3px solid var(--blue);padding:2px 0 2px 18px}
+  .box h3{font-size:18px}
+  footer{padding:36px 0 56px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+  .next-grid{display:grid;gap:16px;margin-top:28px}
+  @media(min-width:760px){.next-grid{grid-template-columns:repeat(6,1fr)}.ncard.feature{grid-column:span 3}.ncard:not(.feature){grid-column:span 2}}
+  .ncard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:24px 26px;transition:border-color .2s,transform .2s}
+  .ncard:hover{border-color:var(--blue);transform:translateY(-3px)}
+  .ncard.feature{background:linear-gradient(160deg,rgba(35,88,230,.22),var(--bg2) 70%);border-color:#2f4a96}
+  .ncard h3{font-size:21px;color:#fff;margin-bottom:10px}
+  .ncard.feature h3{font-size:25px}
+  .ncard p{margin:0;color:#d3d3cc;font-size:16px}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  /* reveal */
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+  .rv.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}.btn,.ncard,.langbtn{transition:none}}
+  .nojs .rv{opacity:1;transform:none}
+
+  /* language switch */
+  html:not([lang="nl"]) [lang="nl"], html[lang="nl"] [lang="en"]{display:none!important}
+  .langbar{position:sticky;top:0;z-index:20;background:rgba(21,23,26,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .langbar .wrap{display:flex;justify-content:flex-end;gap:10px;padding-top:10px;padding-bottom:10px}
+  .langbtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:13px;letter-spacing:.08em;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 12px 6px 8px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+  .langbtn:hover{color:#fff;border-color:#4a5368}
+  .langbtn[aria-pressed="true"]{color:#fff;border-color:var(--blue);background:rgba(35,88,230,.2)}
+  .langbtn svg{width:26px;height:17px;display:block;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+
+  .shots{display:grid;gap:18px;margin-top:20px}
+  @media(min-width:760px){.shots{grid-template-columns:1fr 1fr}}
+  .shots .frame{aspect-ratio:16/10}
+  .langbar .wrap{justify-content:space-between;align-items:center}
+  .langbar .back{color:var(--muted);text-decoration:none;font-size:14px;letter-spacing:.04em}
+  .langbar .back:hover{color:#fff}
+  .langbar .right{display:flex;gap:10px}
+  .linkrow{display:flex;flex-wrap:wrap;gap:12px;margin:0}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#fff;color:#15171A}
+
+  :root{--bg:#0a0e17;--bg2:#0f1522;--line:#27304a;--text:#e6e2d6;--muted:#9ba5b9;--blue:#cdb070;--blueSoft:#8dc3e8;--accent:#cdb070;--display:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif}
+  body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif}
+  h1,h2{text-transform:none;letter-spacing:0;font-weight:700;font-family:var(--display)}
+  h1{font-size:clamp(46px,8vw,92px)}
+  h2{font-size:clamp(30px,4.4vw,44px)}
+  .hero{background:radial-gradient(900px 340px at 20% -10%,rgba(141,195,232,.14),transparent 70%)}
+  .btn{color:#0a0e17}
+  .btn:hover{background:#fff;color:#0a0e17}
+  .btn.ghost{color:var(--text)}
+  .ncard.feature{background:linear-gradient(160deg,rgba(205,176,112,.16),var(--bg2) 70%);border-color:#5a4d2c}
+  .story p:last-child{color:var(--blueSoft)}
+  .box{border-left-color:var(--blue)}
+</style>
+</head>
+<body class="nojs">
+<a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
+<div class="langbar">
+  <div class="wrap">
+    <a class="back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+    <div class="right">
+      <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
+      <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+    </div>
+  </div>
+</div>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow"><span lang="en">Case study</span><span lang="nl">Casestudy</span></p>
+    <h1>Aion 2 Daily Board</h1>
+    <p lang="en" class="pitch">A daily and weekly checklist with live timers for my main and my alts, built to sit on a second screen while I play.</p>
+<p lang="nl" class="pitch">Een dagelijkse en wekelijkse checklist met live timers voor mijn main en mijn alts, gebouwd om op een tweede scherm te staan terwijl ik speel.</p>
+    <dl class="meta"><div><dt><span lang="en">Role</span><span lang="nl">Rol</span></dt><dd><span lang="en">Product owner and builder</span><span lang="nl">Product owner en bouwer</span></dd></div><div><dt><span lang="en">Year</span><span lang="nl">Jaar</span></dt><dd><span lang="en">2026</span><span lang="nl">2026</span></dd></div><div><dt><span lang="en">Game</span><span lang="nl">Game</span></dt><dd><span lang="en">Aion 2, Global Europe, Yustiel</span><span lang="nl">Aion 2, Global Europe, Yustiel</span></dd></div><div><dt><span lang="en">Form</span><span lang="nl">Vorm</span></dt><dd><span lang="en">One HTML file, no account</span><span lang="nl">Eén HTML-bestand, geen account</span></dd></div></dl>
+    <ul class="chips" aria-label="Stack"><li>HTML</li><li>CSS</li><li>Vanilla JavaScript</li><li>Notification API</li><li>Web Audio</li><li>localStorage</li><li>GitHub Pages</li></ul>
+    <div class="linkrow"><a class="btn" href="aion2.html" rel="noopener"><span lang="en">Open the board</span><span lang="nl">Open het bord</span></a><a class="btn ghost" href="portfolio.html" rel="noopener"><span lang="en">All projects</span><span lang="nl">Alle projecten</span></a></div>
+  </div>
+</header>
+<main id="main">
+<section id="why">
+<div class="wrap narrow rv">
+<h2><small>01</small><span lang="en">Why I built it</span><span lang="nl">Waarom ik het bouwde</span></h2>
+
+<p lang="en" class="lead">Aion 2 has a lot of dailies and weeklies, and they differ between a main and an alt. Some things are only worth doing on the main, some are shared across the server, and some are worth doing on every character. I kept losing track of which was which.</p>
+<p lang="nl" class="lead">Aion 2 heeft veel dailies en weeklies, en ze verschillen tussen een main en een alt. Sommige dingen doe je alleen op de main, sommige worden over de hele server gedeeld, en sommige zijn de moeite waard op elk personage. Ik raakte steeds het overzicht kwijt.</p><p lang="en">I wanted a page I can keep on a second screen, tick things off, and keep an eye on the timers for events like the Shugo Festival. There are trackers on the internet, but I wanted one that knows my server, my characters and my way of playing, with a small pop-out window that alerts me.</p>
+<p lang="nl">Ik wilde een pagina die ik op een tweede scherm kan houden, waarop ik dingen kan afvinken en de timers van events zoals het Shugo Festival in de gaten houd. Er bestaan trackers op internet, maar ik wilde er één die mijn server, mijn personages en mijn manier van spelen kent, met een klein pop-outvenster dat me waarschuwt.</p>
+</div>
+</section>
+
+<section id="built">
+<div class="wrap">
+<div class="rv narrow"><h2><small>02</small><span lang="en">What it does</span><span lang="nl">Wat het doet</span></h2>
+<p lang="en" class="lead narrow">Five areas. All screenshots are from the live board.</p>
+<p lang="nl" class="lead narrow">Vijf onderdelen. Alle screenshots komen uit het live bord.</p></div>
+<div class="chapter rv">
+<span class="num">A</span>
+<h3><span lang="en">One checklist per character</span><span lang="nl">Eén checklist per personage</span></h3>
+<p lang="en">Each character has its own tab. The main's list also holds everything that is server-wide, such as Duty Missions, the Daily Dungeon and the Shugo and Invasion keys, so you do those once. Alts only show what is worth doing on an alt. The list is split into Today and This week, shows only what is still open, and folds finished tasks away. Tasks you repeat have a counter.</p>
+<p lang="nl">Elk personage heeft een eigen tab. De lijst van de main bevat ook alles wat voor de hele server geldt, zoals Duty Missions, de Daily Dungeon en de Shugo- en Invasion-sleutels, zodat je die één keer doet. Alts tonen alleen wat de moeite waard is op een alt. De lijst is verdeeld in Vandaag en Deze week, toont alleen wat nog openstaat en vouwt afgeronde taken weg. Taken die je herhaalt hebben een teller.</p>
+<div class="shots">
+<figure><div class="frame"><span class="ph">public/images/aion2-board.jpg</span><img src="public/images/aion2-board.jpg" alt="The checklist for the main character with today and this week blocks" data-alt-en="The checklist for the main character with today and this week blocks" data-alt-nl="De checklist van de main met de blokken vandaag en deze week" loading="lazy"></div><figcaption><span lang="en">The main's checklist, with only what is open.</span><span lang="nl">De checklist van de main, met alleen wat openstaat.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">B</span>
+<h3><span lang="en">Timers that feel like timers</span><span lang="nl">Timers die als timers voelen</span></h3>
+<p lang="en">A big ring clock counts down to the next event, and a timeline shows the next 6, 12 or 24 hours. Server time, the daily reset and the weekly reset sit next to each other. You can click a timer to pin it to the big clock and choose which timers you see at all.</p>
+<p lang="nl">Een grote ringklok telt af naar het volgende event, en een tijdlijn toont de komende 6, 12 of 24 uur. Servertijd, de dagelijkse reset en de wekelijkse reset staan naast elkaar. Je kunt op een timer klikken om hem op de grote klok vast te zetten en kiezen welke timers je überhaupt ziet.</p>
+<p lang="en">Some events have a short window in which you can still join. The clock then switches to "Active to enter" and counts down the time left to get in. Alerts work per timer, with a sound and a desktop notification, and a pop-out tracker puts only the timers in a small window for the second screen.</p>
+<p lang="nl">Sommige events hebben een kort venster waarin je nog kunt meedoen. De klok schakelt dan over op "Active to enter" en telt de tijd af die je nog hebt om binnen te komen. Meldingen werken per timer, met geluid en een bureaubladmelding, en een pop-outtracker zet alleen de timers in een klein venster voor het tweede scherm.</p>
+<div class="shots">
+<figure><div class="frame"><span class="ph">public/images/aion2-timers.jpg</span><img src="public/images/aion2-timers.jpg" alt="The ring clock and timeline with pinned timer" data-alt-en="The ring clock and timeline with pinned timer" data-alt-nl="De ringklok en tijdlijn met een vastgezette timer" loading="lazy"></div><figcaption><span lang="en">The ring clock and the timeline.</span><span lang="nl">De ringklok en de tijdlijn.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">C</span>
+<h3><span lang="en">Your own to-do, arranged your way</span><span lang="nl">Je eigen to-do, op jouw manier ingedeeld</span></h3>
+<p lang="en">My to-do holds your own goals, for example "Get Golden crafter ring", with sub-tasks and no reset. The blocks Today, This week, My to-do and Notes can be dragged or moved up and down, and collapsed or expanded. The layout is remembered.</p>
+<p lang="nl">Mijn to-do bevat je eigen doelen, bijvoorbeeld "Get Golden crafter ring", met subtaken en zonder reset. De blokken Vandaag, Deze week, Mijn to-do en Notities kun je slepen of omhoog en omlaag verplaatsen, en in- of uitklappen. De indeling wordt onthouden.</p>
+<div class="shots">
+<figure><div class="frame"><span class="ph">public/images/aion2-todo.jpg</span><img src="public/images/aion2-todo.jpg" alt="The personal to-do block with sub-tasks next to the notes block" data-alt-en="The personal to-do block with sub-tasks next to the notes block" data-alt-nl="Het persoonlijke to-do-blok met subtaken naast het notitieblok" loading="lazy"></div><figcaption><span lang="en">My to-do, with sub-tasks.</span><span lang="nl">Mijn to-do, met subtaken.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">D</span>
+<h3><span lang="en">An alt guide</span><span lang="nl">Een altgids</span></h3>
+<p lang="en">A guide explains what is shared with your main and what is not, what is worth doing every day and every week on an alt, what to leave for the main, and roughly how much Kina an alt can earn per week at different item levels.</p>
+<p lang="nl">Een gids legt uit wat met je main gedeeld wordt en wat niet, wat de moeite waard is om elke dag en elke week op een alt te doen, wat je voor de main laat liggen, en ongeveer hoeveel Kina een alt per week kan opleveren bij verschillende itemlevels.</p>
+<div class="shots">
+<figure><div class="frame"><span class="ph">public/images/aion2-alt-guide.jpg</span><img src="public/images/aion2-alt-guide.jpg" alt="The alt guide window explaining what is shared and what is not" data-alt-en="The alt guide window explaining what is shared and what is not" data-alt-nl="Het altgids-venster dat uitlegt wat gedeeld wordt en wat niet" loading="lazy"></div><figcaption><span lang="en">The alt guide.</span><span lang="nl">De altgids.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">E</span>
+<h3><span lang="en">Themes and backup</span><span lang="nl">Thema's en back-up</span></h3>
+<p lang="en">There are six themes: Aion (steel and gold, the default), Paper, Lamp, Slate, Mist and Pixel. Everything can be exported and imported as a backup from the More menu.</p>
+<p lang="nl">Er zijn zes thema's: Aion (staal en goud, de standaard), Paper, Lamp, Slate, Mist en Pixel. Alles kan als back-up geëxporteerd en geïmporteerd worden via het Meer-menu.</p>
+<div class="shots">
+<figure><div class="frame"><span class="ph">public/images/aion2-themes.jpg</span><img src="public/images/aion2-themes.jpg" alt="The board in the Aion theme and in the pixel theme" data-alt-en="The board in the Aion theme and in the pixel theme" data-alt-nl="Het bord in het Aion-thema en in het pixelthema" loading="lazy"></div><figcaption><span lang="en">Aion and Pixel themes.</span><span lang="nl">Aion- en Pixelthema.</span></figcaption></figure>
+</div>
+</div>
+</div>
+</section>
+
+<section id="tech">
+<div class="wrap narrow rv">
+<h2><small>03</small><span lang="en">Under the hood</span><span lang="nl">Onder de motorkap</span></h2>
+
+<p lang="en"><strong>One file.</strong> A single static HTML file with inline CSS and plain JavaScript. No build step, no server, no account. State lives in the browser, so anyone who opens the page gets their own board.</p>
+<p lang="nl"><strong>Eén bestand.</strong> Eén statisch HTML-bestand met inline CSS en gewone JavaScript. Geen buildstap, geen server, geen account. De staat staat in de browser, dus iedereen die de pagina opent krijgt zijn eigen bord.</p><p lang="en"><strong>Resets.</strong> The day and week are computed from a reset hour in UTC (07:00 by default), with the week turning over on Wednesday. Pools such as nightmare keys and Shugo keys accrue per reset up to their cap, so the board is correct even after a week away.</p>
+<p lang="nl"><strong>Resets.</strong> De dag en week worden berekend vanaf een resetuur in UTC (standaard 07:00), waarbij de week op woensdag omslaat. Voorraden zoals nightmare-sleutels en Shugo-sleutels lopen per reset op tot hun maximum, dus het bord klopt ook na een week afwezigheid.</p><p lang="en"><strong>Events.</strong> Event times are defined in UTC, and events that follow server time use the Europe/Berlin offset so daylight saving is handled. Alerts use the Notification API, a Web Audio beep and a flashing page title. The pop-out tracker is the same file opened with a tracker mode.</p>
+<p lang="nl"><strong>Events.</strong> Eventtijden zijn in UTC gedefinieerd, en events die de servertijd volgen gebruiken de Europe/Berlin-offset, zodat zomertijd goed gaat. Meldingen gebruiken de Notification API, een Web Audio-piep en een knipperende paginatitel. De pop-outtracker is hetzelfde bestand geopend in trackermodus.</p><p lang="en"><strong>Data.</strong> Limits and event times come from community guides and sites that read the game files for the Global launch, so they can change with patches.</p>
+<p lang="nl"><strong>Data.</strong> Limieten en eventtijden komen uit community-gidsen en sites die de gamebestanden uitlezen voor de Global-launch, dus ze kunnen met patches veranderen.</p><p lang="en"><strong>Testing.</strong> I checked the reset and event logic in a headless browser with a mocked clock, so I could jump to a Wednesday or a daylight saving change without waiting for it.</p>
+<p lang="nl"><strong>Testen.</strong> Ik controleerde de reset- en eventlogica in een headless browser met een nagebootste klok, zodat ik naar een woensdag of een zomertijdwissel kon springen zonder erop te wachten.</p>
+</div>
+</section>
+
+<section id="process">
+<div class="wrap narrow rv">
+<h2><small>04</small><span lang="en">How I built it</span><span lang="nl">Hoe ik het bouwde</span></h2>
+
+<p lang="en" class="lead">The code was written together with an AI coding assistant (Claude) over many sessions. My part was knowing the game, deciding what matters, testing against my own play and steering the design.</p>
+<p lang="nl" class="lead">De code is samen met een AI-codeerassistent (Claude) geschreven, over veel sessies. Mijn aandeel was het kennen van de game, beslissen wat ertoe doet, testen tegen mijn eigen spel en het ontwerp bijsturen.</p><p lang="en">I told the assistant what I needed in plain language, and reviewed each version on my own screen. The first version was too busy. I said so, and we rebuilt it calmer, with one character at a time and only the open tasks. From then on it was small steps: a timer I could pin, a to-do with sub-tasks, a clock that shows how long I still have to join an event. Each change was something I actually missed while playing.</p>
+<p lang="nl">Ik vertelde de assistent in gewone taal wat ik nodig had, en bekeek elke versie op mijn eigen scherm. De eerste versie was te druk. Dat zei ik, en we bouwden het rustiger opnieuw, met één personage tegelijk en alleen de openstaande taken. Daarna ging het in kleine stappen: een timer die ik kon vastzetten, een to-do met subtaken, een klok die laat zien hoe lang ik nog kan meedoen aan een event. Elke wijziging was iets wat ik tijdens het spelen echt miste.</p>
+</div>
+</section>
+
+<section id="lessons">
+<div class="wrap">
+<div class="rv narrow"><h2><small>05</small><span lang="en">Challenges and what I learned</span><span lang="nl">Uitdagingen en wat ik leerde</span></h2>
+<p lang="en" class="lead">Four short stories.</p>
+<p lang="nl" class="lead">Vier korte verhalen.</p></div>
+<div class="stories rv">
+<article class="story">
+<h3><span lang="en">The Daily Dungeon is weekly</span><span lang="nl">De Daily Dungeon is wekelijks</span></h3>
+<p lang="en">I first modeled the Daily Dungeon as a daily. It resets weekly. I caught it by checking the resets across several sources instead of trusting one.</p>
+<p lang="nl">Ik modelleerde de Daily Dungeon eerst als daily. Hij reset wekelijks. Ik ving het door de resets bij meerdere bronnen na te kijken in plaats van één bron te vertrouwen.</p>
+<p lang="en">Lesson: verify against more than one source, and write down what stays unconfirmed.</p>
+<p lang="nl">Les: controleer bij meer dan één bron, en schrijf op wat onbevestigd blijft.</p>
+</article>
+<article class="story">
+<h3><span lang="en">Two pools of keys, not one</span><span lang="nl">Twee voorraden sleutels, niet één</span></h3>
+<p lang="en">Shugo keys looked like one pool. There is a server-wide pool and a separate per-character pool, with different daily gains and caps.</p>
+<p lang="nl">Shugo-sleutels leken één voorraad. Er is een voorraad voor de hele server en een aparte per personage, met verschillende dagelijkse aanwas en maxima.</p>
+<p lang="en">Lesson: always ask what is shared and what is not. It is the question the whole tool is built around.</p>
+<p lang="nl">Les: vraag altijd wat gedeeld wordt en wat niet. Dat is de vraag waar de hele tool omheen is gebouwd.</p>
+</article>
+<article class="story">
+<h3><span lang="en">Server time is not my time</span><span lang="nl">Servertijd is niet mijn tijd</span></h3>
+<p lang="en">Events follow the server clock, and Europe has daylight saving. A fixed offset would be an hour wrong for half the year.</p>
+<p lang="nl">Events volgen de serverklok, en Europa heeft zomertijd. Een vaste offset zou een half jaar lang een uur fout zitten.</p>
+<p lang="en">Lesson: store times in UTC plus a rule, and let the platform do the conversion.</p>
+<p lang="nl">Les: sla tijden op in UTC plus een regel, en laat het platform de omrekening doen.</p>
+</article>
+<article class="story">
+<h3><span lang="en">Too busy to use</span><span lang="nl">Te druk om te gebruiken</span></h3>
+<p lang="en">The first version showed everything at once and nothing stood out. A checklist you have to study is not a checklist.</p>
+<p lang="nl">De eerste versie toonde alles tegelijk en niets viel op. Een checklist die je moet bestuderen is geen checklist.</p>
+<p lang="en">Lesson: show what is actionable now, fold the rest away, and let the person choose the layout.</p>
+<p lang="nl">Les: toon wat nu uitvoerbaar is, vouw de rest weg, en laat de gebruiker de indeling kiezen.</p>
+</article>
+</div>
+</div>
+</section>
+
+<section id="limits">
+<div class="wrap narrow rv">
+<h2><small>06</small><span lang="en">Known limits</span><span lang="nl">Bekende beperkingen</span></h2>
+
+<ul class="tight" lang="en"><li>Siege, Abyss boss and Arena times are assumed to follow Berlin server time. That is not confirmed for Europe.</li><li>Limits and event times can change with patches. Check the in-game countdowns when something looks off.</li><li>Your data lives in your own browser. Use the export button now and then.</li></ul>
+<ul class="tight" lang="nl"><li>Siege-, Abyss boss- en Arena-tijden volgen vermoedelijk de Berlijnse servertijd. Dat is voor Europa niet bevestigd.</li><li>Limieten en eventtijden kunnen met patches veranderen. Controleer de countdowns in de game als iets niet klopt.</li><li>Je gegevens staan in je eigen browser. Gebruik af en toe de exportknop.</li></ul><p style="margin-top:28px"><a class="btn" href="aion2.html"><span lang="en">Open the board</span><span lang="nl">Open het bord</span></a></p>
+</div>
+</section>
+</main>
+<footer>
+  <div class="wrap"><span lang="en">Fan tool, not affiliated with NCSOFT. AION is a trademark of NCSOFT. Screenshots are from the live board.</span><span lang="nl">Fantool, niet verbonden aan NCSOFT. AION is een handelsmerk van NCSOFT. Screenshots komen uit het live bord.</span></div>
+</footer>
+<script>
+  document.body.classList.remove('nojs');
+  (function(){
+    var T = {"en": {"title": "Aion 2 Daily Board - a checklist and timer page for a second screen", "desc": "A single-file daily and weekly checklist with live event timers for an Aion 2 main and alts, built for a second screen. A case study by the builder."}, "nl": {"title": "Aion 2 Daily Board - een checklist- en timerpagina voor een tweede scherm", "desc": "Een dagelijkse en wekelijkse checklist in één bestand met live eventtimers voor een Aion 2 main en alts, gebouwd voor een tweede scherm. Een casestudy door de bouwer."}};
+    function meta(sel, v){ var m = document.querySelector(sel); if (m) m.setAttribute('content', v); }
+    function setLang(l, save){
+      if (l !== 'nl') l = 'en';
+      document.documentElement.lang = l;
+      document.title = T[l].title;
+      meta('meta[name="description"]', T[l].desc);
+      meta('meta[property="og:title"]', T[l].title);
+      meta('meta[property="og:description"]', T[l].desc);
+      document.querySelectorAll('[data-alt-en]').forEach(function(el){
+        var v = el.getAttribute('data-alt-' + l);
+        if (el.getAttribute('data-aria')) el.setAttribute('aria-label', v); else el.setAttribute('alt', v);
+      });
+      document.querySelectorAll('.langbtn').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-lang') === l ? 'true' : 'false'); });
+      if (save){ try{ localStorage.setItem('clubbie_lang', l); }catch(e){} }
+    }
+    document.querySelectorAll('.langbtn').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang'), true); }); });
+    setLang(document.documentElement.lang === 'nl' ? 'nl' : 'en', false);
+  })();
+  (function(){
+    var els = document.querySelectorAll('.rv');
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still || !('IntersectionObserver' in window)){ els.forEach(function(e){ e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function(list){
+      list.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    els.forEach(function(e){ io.observe(e); });
+  })();
+  try{
+    if (sessionStorage.getItem('arcade_in')){
+      sessionStorage.removeItem('arcade_in');
+      var __d = document.createElement('div');
+      __d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#080e20;pointer-events:none;transition:opacity .8s ease';
+      document.body.appendChild(__d);
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ __d.style.opacity = '0'; setTimeout(function(){ __d.remove(); }, 900); }); });
+    }
+  }catch(e){}
+</script>
+</body>
+</html>

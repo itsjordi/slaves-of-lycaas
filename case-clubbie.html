@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clubbie - a team manager app for an amateur football team</title>
+<meta name="description" content="Clubbie is an installable team manager web app for SCG'18 Zaterdag 4: agenda, live match, standings, player cards and a season recap. A case study by the product owner.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Clubbie - a team manager app for an amateur football team">
+<meta property="og:description" content="Agenda, live match, standings, player cards and a season recap in one installable app. Built with an AI coding assistant, steered by the product owner.">
+<!-- og:image URL assumes the site is served from https://jordimutsaers.nl/ and the image sits in images/clubbie/og.jpg. -->
+<meta property="og:image" content="https://jordimutsaers.nl/images/clubbie/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<script>
+  try{
+    var __l = localStorage.getItem('clubbie_lang') || ((navigator.language || '').toLowerCase().indexOf('nl') === 0 ? 'nl' : 'en');
+    if (__l === 'nl') document.documentElement.lang = 'nl';
+  }catch(e){}
+</script>
+<style>
+  :root{
+    --bg:#15171A; --bg2:#1c1f24; --line:#2c3038; --text:#EFEEE8; --muted:#a9acb3;
+    --blue:#2358E6; --blueSoft:#8fb0ff; --accent:#8fb0ff;
+    --display:"Anton",Impact,"Arial Narrow Bold",sans-serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:60px}
+  body{margin:0;background:var(--bg);color:var(--text);font:17px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-underline-offset:3px}
+  a:hover{color:#fff}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:2px}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  .narrow{max-width:700px}
+  .skip{position:absolute;left:-999px;top:8px;background:var(--blue);color:#fff;padding:8px 14px;z-index:10}
+  .skip:focus{left:8px}
+
+  /* hero */
+  .hero{padding:72px 0 56px;border-bottom:1px solid var(--line);background:radial-gradient(900px 340px at 20% -10%,rgba(35,88,230,.28),transparent 70%)}
+  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(56px,11vw,120px);line-height:.95;letter-spacing:.01em;text-transform:uppercase;margin:0}
+  .pitch{font-size:clamp(19px,2.6vw,25px);line-height:1.45;max-width:640px;margin:20px 0 28px;color:#dfe4ee}
+  .meta{display:flex;flex-wrap:wrap;gap:12px 40px;margin:0 0 26px;padding:0}
+  .meta div{min-width:120px}
+  .meta dt{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .meta dd{margin:2px 0 0;font-size:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 30px;list-style:none}
+  .chips li{font-size:13px;border:1px solid var(--line);background:var(--bg2);padding:4px 12px;border-radius:999px;color:#d6dbe6}
+  .btn{display:inline-block;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:13px 24px;border-radius:4px;transition:transform .15s,background .15s}
+  .btn:hover{background:#fff;color:#15171A;transform:translateY(-2px)}
+
+  /* sections */
+  section{padding:72px 0;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,52px);letter-spacing:.02em;text-transform:uppercase;margin:0 0 20px;line-height:1.05}
+  h2 small{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.18em;color:var(--accent);margin-bottom:8px}
+  h3{font-size:22px;line-height:1.25;margin:0 0 8px}
+  p{margin:0 0 16px}
+  .lead{font-size:19px;color:#e4e3dc}
+  .muted{color:var(--muted)}
+  ul.tight{padding-left:20px;margin:0 0 16px}
+  ul.tight li{margin:6px 0}
+  code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--bg2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
+
+  /* chapters */
+  .chapter{padding:36px 0;border-top:1px solid var(--line)}
+  .chapter:first-of-type{border-top:0;padding-top:12px}
+  .chapter .num{font-family:var(--display);color:var(--accent);font-size:18px;letter-spacing:.1em}
+  .chapter p{max-width:700px}
+
+  /* figures */
+  figure{margin:0}
+  figcaption{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.45}
+  .frame{position:relative;background:#101215;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .frame .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:12px ui-monospace,Menlo,Consolas,monospace;color:#5d6572}
+  .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .phone .frame{aspect-ratio:9/19.5}
+  .wide .frame{aspect-ratio:16/10}
+  .strip{display:flex;gap:18px;overflow-x:auto;padding:6px 2px 18px;margin:18px 0 0;scroll-snap-type:x proximity;scrollbar-color:#3a4050 transparent}
+  .strip figure{flex:0 0 clamp(190px,24vw,236px);scroll-snap-align:start}
+  .strip::-webkit-scrollbar{height:8px}
+  .strip::-webkit-scrollbar-thumb{background:#3a4050;border-radius:4px}
+  .wide{margin-top:24px}
+
+  /* stories */
+  .stories{display:grid;gap:18px;margin-top:24px}
+  @media(min-width:760px){.stories{grid-template-columns:1fr 1fr}}
+  .story{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+  .story h3{font-size:19px;color:#fff}
+  .story p{margin:0 0 10px;color:#d3d8e2}
+  .story p:last-child{margin:0;color:var(--blueSoft)}
+  .pair{display:grid;gap:24px;margin-top:20px}
+  @media(min-width:760px){.pair{grid-template-columns:1fr 1fr}}
+  .box{border-left:3px solid var(--blue);padding:2px 0 2px 18px}
+  .box h3{font-size:18px}
+  footer{padding:36px 0 56px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+  .next-grid{display:grid;gap:16px;margin-top:28px}
+  @media(min-width:760px){.next-grid{grid-template-columns:repeat(6,1fr)}.ncard.feature{grid-column:span 3}.ncard:not(.feature){grid-column:span 2}}
+  .ncard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:24px 26px;transition:border-color .2s,transform .2s}
+  .ncard:hover{border-color:var(--blue);transform:translateY(-3px)}
+  .ncard.feature{background:linear-gradient(160deg,rgba(35,88,230,.22),var(--bg2) 70%);border-color:#2f4a96}
+  .ncard h3{font-size:21px;color:#fff;margin-bottom:10px}
+  .ncard.feature h3{font-size:25px}
+  .ncard p{margin:0;color:#d3d3cc;font-size:16px}
+  .tag{display:inline-block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  /* reveal */
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+  .rv.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}.btn,.ncard,.langbtn{transition:none}}
+  .nojs .rv{opacity:1;transform:none}
+
+  /* language switch */
+  html:not([lang="nl"]) [lang="nl"], html[lang="nl"] [lang="en"]{display:none!important}
+  .langbar{position:sticky;top:0;z-index:20;background:rgba(21,23,26,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .langbar .wrap{display:flex;justify-content:flex-end;gap:10px;padding-top:10px;padding-bottom:10px}
+  .langbtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:13px;letter-spacing:.08em;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 12px 6px 8px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+  .langbtn:hover{color:#fff;border-color:#4a5368}
+  .langbtn[aria-pressed="true"]{color:#fff;border-color:var(--blue);background:rgba(35,88,230,.2)}
+  .langbtn svg{width:26px;height:17px;display:block;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+
+  .shots{display:grid;gap:18px;margin-top:20px}
+  @media(min-width:760px){.shots{grid-template-columns:1fr 1fr}}
+  .shots .frame{aspect-ratio:16/10}
+  .langbar .wrap{justify-content:space-between;align-items:center}
+  .langbar .back{color:var(--muted);text-decoration:none;font-size:14px;letter-spacing:.04em}
+  .langbar .back:hover{color:#fff}
+  .langbar .right{display:flex;gap:10px}
+  .linkrow{display:flex;flex-wrap:wrap;gap:12px;margin:0}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#fff;color:#15171A}
+  .demo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px 28px;margin:26px 0 8px;padding:22px 26px;border:1px solid #2f4a96;border-left:4px solid var(--blue);border-radius:12px;background:linear-gradient(160deg,rgba(35,88,230,.2),var(--bg2) 70%)}
+  .demo h3{margin:0 0 6px;font-size:22px;color:#fff}
+  .demo p{margin:0;max-width:560px;color:#d9d8d1}
+  .note{margin:14px 0 0;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body class="nojs">
+<a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
+
+<div class="langbar">
+  <div class="wrap">
+    <a class="back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+    <div class="right">
+    <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
+    <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow"><span lang="en">Case study</span><span lang="nl">Casestudy</span></p>
+    <h1>Clubbie</h1>
+    <p lang="en" class="pitch">One place for an amateur football team that knows who is coming, what the score is and who scored, with as little admin as possible for the people who run the team.</p>
+<p lang="nl" class="pitch">Eén plek voor een amateurvoetbalteam die weet wie er komt, wat de stand is en wie er scoorde, met zo min mogelijk beheer voor de mensen die het team draaiende houden.</p>
+    <dl class="meta">
+      <div><dt><span lang="en">Role</span><span lang="nl">Rol</span></dt><dd><span lang="en">Product owner and project manager</span><span lang="nl">Product owner en projectmanager</span></dd></div>
+      <div><dt><span lang="en">Year</span><span lang="nl">Jaar</span></dt><dd>2026</dd></div><!-- ASSUMPTION: year was not in the facts, 2026 is a guess. Change it. -->
+      <div><dt>Team</dt><dd><span lang="en">SCG'18 Zaterdag 4, Netherlands</span><span lang="nl">SCG'18 Zaterdag 4, Nederland</span></dd></div>
+      <div><dt><span lang="en">Language</span><span lang="nl">Taal</span></dt><dd><span lang="en">Dutch, installable PWA</span><span lang="nl">Nederlands, installeerbare PWA</span></dd></div>
+    </dl>
+    <ul class="chips" aria-label="Stack">
+      <li>Vite</li><li>React</li><li>TypeScript</li><li>Tailwind CSS v4</li><li>shadcn/ui</li><li>TanStack Query</li><li>Supabase</li><li>Postgres with RLS</li><li>Vercel</li>
+    </ul>
+    <a class="btn" href="https://clubbie.net/demo" rel="noopener"><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></a>
+    <p class="note" lang="en">The demo uses fictional data. Nothing you do there is saved.</p>
+    <p class="note" lang="nl">De demo gebruikt verzonnen data. Niets wat je daar doet wordt opgeslagen.</p>
+  </div>
+</header>
+
+<main id="main">
+
+<section id="problem">
+  <div class="wrap narrow rv">
+    <h2><small>01</small><span lang="en">The problem</span><span lang="nl">Het probleem</span></h2>
+<p lang="en" class="lead">A team of about twenty people, one match day a week, one training a week, and all of the coordination lived in a chat.</p>
+<p lang="nl" class="lead">Een team van ongeveer twintig mensen, één wedstrijddag per week, één training per week, en alle afstemming liep via een chat.</p>
+<p lang="en">Who is coming, who is late, who forgot the shirts, what was the score, who scored. Chats lose information. Nobody can answer "how often did I actually train" or "who scored the most".</p>
+<p lang="nl">Wie komt er, wie is te laat, wie is de shirts vergeten, wat was de uitslag, wie scoorde. Chats verliezen informatie. Niemand kan antwoord geven op "hoe vaak heb ik eigenlijk getraind" of "wie scoorde het meest".</p>
+<p lang="en">Clubbie replaces the WhatsApp group and the captain's head. Players sign in, see the agenda, the live match, the standings and their own stats. Trainers manage attendance, line-ups and the match day. The real app is for team members only, because it needs an account. To let anyone see it, there is a public demo with made-up data at <a href="https://clubbie.net/demo" rel="noopener">clubbie.net/demo</a>. The first team on the platform is my own, and the product is built so more teams can follow.</p>
+<p lang="nl">Clubbie vervangt de WhatsApp-groep en het hoofd van de aanvoerder. Spelers loggen in en zien de agenda, de live wedstrijd, de stand en hun eigen statistieken. Trainers beheren aanwezigheid, opstellingen en de wedstrijddag. De echte app is alleen voor teamleden, want je hebt een account nodig. Om het voor iedereen te laten zien is er een openbare demo met verzonnen data op <a href="https://clubbie.net/demo" rel="noopener">clubbie.net/demo</a>. Het eerste team op het platform is mijn eigen team, en het product is zo gebouwd dat er meer teams kunnen volgen.</p>
+  </div>
+</section>
+
+<section id="built">
+  <div class="wrap">
+    <div class="rv">
+      <h2><small>02</small><span lang="en">What I built</span><span lang="nl">Wat ik heb gebouwd</span></h2>
+<p lang="en" class="lead narrow">A tour in six chapters. All screenshots come from the demo mode, with made-up names and scores.</p>
+<p lang="nl" class="lead narrow">Een rondleiding in zes hoofdstukken. Alle screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</p>
+      <div class="demo rv">
+        <div>
+          <h3><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></h3>
+          <p lang="en">It opens straight into the app as a trainer, with a switcher for trainer, player and guest. The data is fictional, and nothing can break or be saved for real.</p>
+          <p lang="nl">Hij opent direct in de app als trainer, met een wisselaar voor trainer, speler en gast. De data is verzonnen en er kan niets echt kapotgaan of worden opgeslagen.</p>
+        </div>
+        <a class="btn" href="https://clubbie.net/demo" rel="noopener"><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></a>
+      </div>
+    </div>
+
+<div class="chapter rv">
+<span class="num">A</span>
+<h3><span lang="en">Agenda and attendance</span><span lang="nl">Agenda en aanwezigheid</span></h3>
+<p lang="en">The agenda shows trainings, matches and team outings, with filters and a list and calendar view. Matches arrive automatically from the official club schedule feed (iCal). Trainings and outings are added by hand.</p>
+<p lang="nl">De agenda toont trainingen, wedstrijden en teamuitjes, met filters en een lijst- en kalenderweergave. Wedstrijden komen automatisch binnen via de officiële clubplanning (iCal). Trainingen en uitjes worden met de hand toegevoegd.</p>
+<p lang="en">Attendance is entered by the trainer per day on a "Start check" screen, so players do not have to answer anything. Injured players are credited as present. An outing is a plain check-in list that can be copied to WhatsApp. Self-service RSVP is built, and paused behind a feature flag until the team is ready for it.</p>
+<p lang="nl">De aanwezigheid wordt per dag door de trainer ingevoerd op een "Start check"-scherm, dus spelers hoeven niets te beantwoorden. Geblesseerde spelers tellen als aanwezig. Een uitje is een gewone incheck-lijst die naar WhatsApp gekopieerd kan worden. Zelf aan- en afmelden (RSVP) is gebouwd en staat gepauzeerd achter een feature flag, tot het team eraan toe is.</p>
+<div class="strip phone" role="region" aria-label="Agenda screenshots" data-alt-en="Agenda screenshots" data-alt-nl="Screenshots van de agenda" data-aria="1" tabindex="0">
+<figure><div class="frame"><span class="ph">images/clubbie/agenda.jpg</span><img src="images/clubbie/agenda.jpg" alt="The agenda as a list of trainings and matches with filter chips at the top" data-alt-en="The agenda as a list of trainings and matches with filter chips at the top" data-alt-nl="De agenda als lijst met trainingen en wedstrijden en filters bovenaan" loading="lazy"></div><figcaption><span lang="en">The agenda in list view.</span><span lang="nl">De agenda in lijstweergave.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">B</span>
+<h3><span lang="en">Match day</span><span lang="nl">Wedstrijddag</span></h3>
+<p lang="en">The trainer runs the match live: a timer, goals with scorer and assist, opponent goals, cards, substitutions with the minute, half-time and full-time. Everyone sees the live score. People who are not logged in can follow along on a public page.</p>
+<p lang="nl">De trainer bestuurt de wedstrijd live: een timer, doelpunten met schutter en assist, tegendoelpunten, kaarten, wissels met de minuut, rust en eindsignaal. Iedereen ziet de live stand. Wie niet is ingelogd, kan meekijken op een openbare pagina.</p>
+<p lang="en">When a goal goes in, a shareable goal card pops up with confetti on every phone that has the app open. Web push notifications cover goals and the final whistle, also for people who are not logged in. A line-up builder with formations lets the trainer set the team, and position swaps are updated after the match.</p>
+<p lang="nl">Bij een doelpunt verschijnt er op elke telefoon waar de app open staat een deelbare doelpuntkaart met confetti. Webpushmeldingen voor doelpunten en het eindsignaal werken ook voor mensen die niet zijn ingelogd. Met een opstellingsbouwer met formaties zet de trainer het team neer, en positiewissels worden na de wedstrijd bijgewerkt.</p>
+<div class="strip phone" role="region" aria-label="Match day screenshots" data-alt-en="Match day screenshots" data-alt-nl="Screenshots van de wedstrijddag" data-aria="1" tabindex="0">
+<figure><div class="frame"><span class="ph">images/clubbie/home-public.jpg</span><img src="images/clubbie/home-public.jpg" alt="The public homepage showing the live or latest match" data-alt-en="The public homepage showing the live or latest match" data-alt-nl="De openbare homepage met de live of laatste wedstrijd" loading="lazy"></div><figcaption><span lang="en">The public homepage with the live or latest match.</span><span lang="nl">De openbare homepage met de live of laatste wedstrijd.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/match-live.jpg</span><img src="images/clubbie/match-live.jpg" alt="Live match control for the trainer with timer, goal and card buttons" data-alt-en="Live match control for the trainer with timer, goal and card buttons" data-alt-nl="Live wedstrijdbediening voor de trainer met timer, doelpunt- en kaartknoppen" loading="lazy"></div><figcaption><span lang="en">Live match control for the trainer.</span><span lang="nl">Live wedstrijdbediening voor de trainer.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/goal-card.jpg</span><img src="images/clubbie/goal-card.jpg" alt="A goal celebration card with the scorer and the new score" data-alt-en="A goal celebration card with the scorer and the new score" data-alt-nl="Een doelpuntkaart met de schutter en de nieuwe stand" loading="lazy"></div><figcaption><span lang="en">The goal card, shareable.</span><span lang="nl">De doelpuntkaart, deelbaar.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/lineup.jpg</span><img src="images/clubbie/lineup.jpg" alt="The line-up builder with players placed on a formation" data-alt-en="The line-up builder with players placed on a formation" data-alt-nl="De opstellingsbouwer met spelers op een formatie" loading="lazy"></div><figcaption><span lang="en">The line-up builder.</span><span lang="nl">De opstellingsbouwer.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">C</span>
+<h3><span lang="en">Competition</span><span lang="nl">Competitie</span></h3>
+<p lang="en">The league table and the programme of the whole poule, plus an opponent preview with form, head-to-head and a forecast.</p>
+<p lang="nl">De ranglijst en het programma van de hele poule, plus een voorbeschouwing op de tegenstander met vorm, onderlinge resultaten en een verwachting.</p>
+<p lang="en">The club sites block bots, so poule results are imported through a personal bookmarklet that reads the page in the phone's own browser, with a paste fallback. Importing results rebuilds the league table and fills in our own match scores.</p>
+<p lang="nl">De clubsites blokkeren bots, dus poule-uitslagen worden geïmporteerd met een persoonlijke bookmarklet die de pagina leest in de eigen browser van de telefoon, met een plakoptie als terugval. Het importeren van uitslagen bouwt de ranglijst opnieuw op en vult onze eigen wedstrijduitslagen in.</p>
+<div class="strip phone" role="region" aria-label="Competition screenshots" data-alt-en="Competition screenshots" data-alt-nl="Screenshots van de competitie" data-aria="1" tabindex="0">
+<figure><div class="frame"><span class="ph">images/clubbie/standings.jpg</span><img src="images/clubbie/standings.jpg" alt="The league table with points, goal difference and form" data-alt-en="The league table with points, goal difference and form" data-alt-nl="De ranglijst met punten, doelsaldo en vorm" loading="lazy"></div><figcaption><span lang="en">The league table.</span><span lang="nl">De ranglijst.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">D</span>
+<h3><span lang="en">Player cards and ratings</span><span lang="nl">Spelerskaarten en ratings</span></h3>
+<p lang="en">FIFA-style player cards with a rating per player. The model is documented inside the app, in a screen I called the rating bot. Attendance counts for 60 percent (trainings and matches, injured counts as present). What you do on the pitch counts for 40 percent, per position, so a goalkeeper is scored differently from a striker. The result is shrunk towards a neutral value when there are few matches, so one lucky game cannot give a 99. Competition matches only.</p>
+<p lang="nl">FIFA-achtige spelerskaarten met een rating per speler. Het model wordt in de app zelf uitgelegd, op een scherm dat ik de rating bot heb genoemd. Aanwezigheid telt voor 60 procent mee (trainingen en wedstrijden, geblesseerd telt als aanwezig). Wat je op het veld doet telt voor 40 procent, per positie, dus een keeper wordt anders beoordeeld dan een spits. Het resultaat wordt bij weinig wedstrijden richting een neutrale waarde getrokken, zodat één gelukkige wedstrijd geen 99 kan opleveren. Alleen competitiewedstrijden.</p>
+<p lang="en">Around the cards: Man of the Match per game, a Team of the Month in 4-3-3 where players can only fill positions they actually played, a prompt generator for a monthly poster that the owner uploads, and public player profiles.</p>
+<p lang="nl">Rondom de kaarten: Man of the Match per wedstrijd, een Team van de Maand in 4-3-3 waarin spelers alleen posities kunnen invullen die ze echt hebben gespeeld, een promptgenerator voor een maandelijkse poster die de eigenaar uploadt, en openbare spelersprofielen.</p>
+<div class="strip phone" role="region" aria-label="Player card screenshots" data-alt-en="Player card screenshots" data-alt-nl="Screenshots van de spelerskaarten" data-aria="1" tabindex="0">
+<figure><div class="frame"><span class="ph">images/clubbie/cards-grid.jpg</span><img src="images/clubbie/cards-grid.jpg" alt="An overview grid of player cards with ratings" data-alt-en="An overview grid of player cards with ratings" data-alt-nl="Een overzicht van spelerskaarten met ratings" loading="lazy"></div><figcaption><span lang="en">The squad as player cards.</span><span lang="nl">De selectie als spelerskaarten.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/card-detail.jpg</span><img src="images/clubbie/card-detail.jpg" alt="A single player card with a share button underneath" data-alt-en="A single player card with a share button underneath" data-alt-nl="Eén spelerskaart met een deelknop eronder" loading="lazy"></div><figcaption><span lang="en">One card, with the share button.</span><span lang="nl">Eén kaart, met de deelknop.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/team-of-month.jpg</span><img src="images/clubbie/team-of-month.jpg" alt="The team of the month on a pitch in a 4-3-3 formation" data-alt-en="The team of the month on a pitch in a 4-3-3 formation" data-alt-nl="Het team van de maand op een veld in een 4-3-3 formatie" loading="lazy"></div><figcaption><span lang="en">Team of the Month.</span><span lang="nl">Team van de Maand.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/rating-explainer.jpg</span><img src="images/clubbie/rating-explainer.jpg" alt="The screen that explains how player ratings are calculated" data-alt-en="The screen that explains how player ratings are calculated" data-alt-nl="Het scherm dat uitlegt hoe spelersratings worden berekend" loading="lazy"></div><figcaption><span lang="en">The rating model, explained in the app.</span><span lang="nl">Het ratingmodel, uitgelegd in de app.</span></figcaption></figure>
+</div>
+</div>
+
+<div class="chapter rv">
+<span class="num">E</span>
+<h3><span lang="en">Statistics</span><span lang="nl">Statistieken</span></h3>
+<p lang="en">Team and player statistics, and a "Het seizoen" page with results, home against away, form, training attendance, who plays the most, goals per half and cards.</p>
+<p lang="nl">Team- en spelersstatistieken, en een "Het seizoen"-pagina met uitslagen, thuis tegen uit, vorm, trainingsaanwezigheid, wie de meeste minuten speelt, doelpunten per helft en kaarten.</p>
+<div class="strip phone" role="region" aria-label="Statistics screenshots" data-alt-en="Statistics screenshots" data-alt-nl="Screenshots van de statistieken" data-aria="1" tabindex="0">
+<figure><div class="frame"><span class="ph">images/clubbie/season.jpg</span><img src="images/clubbie/season.jpg" alt="The season page with results, form and attendance statistics" data-alt-en="The season page with results, form and attendance statistics" data-alt-nl="De seizoenspagina met uitslagen, vorm en aanwezigheidsstatistieken" loading="lazy"></div><figcaption><span lang="en">The "Het seizoen" page.</span><span lang="nl">De pagina "Het seizoen".</span></figcaption></figure>
+</div>
+<figure class="wide"><div class="frame"><span class="ph">images/clubbie/desktop-stats.jpg</span><img src="images/clubbie/desktop-stats.jpg" alt="The statistics page on a laptop screen" data-alt-en="The statistics page on a laptop screen" data-alt-nl="De statistiekenpagina op een laptopscherm" loading="lazy"></div><figcaption><span lang="en">The statistics page on a laptop.</span><span lang="nl">De statistiekenpagina op een laptop.</span></figcaption></figure>
+</div>
+
+<div class="chapter rv">
+<span class="num">F</span>
+<h3><span lang="en">Season recap, "Terugblik"</span><span lang="nl">Seizoensterugblik, "Terugblik"</span></h3>
+<p lang="en">A Spotify-Wrapped-style recap of the season, as full-screen story slides with one statistic each: goal balance, top scorers, assists, minutes, strongest cards, Man of the Match, most loyal trainers, team attendance, clean sheets, biggest win, win streak, comebacks, supersub, cards, home against away, most matches, guest players and funny moments the trainers noted down. Then a browsable squad slide with every player's shareable card, and a closing "Bedankt mannen" slide.</p>
+<p lang="nl">Een terugblik op het seizoen in de stijl van Spotify Wrapped, als schermvullende verhaalslides met elk één statistiek: doelsaldo, topscorers, assists, minuten, sterkste kaarten, Man of the Match, trouwste trainers, teamaanwezigheid, clean sheets, grootste zege, winstreeks, comebacks, supersub, kaarten, thuis tegen uit, meeste wedstrijden, gastspelers en grappige momenten die de trainers hebben genoteerd. Daarna een bladerbare selectieslide met de deelbare kaart van elke speler, en een afsluitende "Bedankt mannen"-slide.</p>
+<p lang="en">Each slide can have a generated background picture. I wrote the image prompts, and the pictures are uploaded in the app. Music starts after a "Start met muziek" tap, from an uploaded track or a YouTube link. Slides push over each other with a swipe that follows the finger, an automatic timer with a visible progress bar and a pause, staged entrances and count-up numbers. A public share link, a frozen snapshot, lets people outside the team watch it, with a proper link preview in WhatsApp.</p>
+<p lang="nl">Elke slide kan een gegenereerde achtergrondafbeelding hebben. Ik schreef de afbeeldingsprompts, en de plaatjes worden in de app geüpload. De muziek start na een tik op "Start met muziek", van een geüploade track of een YouTube-link. Slides schuiven over elkaar met een swipe die de vinger volgt, een automatische timer met zichtbare voortgangsbalk en een pauzeknop, gefaseerde entrees en optellende getallen. Met een openbare deellink, een bevroren momentopname, kunnen mensen buiten het team meekijken, met een nette linkvoorbeeld in WhatsApp.</p>
+<div class="strip phone" role="region" aria-label="Season recap screenshots" data-alt-en="Season recap screenshots" data-alt-nl="Screenshots van de seizoensterugblik" data-aria="1" tabindex="0">
+<figure><div class="frame"><span class="ph">images/clubbie/recap-intro.jpg</span><img src="images/clubbie/recap-intro.jpg" alt="The opening slide of the season recap" data-alt-en="The opening slide of the season recap" data-alt-nl="De openingsslide van de seizoensterugblik" loading="lazy"></div><figcaption><span lang="en">The recap opens.</span><span lang="nl">De terugblik opent.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-homeaway.jpg</span><img src="images/clubbie/recap-homeaway.jpg" alt="A recap slide comparing home and away results" data-alt-en="A recap slide comparing home and away results" data-alt-nl="Een slide die thuis- en uitwaartse resultaten vergelijkt" loading="lazy"></div><figcaption><span lang="en">Home against away.</span><span lang="nl">Thuis tegen uit.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-topscorers.jpg</span><img src="images/clubbie/recap-topscorers.jpg" alt="A recap slide showing the top scorers of the season" data-alt-en="A recap slide showing the top scorers of the season" data-alt-nl="Een slide met de topscorers van het seizoen" loading="lazy"></div><figcaption><span lang="en">One statistic per slide.</span><span lang="nl">Eén statistiek per slide.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-moments.jpg</span><img src="images/clubbie/recap-moments.jpg" alt="A recap slide with funny moments noted down by the trainers" data-alt-en="A recap slide with funny moments noted down by the trainers" data-alt-nl="Een slide met grappige momenten die de trainers hebben genoteerd" loading="lazy"></div><figcaption><span lang="en">Funny moments, noted by the trainers.</span><span lang="nl">Grappige momenten, genoteerd door de trainers.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-squad.jpg</span><img src="images/clubbie/recap-squad.jpg" alt="The squad slide with a browsable player card" data-alt-en="The squad slide with a browsable player card" data-alt-nl="De selectieslide met een bladerbare spelerskaart" loading="lazy"></div><figcaption><span lang="en">The squad slide.</span><span lang="nl">De selectieslide.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-closing.jpg</span><img src="images/clubbie/recap-closing.jpg" alt="The closing slide thanking the team" data-alt-en="The closing slide thanking the team" data-alt-nl="De afsluitende slide waarin het team wordt bedankt" loading="lazy"></div><figcaption><span lang="en">The closing slide.</span><span lang="nl">De afsluitende slide.</span></figcaption></figure>
+</div>
+</div>
+
+    <div class="pair rv">
+      <div class="box">
+        <h3><span lang="en">Built for weak signal</span><span lang="nl">Gebouwd voor zwak signaal</span></h3>
+<p lang="en">At the pitch the signal is poor. The app shell is cached by a service worker and the last known data stays on the phone. Goals and cards entered offline wait in a queue and are sent in order when the connection returns. Each entry carries its own id, so a re-send never counts a goal twice.</p>
+<p lang="nl">Bij het veld is het signaal slecht. De appshell wordt gecachet door een service worker en de laatst bekende gegevens blijven op de telefoon. Doelpunten en kaarten die offline worden ingevoerd, wachten in een wachtrij en worden op volgorde verstuurd zodra de verbinding terugkomt. Elke invoer heeft een eigen id, dus opnieuw versturen telt nooit een doelpunt dubbel.</p>
+      </div>
+      <div class="box">
+        <h3><span lang="en">Privacy by design</span><span lang="nl">Privacy door ontwerp</span></h3>
+<p lang="en">Phone numbers live in a separate table that only staff can read. Roles (player, trainer, admin, owner) are enforced in the database with row-level security, not only in the interface. Fines, a boetepot, are built and tested but paused behind a feature flag.</p>
+<p lang="nl">Telefoonnummers staan in een aparte tabel die alleen staf kan lezen. Rollen (speler, trainer, admin, eigenaar) worden in de database afgedwongen met row-level security, niet alleen in de interface. Boetes, een boetepot, zijn gebouwd en getest, maar staan gepauzeerd achter een feature flag.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tech">
+  <div class="wrap narrow rv">
+    <h2><small>03</small><span lang="en">Under the hood</span><span lang="nl">Onder de motorkap</span></h2>
+<p lang="en"><strong>Front end.</strong> Vite, React, TypeScript, React Router, Tailwind CSS v4, shadcn/ui and TanStack Query, with a persisted cache and a version buster.</p>
+<p lang="nl"><strong>Front-end.</strong> Vite, React, TypeScript, React Router, Tailwind CSS v4, shadcn/ui en TanStack Query, met een persistente cache en een versie-buster.</p>
+<p lang="en"><strong>Back end.</strong> Supabase only: Postgres, Auth, row-level security, <code>SECURITY DEFINER</code> functions for every multi-step write, Storage for pictures and audio, Edge Functions for the schedule sync, the league-table scrape and push notifications, and scheduled jobs with pg_cron.</p>
+<p lang="nl"><strong>Back-end.</strong> Alleen Supabase: Postgres, Auth, row-level security, <code>SECURITY DEFINER</code>-functies voor elke schrijfactie in meerdere stappen, Storage voor afbeeldingen en audio, Edge Functions voor de plannings-sync, het scrapen van de ranglijst en pushmeldingen, en geplande taken met pg_cron.</p>
+<p lang="en"><strong>Hosting.</strong> Vercel, plus one small serverless function that adds link-preview tags to shared recap links.</p>
+<p lang="nl"><strong>Hosting.</strong> Vercel, plus één kleine serverless functie die linkvoorbeeld-tags toevoegt aan gedeelde terugblik-links.</p>
+<p lang="en"><strong>Migrations.</strong> More than 90 numbered SQL migrations, each commented with the reason for the change.</p>
+<p lang="nl"><strong>Migraties.</strong> Meer dan 90 genummerde SQL-migraties, elk met commentaar waarom de wijziging nodig was.</p>
+<p lang="en"><strong>Demo mode.</strong> An in-memory fake backend, so the whole UI can be explored and tested without touching real data. In the public demo the app's database client even points at an address that does not exist, so nothing can reach the real project. Every screenshot on this page comes from it.</p>
+<p lang="nl"><strong>Demomodus.</strong> Een nep-backend in het geheugen, zodat de hele interface kan worden verkend en getest zonder echte data aan te raken. In de openbare demo wijst de databaseclient van de app zelfs naar een adres dat niet bestaat, zodat niets het echte project kan bereiken. Elke screenshot op deze pagina komt hieruit.</p>
+<p lang="en"><strong>Details worth a sentence.</strong></p>
+<p lang="nl"><strong>Details die een zin waard zijn.</strong></p>
+    <ul class="tight" lang="en">
+      <li>The recap's slide transitions and swipe are hand-built, with no animation library.</li>
+      <li>The player cards scale with container queries.</li>
+      <li>Cards are rendered to images for sharing.</li>
+      <li>The offline queue is idempotent.</li>
+    </ul>
+    <ul class="tight" lang="nl">
+      <li>De slide-overgangen en swipe van de terugblik zijn met de hand gebouwd, zonder animatiebibliotheek.</li>
+      <li>De spelerskaarten schalen mee met container queries.</li>
+      <li>Kaarten worden naar afbeeldingen gerenderd om te delen.</li>
+      <li>De offline wachtrij is idempotent.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap narrow rv">
+    <h2><small>04</small><span lang="en">How I built it</span><span lang="nl">Hoe ik het bouwde</span></h2>
+<p lang="en" class="lead">The code was written together with an AI coding assistant (Claude Code) over many sessions. My part was the product thinking, the priorities, the domain knowledge, the testing and the decisions.</p>
+<p lang="nl" class="lead">De code is samen met een AI-codeerassistent (Claude Code) geschreven, over veel sessies. Mijn aandeel was het productdenken, de prioriteiten, de domeinkennis, het testen en de beslissingen.</p>
+<p lang="en">I acted as product owner. I described the problem in plain language, reviewed the results on my own phone and steered. The loop was always the same. I describe a need, for example "when someone walks off the pitch angry, I want to see that back in the season recap". The assistant proposes a design and asks only what I have to decide, builds it, and tests it in the demo and in a real browser. Then I verify on the phone.</p>
+<p lang="nl">Ik trad op als product owner. Ik beschreef het probleem in gewone taal, bekeek de resultaten op mijn eigen telefoon en stuurde bij. De lus was steeds hetzelfde. Ik beschrijf een behoefte, bijvoorbeeld "als iemand boos het veld af loopt, wil ik dat terugzien in de seizoensterugblik". De assistent stelt een ontwerp voor en vraagt alleen wat ik moet beslissen, bouwt het, en test het in de demo en in een echte browser. Daarna controleer ik het op mijn telefoon.</p>
+<p lang="en">I also made a point of deciding what not to build: no test suite for now and no migration automation. Saying no kept the project small enough to finish.</p>
+<p lang="nl">Ik heb er ook bewust voor gekozen wat ik niet ga bouwen: voorlopig geen testsuite en geen migratie-automatisering. Nee zeggen hield het project klein genoeg om af te maken.</p>
+  </div>
+</section>
+
+<section id="lessons">
+  <div class="wrap">
+    <div class="rv narrow">
+      <h2><small>05</small><span lang="en">Challenges and what I learned</span><span lang="nl">Uitdagingen en wat ik leerde</span></h2>
+<p lang="en" class="lead">Four short stories.</p>
+<p lang="nl" class="lead">Vier korte verhalen.</p>
+    </div>
+    <div class="stories rv">
+<article class="story">
+<h3><span lang="en">The 5-0 that vanished</span><span lang="nl">De 5-0 die verdween</span></h3>
+<p lang="en">A match we won 5-0 disappeared from all statistics. The live entry only counted goals, so "goals against" stayed empty instead of 0, and the app read a score with an empty side as "no result yet".</p>
+<p lang="nl">Een wedstrijd die we met 5-0 wonnen verdween uit alle statistieken. De live invoer telde alleen doelpunten, dus "tegendoelpunten" bleef leeg in plaats van 0, en de app las een uitslag met een lege kant als "nog geen uitslag".</p>
+<p lang="en">Lesson: model "nothing happened" explicitly, and fix it in the database, the write path and the reader.</p>
+<p lang="nl">Les: modelleer "er gebeurde niets" expliciet, en repareer het in de database, het schrijfpad en de lezer.</p>
+</article>
+<article class="story">
+<h3><span lang="en">The white agenda</span><span lang="nl">De witte agenda</span></h3>
+<p lang="en">The agenda went white after I added offline caching. A Map is not serializable, so the saved copy came back as an empty object.</p>
+<p lang="nl">De agenda werd wit nadat ik offline caching had toegevoegd. Een Map is niet serialiseerbaar, dus de opgeslagen kopie kwam terug als een leeg object.</p>
+<p lang="en">Lesson: store only plain data in a persisted cache, bump the cache version when its shape changes, and give every page an error screen with a way out instead of a white screen.</p>
+<p lang="nl">Les: sla alleen gewone data op in een persistente cache, verhoog de cacheversie als de vorm verandert, en geef elke pagina een foutscherm met een uitweg in plaats van een wit scherm.</p>
+</article>
+<article class="story">
+<h3><span lang="en">Club sites refuse bots</span><span lang="nl">Clubsites weigeren bots</span></h3>
+<p lang="en">Instead of fighting that, the import runs in the user's own browser through a bookmarklet. The league table is now computed from the imported results.</p>
+<p lang="nl">In plaats van daartegen te vechten, draait de import in de eigen browser van de gebruiker via een bookmarklet. De ranglijst wordt nu berekend uit de geïmporteerde uitslagen.</p>
+<p lang="en">Lesson: sometimes the answer is to move the work to where the access already is.</p>
+<p lang="nl">Les: soms is het antwoord het werk te verplaatsen naar waar de toegang al is.</p>
+</article>
+<article class="story">
+<h3><span lang="en">Music in a public share</span><span lang="nl">Muziek in een openbare deellink</span></h3>
+<p lang="en">A copyrighted track must not be handed to the whole internet by accident. The team's copy is private, and a public copy only exists while a share link does.</p>
+<p lang="nl">Een auteursrechtelijk beschermd nummer mag niet per ongeluk aan heel het internet worden gegeven. De kopie van het team is privé, en een openbare kopie bestaat alleen zolang er een deellink is.</p>
+<p lang="en">Lesson: decide what is public by default, then make the exception temporary.</p>
+<p lang="nl">Les: bepaal wat standaard openbaar is, en maak de uitzondering tijdelijk.</p>
+</article>
+    </div>
+  </div>
+</section>
+
+<section id="next">
+  <div class="wrap">
+    <div class="rv narrow">
+      <h2><small>06</small><span lang="en">What is next</span><span lang="nl">Wat nu komt</span></h2>
+<p lang="en" class="lead">Two big steps, and a few smaller ones behind them.</p>
+<p lang="nl" class="lead">Twee grote stappen, met een paar kleinere erachter.</p>
+    </div>
+    <div class="next-grid rv">
+<article class="ncard feature">
+<span class="tag"><span lang="en">Data</span><span lang="nl">Data</span></span>
+<h3><span lang="en">Live results from an API</span><span lang="nl">Live uitslagen via een API</span></h3>
+<p lang="en">Today the poule results come in through a bookmarklet that reads the club site in the phone's own browser. It works, but it needs a person to tap it. The goal is a proper data source I can query for live results and standings, so the league table and our own match scores update without anyone doing anything, and without scraping a website.</p>
+<p lang="nl">Nu komen de poule-uitslagen binnen via een bookmarklet die de clubsite in de eigen browser van de telefoon leest. Dat werkt, maar er moet iemand op tikken. Het doel is een echte databron die ik kan bevragen voor live uitslagen en standen, zodat de ranglijst en onze eigen wedstrijduitslagen vanzelf bijwerken, zonder dat iemand iets hoeft te doen en zonder een website te scrapen.</p>
+</article>
+<article class="ncard feature">
+<span class="tag"><span lang="en">Distribution</span><span lang="nl">Distributie</span></span>
+<h3><span lang="en">Official apps in both stores</span><span lang="nl">Officiële apps in beide stores</span></h3>
+<p lang="en">Publish Clubbie in the Apple App Store and Google Play, so players can find it and install it like any other app, with push notifications and a home screen icon that need no explanation.</p>
+<p lang="nl">Clubbie publiceren in de Apple App Store en Google Play, zodat spelers de app kunnen vinden en installeren zoals elke andere app, met pushmeldingen en een icoon op het beginscherm dat geen uitleg nodig heeft.</p>
+</article>
+<article class="ncard">
+<span class="tag"><span lang="en">Growth</span><span lang="nl">Groei</span></span>
+<h3><span lang="en">A second team</span><span lang="nl">Een tweede team</span></h3>
+<p lang="en">Let another team use the platform, with a nicer onboarding for new members.</p>
+<p lang="nl">Een ander team het platform laten gebruiken, met een mooiere onboarding voor nieuwe leden.</p>
+</article>
+<article class="ncard">
+<span class="tag"><span lang="en">Notifications</span><span lang="nl">Meldingen</span></span>
+<h3><span lang="en">Per player preference</span><span lang="nl">Op voorkeur van de speler</span></h3>
+<p lang="en">Let everyone choose which pushes they want: goals, the final whistle, or only their own team.</p>
+<p lang="nl">Iedereen laten kiezen welke meldingen hij wil: doelpunten, het eindsignaal, of alleen zijn eigen team.</p>
+</article>
+<article class="ncard">
+<span class="tag"><span lang="en">Paused</span><span lang="nl">Gepauzeerd</span></span>
+<h3><span lang="en">Self-service RSVP</span><span lang="nl">Zelf aan- en afmelden</span></h3>
+<p lang="en">Built and switched off. I will finish it once the team is ready for it.</p>
+<p lang="nl">Gebouwd en uitgezet. Ik maak het af zodra het team eraan toe is.</p>
+</article>
+    </div>
+    <p class="rv" style="margin-top:32px"><a class="btn" href="https://clubbie.net/demo" rel="noopener"><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></a></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap"><span lang="en">Clubbie is built for SCG'18 Zaterdag 4. Screenshots are from the demo mode, with made-up names and scores.</span><span lang="nl">Clubbie is gebouwd voor SCG'18 Zaterdag 4. Screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</span></div>
+</footer>
+
+<script>
+  document.body.classList.remove('nojs');
+  (function(){
+    var T = {
+      en: { title: 'Clubbie - a team manager app for an amateur football team',
+            desc: "Clubbie is an installable team manager web app for SCG'18 Zaterdag 4: agenda, live match, standings, player cards and a season recap. A case study by the product owner.",
+            ogd: 'Agenda, live match, standings, player cards and a season recap in one installable app. Built with an AI coding assistant, steered by the product owner.' },
+      nl: { title: 'Clubbie - een teammanager-app voor een amateurvoetbalteam',
+            desc: "Clubbie is een installeerbare teammanager-webapp voor SCG'18 Zaterdag 4: agenda, live wedstrijd, ranglijst, spelerskaarten en een seizoensterugblik. Een casestudy door de product owner.",
+            ogd: 'Agenda, live wedstrijd, ranglijst, spelerskaarten en een seizoensterugblik in een installeerbare app. Gebouwd met een AI-codeerassistent, gestuurd door de product owner.' }
+    };
+    function meta(sel, v){ var m = document.querySelector(sel); if (m) m.setAttribute('content', v); }
+    function setLang(l, save){
+      if (l !== 'nl') l = 'en';
+      document.documentElement.lang = l;
+      document.title = T[l].title;
+      meta('meta[name="description"]', T[l].desc);
+      meta('meta[property="og:title"]', T[l].title);
+      meta('meta[property="og:description"]', T[l].ogd);
+      document.querySelectorAll('[data-alt-en]').forEach(function(el){
+        var v = el.getAttribute('data-alt-' + l);
+        if (el.getAttribute('data-aria')) el.setAttribute('aria-label', v); else el.setAttribute('alt', v);
+      });
+      document.querySelectorAll('.langbtn').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-lang') === l ? 'true' : 'false'); });
+      if (save){ try{ localStorage.setItem('clubbie_lang', l); }catch(e){} }
+    }
+    document.querySelectorAll('.langbtn').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang'), true); }); });
+    setLang(document.documentElement.lang === 'nl' ? 'nl' : 'en', false);
+  })();
+
+  (function(){
+    var els = document.querySelectorAll('.rv');
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still || !('IntersectionObserver' in window)){ els.forEach(function(e){ e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function(list){
+      list.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    els.forEach(function(e){ io.observe(e); });
+  })();
+  try{
+    if (sessionStorage.getItem('arcade_in')){
+      sessionStorage.removeItem('arcade_in');
+      var __d = document.createElement('div');
+      __d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#080e20;pointer-events:none;transition:opacity .8s ease';
+      document.body.appendChild(__d);
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ __d.style.opacity = '0'; setTimeout(function(){ __d.remove(); }, 900); }); });
+    }
+  }catch(e){}
+</script>
+</body>
+</html>
