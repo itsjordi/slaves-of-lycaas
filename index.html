@@ -34,9 +34,17 @@
   #bg canvas.bloom{pointer-events:none;filter:contrast(2.2) brightness(1.2) blur(10px);mix-blend-mode:screen;opacity:.6}
   body.three .hl{display:none}
   body.three #bg{filter:none}
-  body.three.arrived #bg{transform:scale(1.08);filter:brightness(.5) blur(3px)}
-  body.three .stage:not(.go){animation-name:approach3}
-  @keyframes approach3{0%{transform:scale(.7);opacity:0}100%{transform:none;opacity:1}}
+  body.three .sign h1,body.three .open{display:none}
+  body.three .sign{margin-top:18px}
+  /* in 3D you stay in the hall at the machine: the menu is laid over the 3D screen, hand and coin are 3D too */
+  body.three.arrived #bg{transform:none;filter:none}
+  body.three.arrived .vig{background:radial-gradient(ellipse at 50% 45%,transparent 50%,rgba(5,3,12,.5))}
+  body.three .stage{left:0!important;top:0!important;width:100%!important;height:100%!important;animation:none!important}
+  body.three .stage>img,body.three .hand,body.three #toss,body.three .coinzone{display:none!important}
+  body.three .screen{height:424px;border-radius:18px/14px}
+  body.three .screen:not(.boot):not(.on){visibility:hidden}
+  body.three.compact .stage.go .screen{opacity:0;transition:opacity .35s}
+  body.three .vig{background:radial-gradient(ellipse at 50% 55%,transparent 45%,rgba(7,4,15,.5))}
   @media (max-width:1180px){.open{position:static;display:inline-block;margin-top:12px}}
 
   /* intro / hud */
@@ -325,7 +333,7 @@
 
     var scene = new T3.Scene();
     scene.fog = new T3.Fog(0x06040e, 9, 40);
-    var camera = new T3.PerspectiveCamera(58, 1, 0.05, 60);
+    var camera = new T3.PerspectiveCamera(58, 1, 0.05, 130);
 
     // ---------- tiny pixel font (3x5) ----------
     var F = {
@@ -775,6 +783,97 @@
     hockey(1.9, 1.8, 0);
     plant(-HALF + .45, ZF + .5); plant(HALF - .45, ZF + .5); bin(2.6, -10.8); bin(-2.7, 6.5);
 
+    // ---------- outside: street, facade, neon sign, doors ----------
+    var FZ = ZN + .15, DOOR = 1.1, DH = 2.7;
+    (function(){
+      var root = frameAt(0, 0, 0, 0);
+      lambert('facade', 0x1d1533); lambert('facadeDark', 0x120d22); lambert('curb', 0x3a3a48); lambert('pole', 0x22222e);
+      basic('lamp', 0xffd08a); basic('shopA', 0x3a2470); basic('shopB', 0x6a3a1c); basic('win', 0xffd9a0);
+      basic('bulbA', 0xffe08a); basic('bulbB', 0x5a4220);
+      mats.glass = new T3.MeshBasicMaterial({ color: 0x4fe6ff, transparent: true, opacity: .1, depthWrite: false, fog: true });
+      // the front wall, with a door and two shop windows that show the hall inside
+      var WX = HALF + .3, TOP = 5.2, W1 = 1.7, W2 = 3.9, WB = .9, WT = 2.5;
+      function slab(x0, x1, y0, y1){ part(root, G.box(x1 - x0, y1 - y0, .3), 'facade', (x0 + x1)/2, (y0 + y1)/2, FZ); }
+      slab(-WX, -W2, 0, TOP); slab(W2, WX, 0, TOP);
+      slab(-W1, -DOOR, 0, TOP); slab(DOOR, W1, 0, TOP);
+      slab(-W2, -W1, 0, WB); slab(W1, W2, 0, WB); slab(-W2, -W1, WT, TOP); slab(W1, W2, WT, TOP);
+      slab(-DOOR, DOOR, DH, TOP);
+      part(root, G.box(WX*2 + .2, .2, .5), 'facadeDark', 0, TOP + .1, FZ + .05);
+      [[-W2, -W1], [W1, W2]].forEach(function(w){
+        part(root, G.plane(w[1] - w[0], WT - WB), 'glass', (w[0] + w[1])/2, (WB + WT)/2, FZ + .02);
+        part(root, G.box(w[1] - w[0] + .06, .04, .06), 'n_cyan', (w[0] + w[1])/2, WT, FZ + .17);
+        part(root, G.box(w[1] - w[0] + .06, .04, .06), 'n_cyan', (w[0] + w[1])/2, WB, FZ + .17);
+      });
+      part(root, G.box(DOOR*2 + .1, .05, .06), 'n_pink', 0, DH, FZ + .17);
+      part(root, G.box(.05, DH, .06), 'n_pink', -DOOR - .02, DH/2, FZ + .17); part(root, G.box(.05, DH, .06), 'n_pink', DOOR + .02, DH/2, FZ + .17);
+      // the big sign, framed by chasing bulbs
+      var c = canvas(128, 32), g = c.getContext('2d');
+      g.fillStyle = '#0c0718'; g.fillRect(0, 0, 128, 32);
+      var a = "JORDI'S", b = 'ARCADE', k = 2, wA = textW(a, k), wB = textW(b, k), x0 = Math.round((128 - wA - wB - 10)/2);
+      text(g, a, x0 + 1, 10, k, '#6a1048'); text(g, a, x0, 9, k, '#ffb3e3');
+      text(g, b, x0 + wA + 11, 10, k, '#0a4a5a'); text(g, b, x0 + wA + 10, 9, k, '#c8fbff');
+      g.fillStyle = NEON.pink; g.fillRect(2, 2, 124, 1); g.fillRect(2, 29, 124, 1); g.fillStyle = NEON.cyan; g.fillRect(2, 2, 1, 28); g.fillRect(125, 2, 1, 28);
+      mats.sign = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats.sign.userData.glow = true;
+      part(root, G.plane(4.4, 1.1), 'sign', 0, 3.75, FZ + .17);
+      part(root, G.box(4.6, 1.3, .1), 'facadeDark', 0, 3.75, FZ + .1);
+      for (var i = 0; i < 22; i++){
+        var bx = -2.25 + i*(4.5/21);
+        part(root, G.box(.07, .07, .05), i % 2 ? 'bulbA' : 'bulbB', bx, 4.45, FZ + .19);
+        part(root, G.box(.07, .07, .05), i % 2 ? 'bulbB' : 'bulbA', bx, 3.05, FZ + .19);
+      }
+      // a small OPEN sign in the window
+      var o = canvas(32, 12), og = o.getContext('2d'); og.fillStyle = '#05040c'; og.fillRect(0, 0, 32, 12);
+      ctext(og, 'OPEN', 16, 3, 1, NEON.cyan); og.fillStyle = NEON.pink; og.fillRect(1, 1, 30, 1); og.fillRect(1, 10, 30, 1);
+      mats.open = new T3.MeshBasicMaterial({ map: ctex(o), fog: true }); mats.open.userData.glow = true;
+      part(root, G.plane(.7, .26), 'open', 2.8, 2.1, FZ + .04);
+      // sidewalk, curb, wet street
+      var sw = canvas(16, 16), sg = sw.getContext('2d'); sg.fillStyle = '#26243a'; sg.fillRect(0, 0, 16, 16); sg.fillStyle = '#1a1828'; sg.fillRect(0, 15, 16, 1); sg.fillRect(15, 0, 1, 16);
+      var side = new T3.Mesh(new T3.PlaneGeometry(30, 4.5), new T3.MeshLambertMaterial({ map: ctex(sw, [30/1.2, 4.5/1.2]), transparent: true, opacity: .86 }));
+      side.rotation.x = -Math.PI/2; side.position.set(0, .001, ZN + .3 + 2.25); side.renderOrder = 1; scene.add(side);
+      var st = new T3.Mesh(new T3.PlaneGeometry(40, 16), new T3.MeshLambertMaterial({ color: 0x0e0d18, transparent: true, opacity: .72 }));
+      st.rotation.x = -Math.PI/2; st.position.set(0, -.12, ZN + 4.8 + 8); st.renderOrder = 1; scene.add(st);
+      part(root, G.box(30, .14, .2), 'curb', 0, -.05, ZN + 4.8);
+      lambert('roadLine', 0x7a7a90);
+      for (var m = -3; m <= 3; m++) part(root, G.box(1.4, .01, .14), 'roadLine', m*3.4, -.11, ZN + 9);
+      // lamp post with a warm pool of light
+      part(root, G.cyl(.06, .08, 4.2), 'pole', -3.6, 2.1, ZN + 4.2);
+      part(root, G.box(.9, .08, .14), 'pole', -3.25, 4.2, ZN + 4.2);
+      part(root, G.box(.36, .06, .2), 'lamp', -2.9, 4.13, ZN + 4.2);
+      glowPool(root, 'gold', -2.9, ZN + 4.2, 3.2, 3.2);
+      glowPool(root, 'pink', 0, ZN + 1.2, 6, 2.4);
+      // neighbours: dark shop fronts and taller buildings with lit windows
+      [-1, 1].forEach(function(sd){
+        part(root, G.box(9, 4.2, .3), 'facadeDark', sd*(WX + 4.5), 2.1, FZ);
+        part(root, G.plane(2.4, 1.6), sd < 0 ? 'shopA' : 'shopB', sd*(WX + 2.2), 1.7, FZ + .16);
+        part(root, G.plane(2.0, 1.6), sd < 0 ? 'shopB' : 'shopA', sd*(WX + 6.2), 1.7, FZ + .16);
+      });
+      var wc = canvas(16, 32), wg = wc.getContext('2d'); wg.fillStyle = '#0d0b1c'; wg.fillRect(0, 0, 16, 32);
+      for (var yy = 1; yy < 32; yy += 3) for (var xx = 1; xx < 16; xx += 3) if (rnd() < .38){ wg.fillStyle = rnd() < .7 ? '#c9a46a' : '#6a7ac8'; wg.fillRect(xx, yy, 1, 1); }
+      mats.tower = new T3.MeshBasicMaterial({ map: ctex(wc), fog: true, color: 0x9a9ab0 }); mats.tower.userData.glow = true;
+      [[-10.5, 10, 3, 9], [-15, 13, -3, 7], [-8.5, 8, -7, 6], [10.5, 12, 4, 8], [15, 9, -2, 6], [8.5, 15, -9, 7]].forEach(function(b){
+        part(root, G.box(b[3], b[1], 5), 'tower', b[0], b[1]/2, b[2]);
+      });
+      // a sky that fog does not touch, with a few stars
+      var sk = canvas(4, 64), kg = sk.getContext('2d');
+      for (var y = 0; y < 64; y++){ var q = y/63; kg.fillStyle = 'rgb(' + Math.round(8 + 30*q) + ',' + Math.round(6 + 10*q) + ',' + Math.round(24 + 40*q) + ')'; kg.fillRect(0, y, 4, 1); }
+      var sky = new T3.Mesh(new T3.PlaneGeometry(260, 70), new T3.MeshBasicMaterial({ map: ctex(sk), fog: false, depthWrite: false }));
+      sky.position.set(0, 30, -80); scene.add(sky);
+      var starsM = new T3.MeshBasicMaterial({ color: 0xcfd6ff, fog: false });
+      for (var s2 = 0; s2 < 40; s2++){ var st2 = new T3.Mesh(new T3.PlaneGeometry(.5, .5), starsM); st2.position.set(-110 + rnd()*220, 22 + rnd()*36, -79); scene.add(st2); }
+    })();
+    // the two sliding doors (moved every frame, so not merged)
+    var doors = [];
+    [-1, 1].forEach(function(sd){
+      var d = new T3.Group();
+      var pane = new T3.Mesh(new T3.PlaneGeometry(DOOR - .04, DH - .06), mats.glass); pane.position.set(0, DH/2, 0); d.add(pane);
+      [[0, DH - .03, DOOR, .04], [0, .03, DOOR, .04]].forEach(function(r){ var m = new T3.Mesh(new T3.BoxGeometry(r[2], r[3], .05), mats.n_cyan); m.position.set(r[0], r[1], 0); d.add(m); });
+      [-1, 1].forEach(function(e){ var m = new T3.Mesh(new T3.BoxGeometry(.04, DH, .05), mats.n_cyan); m.position.set(e*(DOOR/2 - .02), DH/2, 0); d.add(m); });
+      var hdl = new T3.Mesh(new T3.BoxGeometry(.03, .5, .05), mats.metal); hdl.position.set(-sd*(DOOR/2 - .12), 1.1, .03); d.add(hdl);
+      d.position.set(sd*DOOR/2, 0, FZ + .05); d.userData.sd = sd; scene.add(d); doors.push(d);
+    });
+    var lampLight = new T3.PointLight(0xffc070, 1.1, 11, 1.4); lampLight.position.set(-2.9, 3.9, ZN + 4.2); scene.add(lampLight);
+    var signLight = new T3.PointLight(0xff4fb8, .9, 8, 1.6); signLight.position.set(0, 3.2, ZN + 1.6); scene.add(signLight);
+
     // ---------- bake ----------
     var mirror = new T3.Group(); mirror.scale.set(1, -1, 1); scene.add(mirror);
     Object.keys(batches).forEach(function(key){
@@ -792,50 +891,211 @@
       var p = new T3.PointLight(l[3], 1.2, 9, 1.6); p.position.set(l[0], l[1], l[2]); scene.add(p);
     });
 
+    // ---------- you: legs, a hand and a coin, only seen when you look down or reach out ----------
+    var rig = new T3.Group(); rig.visible = false; scene.add(rig);
+    var M = function(c){ return new T3.MeshLambertMaterial({ color: c }); };
+    var mJeans = M(0x2b4478), mTee = M(0x1f1b3a), mShoe = M(0x15141c), mSole = M(0xd8d4e8), mSkin = M(0xd9a77a), mSleeve = M(0x3b2f6a), mPocket = M(0x1c2d58);
+    function rb(w, h, d, m, x, y, z, parent){ var o = new T3.Mesh(new T3.BoxGeometry(w, h, d), m); o.position.set(x, y, z); (parent || rig).add(o); return o; }
+    rb(.4, .48, .24, mTee, 0, 1.0, .22);
+    rb(.16, .82, .17, mJeans, -.1, .41, -.04); rb(.16, .82, .17, mJeans, .1, .41, -.04);
+    rb(.09, .1, .01, mPocket, .12, .74, -.126);
+    rb(.14, .08, .27, mShoe, -.1, .05, -.12); rb(.14, .08, .27, mShoe, .1, .05, -.12);
+    rb(.145, .02, .28, mSole, -.1, .01, -.12); rb(.145, .02, .28, mSole, .1, .01, -.12);
+    var hand = new T3.Group(); rig.add(hand);
+    rb(.09, .08, .07, mSleeve, 0, .006, .09, hand);
+    rb(.115, .045, .13, mSkin, 0, 0, 0, hand);
+    [-.04, -.013, .013, .04].forEach(function(x, i){ var fg = rb(.025, .028, .07, mSkin, x, -.008, -.095, hand); fg.rotation.x = .55 + i*.06; });
+    var thumb = rb(.03, .03, .065, mSkin, -.068, .015, -.03, hand); thumb.rotation.y = .7;
+    var coinTex = (function(){
+      var c = canvas(16, 16), g = c.getContext('2d');
+      var rows = ['....111111......', '..1122222211....', '.122333322221...', '.123322222224...', '1223222112222441', '1232221221222441', '1232222212222441', '1232222212222441',
+                  '1232222212222441', '1222222212222441', '1222221111122441', '.122222222224441', '.124222222244441', '..1144444444411.', '....11111111....', '................'];
+      var col = { '1': '#6a3a00', '2': '#ffcf3a', '3': '#fff2a8', '4': '#d89a1a' };
+      rows.forEach(function(r, y){ for (var x = 0; x < 16; x++){ var ch = r[x]; if (col[ch]){ g.fillStyle = col[ch]; g.fillRect(x, y, 1, 1); } } });
+      return ctex(c);
+    })();
+    var mFace = new T3.MeshBasicMaterial({ map: coinTex, transparent: true, alphaTest: .5 }), mEdge = new T3.MeshLambertMaterial({ color: 0xc8901a, emissive: 0x3a2400 });
+    var coin = new T3.Mesh(new T3.CylinderGeometry(.042, .042, .008, 16), [mEdge, mFace, mFace]);
+    var COIN_HELD = new T3.Vector3(-.04, .03, -.1);
+    hand.add(coin); coin.position.copy(COIN_HELD); coin.rotation.set(Math.PI/2, 0, 0);
+
+    // ---------- the screen of our machine, used to place the menu on it ----------
+    var SCR = new T3.Object3D(); SCR.position.set(0, 1.43, ZF + .5 + .214); SCR.rotation.x = -.1; scene.add(SCR); SCR.updateMatrixWorld(true);
+    var SLOT = new T3.Vector3(-.05, .6, ZF + .5 + .33);
+    var scrN = new T3.Vector3(0, 0, 1).applyQuaternion(SCR.quaternion);
+    var corners = [[-.33, .25], [.33, .25], [.33, -.25], [-.33, -.25]].map(function(c){ return new T3.Vector3(c[0], c[1], 0); });
+
     // ---------- size, camera, loop ----------
-    var W = 0, Hh = 0;
+    var W = 0, Hh = 0, baseFov = 58, CLOSE = new T3.Vector3();
     function size(){
       var vw = innerWidth, vh = innerHeight, k = Math.max(2, Math.round(Math.max(vw, vh)/460));
       W = Math.max(1, Math.round(vw/k)); Hh = Math.max(1, Math.round(vh/k));
       renderer.setSize(W, Hh, false);
       bloom.width = Math.max(1, W >> 1); bloom.height = Math.max(1, Hh >> 1);
-      camera.aspect = vw/vh; camera.fov = vw < vh ? 66 : 58; camera.updateProjectionMatrix();
+      baseFov = vw < vh ? 66 : 58;
+      camera.aspect = vw/vh; camera.fov = baseFov; camera.updateProjectionMatrix();
+      // stand so the whole screen fits: about half the height, never wider than the view
+      var tv = Math.tan(baseFov*Math.PI/360), d = Math.max(.5/(.5*2*tv), .66/(.86*2*tv*camera.aspect));
+      CLOSE.copy(SCR.position).addScaledVector(scrN, d);
     }
     size(); addEventListener('resize', size);
 
-    var Z0 = 12.2, Z1 = ZF + 2.75, TGT = END - 1.3, pose = { cam: 0, bob: 0 };
+    var Z0 = ZN + 9.5, TGT = END - 1.3, pose = { cam: 0, bob: 0 }, seq = null;
     function sm(x){ x = Math.max(0, Math.min(1, x)); return x*x*(3 - 2*x); }
-    function place(t){
+    function lerp(a, b, t){ return a + (b - a)*t; }
+    function seg(t, a, b){ return sm((t - a)/(b - a)); }
+    var LOOK = new T3.Vector3(), POS = new T3.Vector3(), V = new T3.Vector3();
+    function pathPose(t){
       var p = Math.max(0, Math.min(1, pose.cam/TGT)), moving = pose.bob !== 0 ? 1 : 0;
-      var z = Z0 + (Z1 - Z0)*p;
-      var x = Math.sin(pose.cam*4.2)*.03*moving + Math.sin(t*.37)*.02*(1 - p);
-      var y = 1.62 - .08*sm(p) + pose.bob*.011 + Math.sin(t*1.1)*.006;
-      var glance = Math.sin(p*Math.PI*2.6)*.9*(1 - sm(p)) + Math.sin(t*.25)*.25*(1 - p);
-      camera.position.set(x, y, z);
-      camera.lookAt(x*.3 + glance, 1.62 - .3*sm(p), ZF + .7);
-      camera.rotateZ(pose.bob*.0016);
+      var z = lerp(Z0, CLOSE.z, p);
+      var inside = sm((ZN + 1.5 - z)/3), end = sm((CLOSE.z + 4 - z)/4);
+      var x = (Math.sin(pose.cam*4.2)*.03*moving + Math.sin(t*.37)*.02*(1 - p))*(1 - end);
+      var y = lerp(1.62, CLOSE.y, end) + pose.bob*.011*(1 - end) + Math.sin(t*1.1)*.006*(1 - p);
+      POS.set(x, y, z);
+      var glance = (Math.sin(p*Math.PI*2.6)*.9 + Math.sin(t*.25)*.25)*inside*(1 - end);
+      var outLook = V.set(0, lerp(2.35, 1.7, sm((Z0 - z)/6)), z - 8);
+      LOOK.set(lerp(outLook.x, x*.3 + glance, inside), lerp(outLook.y, 1.55, inside), lerp(outLook.z, ZF + .7, inside));
+      LOOK.lerp(SCR.position, end);
     }
+    // look in a direction: pitch/yaw offsets from "straight at the screen"
+    function aim(pos, pitch, yaw){
+      var dx = SCR.position.x - pos.x, dy = SCR.position.y - pos.y, dz = SCR.position.z - pos.z;
+      var bp = Math.atan2(dy, Math.sqrt(dx*dx + dz*dz)), by = Math.atan2(dx, -dz);
+      var P = bp + pitch, Y = by + yaw;
+      LOOK.set(pos.x + Math.sin(Y)*Math.cos(P), pos.y + Math.sin(P), pos.z - Math.cos(Y)*Math.cos(P));
+    }
+    function angTo(pos, target){
+      var dx = target.x - pos.x, dy = target.y - pos.y, dz = target.z - pos.z;
+      var bp = Math.atan2(SCR.position.y - pos.y, Math.sqrt(Math.pow(SCR.position.x - pos.x, 2) + Math.pow(SCR.position.z - pos.z, 2)));
+      return { p: Math.atan2(dy, Math.sqrt(dx*dx + dz*dz)) - bp, y: Math.atan2(dx, -dz) };
+    }
+
+    // hand keyframes in your own frame (x right, y up, -z forward); the arm runs from your shoulder to the hand
+    function hk(x, y, z, rx){ return { p: new T3.Vector3(x, y, z), rx: rx }; }
+    var H_POCKET = hk(.15, .74, -.12, -1.0), H_OUT = hk(.12, 1.02, -.32, -.3), H_FRONT = hk(.1, 1.26, -.4, 0), H_DOWN = hk(.22, .9, -.22, -.6);
+    var SHOULDER = new T3.Vector3(.2, 1.3, .1), V2 = new T3.Vector3(), LEAN = new T3.Vector3(0, -.12, -.26);
+    var arm = new T3.Mesh(new T3.BoxGeometry(.095, .095, 1), mSleeve); rig.add(arm);
+    var qHeld = new T3.Quaternion().setFromEuler(new T3.Euler(Math.PI/2, 0, 0)), qSlot = new T3.Quaternion().setFromEuler(new T3.Euler(0, 0, Math.PI/2));
+    function handAt(a, b, t){
+      hand.position.lerpVectors(a.p, b.p, t);
+      V2.copy(SHOULDER).add(rig.position); hand.lookAt(V2); hand.rotateX(lerp(a.rx, b.rx, t)*.5);
+      var L = SHOULDER.distanceTo(hand.position);
+      arm.position.lerpVectors(SHOULDER, hand.position, .5 + .03/L); arm.scale.set(1, 1, Math.max(.01, L - .06));
+      V2.copy(hand.position).add(rig.position); arm.lookAt(V2);
+    }
+
+    var COIN_T = 5.8, DIVE_T = 1.3, slotFlash = 0;
+    function runCoin(t){
+      var base = CLOSE, P = 0, Y = 0;
+      rig.visible = true; rig.position.set(base.x, 0, base.z);
+      // lean in towards the slot while you put the coin in, and back again after
+      var lean = seg(t, 3.4, 4.1)*(1 - seg(t, 4.8, 5.5));
+      POS.copy(base).addScaledVector(LEAN, lean);
+      var H_SLOT = hk(SLOT.x - base.x + .02, SLOT.y + .03, SLOT.z - base.z + .11, -.5), sl = angTo(V.copy(base).add(LEAN), SLOT);
+      // 1. look down, 2. pull the coin out of your pocket, 3. bring it up in front of you
+      if (t < 1.5){ var a = seg(t, 0, .8); P = lerp(0, -.95, a); Y = lerp(0, .15, a); }
+      else if (t < 2.25){ var b = seg(t, 1.5, 2.2); P = lerp(-.95, -.36, b); Y = lerp(.15, .06, b); }
+      if (t < .45) handAt(H_POCKET, H_POCKET, 0);
+      else if (t < 1.5) handAt(H_POCKET, H_OUT, seg(t, .45, 1.45));
+      else if (t < 2.25) handAt(H_OUT, H_FRONT, seg(t, 1.5, 2.2));
+      // 4. flip it: it leaves your hand, spins, and you catch it again
+      var held = true;
+      if (t >= 2.25 && t < 3.45){
+        var u = (t - 2.25)/1.2;
+        P = -.36 + .42*Math.sin(Math.PI*u); Y = .06;
+        handAt(H_FRONT, H_FRONT, 0); hand.position.y -= .05*Math.sin(Math.PI*u);
+        held = false;
+        if (coin.parent !== rig) rig.add(coin);
+        V.copy(COIN_HELD).applyQuaternion(hand.quaternion).add(hand.position);
+        coin.position.set(V.x, V.y + .42*4*u*(1 - u), V.z + .05*Math.sin(Math.PI*u));
+        coin.rotation.set(Math.PI/2 + u*Math.PI*12, 0, 0);
+      }
+      if (held && coin.parent !== hand){ hand.add(coin); coin.position.copy(COIN_HELD); coin.quaternion.copy(qHeld); }
+      // 5. reach to the slot, turn the coin on its edge and push it in
+      if (t >= 3.45 && t < 4.8){
+        P = lerp(-.36, sl.p, seg(t, 3.45, 4.1)); Y = lerp(.06, sl.y, seg(t, 3.45, 4.1));
+        handAt(H_FRONT, H_SLOT, seg(t, 3.45, 4.35));
+        coin.quaternion.copy(qHeld).slerp(qSlot, seg(t, 3.5, 4.2));
+        var push = seg(t, 4.3, 4.6); coin.position.set(COIN_HELD.x, COIN_HELD.y, COIN_HELD.z - .07*push);
+        if (t > 4.55 && !slotFlash) slotFlash = performance.now();
+      }
+      // 6. hand goes back down, eyes back on the screen
+      if (t >= 4.8){
+        var e = seg(t, 4.8, 5.6);
+        P = lerp(sl.p, 0, e); Y = lerp(sl.y, 0, e);
+        handAt(H_SLOT, H_DOWN, seg(t, 4.8, 5.4));
+        if (t > 5.45) rig.visible = false;
+      }
+      coin.visible = t < 4.6;
+      aim(POS, P, Y);
+      return t >= COIN_T;
+    }
+    function runDive(t){
+      var u = Math.min(1, t/DIVE_T), e = u*u*(3 - 2*u);
+      POS.copy(CLOSE).lerp(V.copy(SCR.position).addScaledVector(scrN, .1), e);
+      aim(POS, 0, 0);
+      camera.fov = baseFov*(1 - .18*e); camera.updateProjectionMatrix();
+      return u >= 1;
+    }
+
+    var api = { END: END, three: true, onScreen: null };
+    function projectScreen(){
+      if (!api.onScreen) return;
+      var vw = innerWidth, vh = innerHeight, x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      corners.forEach(function(c){
+        V.copy(c); SCR.localToWorld(V); V.project(camera);
+        var sx = (V.x + 1)/2*vw, sy = (1 - V.y)/2*vh;
+        x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
+      });
+      api.onScreen({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+    }
+
     var last = 0, t0 = performance.now();
     function frame(now){
       requestAnimationFrame(frame);
       if (document.hidden) return;
-      var b = document.body, gap = b.classList.contains('walking') ? 0 : (b.classList.contains('arrived') ? 150 : 33);
+      var b = document.body, arrived = b.classList.contains('arrived');
+      var gap = (seq || b.classList.contains('walking')) ? 0 : (arrived ? 66 : 33);
       if (now - last < gap) return;
       last = now;
       var t = (now - t0)/1000;
       screens.forEach(function(s){ s.draw(s.g, t); s.t.needsUpdate = true; });
       mats.ceilDim.color.setHex((Math.floor(t*7) % 23) === 0 ? 0x16303a : 0x5aa8c0);
-      place(t);
+      var chase = Math.floor(t*4) % 2; mats.bulbA.color.setHex(chase ? 0xffe08a : 0x5a4220); mats.bulbB.color.setHex(chase ? 0x5a4220 : 0xffe08a);
+      mats.open.color.setHex((Math.floor(t*1.3) % 5) === 4 ? 0x404050 : 0xffffff);
+      if (slotFlash){ var fl = Math.min(1, (now - slotFlash)/450); mats.coin.color.setHex(fl < 1 ? (fl < .5 ? 0xffffff : 0xffd08a) : 0xff9a2a); if (fl >= 1) slotFlash = 0; }
+      if (seq){
+        var st = api.freeze != null ? api.freeze : (now - seq.t0)/1000, fin = seq.run(st);
+        if (fin && api.freeze == null){ var cb = seq.done; seq = null; if (cb) cb(); }
+      } else {
+        pathPose(t);
+        if (camera.fov !== baseFov){ camera.fov = baseFov; camera.updateProjectionMatrix(); }
+      }
+      camera.position.copy(POS); camera.lookAt(LOOK);
+      if (!seq) camera.rotateZ(pose.bob*.0016);
+      // the doors slide open when you come close, and close behind you when you leave
+      var open = sm((ZN + 4.6 - camera.position.z)/2.6) * (1 - sm((ZN - 1.5 - camera.position.z)/3));
+      doors.forEach(function(d){ d.position.x = d.userData.sd*(DOOR/2 + open*(DOOR - .08)); });
       renderer.render(scene, camera);
       bctx.clearRect(0, 0, bloom.width, bloom.height);
       bctx.drawImage(cv, 0, 0, bloom.width, bloom.height);
+      if (arrived) projectScreen();
     }
     requestAnimationFrame(frame);
 
-    return {
-      END: END,
-      draw: function(cam, f, bob){ pose.cam = cam; pose.bob = bob || 0; }
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    api.draw = function(cam, f, bob){ pose.cam = cam; pose.bob = bob || 0; };
+    api.coin = function(done){
+      if (still){ setTimeout(done, 300); return; }
+      seq = { t0: performance.now(), run: runCoin, done: function(){ rig.visible = false; done && done(); } };
     };
+    api.dive = function(){ if (still) return; seq = { t0: performance.now(), run: runDive, done: null }; };
+    api.reset = function(){
+      seq = null; rig.visible = false; coin.visible = true; slotFlash = 0;
+      if (coin.parent !== hand){ hand.add(coin); coin.position.copy(COIN_HELD); coin.quaternion.copy(qHeld); }
+      camera.fov = baseFov; camera.updateProjectionMatrix();
+    };
+    return api;
   }
 
   // Pick the hall: the 3D one when WebGL and Three.js are there, else the three pictures.
@@ -877,22 +1137,23 @@
     function walkIn(){
       if (state !== 'hall') return;
       state = 'walking'; body.classList.add('walking');
-      walk(TARGET, 12500, function(){
-        state = 'arrived'; body.classList.remove('walking'); body.classList.add('arrived'); paint(0); resetMachine(); setTimeout(function(){ if (state === 'arrived') insertCoin(); }, 1400);
+      walk(TARGET, Hall.three ? 15000 : 12500, function(){
+        state = 'arrived'; body.classList.remove('walking'); body.classList.add('arrived'); paint(0); resetMachine(); setTimeout(function(){ if (state === 'arrived') insertCoin(); }, Hall.three ? 500 : 1400);
       });
     }
     function walkBack(){
       if (state !== 'arrived') return;
       try{ sessionStorage.removeItem('arcade_at'); }catch(x){}
       state = 'walking'; body.classList.remove('arrived'); body.classList.add('walking');
-      document.getElementById('m').classList.remove('go');
-      walk(0, 5000, function(){ state = 'hall'; body.classList.remove('walking'); paint(0); });
+      document.getElementById('m').classList.remove('go'); if (Hall.reset) Hall.reset();
+      walk(0, Hall.three ? 7000 : 5000, function(){ state = 'hall'; body.classList.remove('walking'); paint(0); });
     }
     document.getElementById('walkBtn').addEventListener('click', walkIn);
     document.getElementById('back').addEventListener('click', walkBack);
 
     // size the close-up picture like the hall (cover), and place the menu on its screen
     function fit(){
+      if (body.classList.contains('three')){ body.classList.toggle('compact', innerWidth < 760 || innerHeight < 560); return; }
       var vw = innerWidth, vh = innerHeight, IW = 1672, IH = 941, z = (vw < 760 || vh < 560) ? 0.6 : 0.78, cs = Math.max(vw/IW, vh/IH)*z, ox = (vw - IW*cs)/2, oy = (vh - IH*cs)/2;
       var st = document.getElementById('m'), sc = document.getElementById('scr');
       st.style.left = ox + 'px'; st.style.top = oy + 'px'; st.style.width = (IW*cs) + 'px'; st.style.height = (IH*cs) + 'px';
@@ -903,31 +1164,42 @@
       document.body.classList.toggle('compact', vw < 760 || vh < 560);
     }
     fit(); addEventListener('resize', fit);
+    // 3D: keep the menu glued to the machine's screen
+    if (Hall.three){
+      Hall.onScreen = function(r){
+        var st = document.getElementById('m'), sc = document.getElementById('scr'), k = r.w/560;
+        sc.style.left = r.x.toFixed(1) + 'px'; sc.style.top = (r.y + (r.h - 424*k)/2).toFixed(1) + 'px';
+        st.style.setProperty('--k', k.toFixed(4));
+      };
+    }
 
     // menu
     var opts = Array.prototype.slice.call(document.querySelectorAll('.opt')), sel = 0, stick = { style: {} };
     var powered = false, inserting = false, scr = document.getElementById('scr'), mEl = document.getElementById('m'), coinBtn = document.getElementById('coinBtn'), boot = document.getElementById('bootlog');
     var lastTagged = false;
     function resetMachine(){
-      powered = false; inserting = false; body.classList.remove('tossing');
+      powered = false; inserting = false; body.classList.remove('tossing'); if (Hall.reset) Hall.reset();
       scr.classList.remove('on', 'boot'); mEl.classList.remove('ins', 'go', 'powered'); body.classList.remove('leaving'); coinBtn.classList.add('ready'); coinBtn.classList.remove('used'); boot.textContent = '';
     }
     function insertCoin(){
       if (powered || inserting) return;
       inserting = true; coinBtn.classList.remove('ready'); coinBtn.classList.add('used');
+      // 3D: look down, take the coin from your pocket, flip it, put it in; then the machine boots
+      if (Hall.coin){ Hall.coin(function(){ if (state === 'arrived' && inserting) bootUp(); }); return; }
       var tossMs = still ? 0 : 1750;
       if (tossMs) body.classList.add('tossing');
       setTimeout(function(){ body.classList.remove('tossing'); mEl.classList.add('ins'); }, tossMs);
-      setTimeout(function(){
-        scr.classList.add('boot');
-        var lines = I18N[LANG].boot, i = 0;
-        (function nextLine(){
-          if (i < lines.length){ boot.textContent += (i ? '\n' : '') + lines[i++]; setTimeout(nextLine, 170); }
-          else setTimeout(function(){
-            scr.classList.remove('boot'); scr.classList.add('on'); powered = true; mEl.classList.add('powered'); select(startIndex());
-          }, 350);
-        })();
-      }, tossMs + 700);
+      setTimeout(bootUp, tossMs + 700);
+    }
+    function bootUp(){
+      scr.classList.add('boot');
+      var lines = I18N[LANG].boot, i = 0;
+      (function nextLine(){
+        if (i < lines.length){ boot.textContent += (i ? '\n' : '') + lines[i++]; setTimeout(nextLine, 170); }
+        else setTimeout(function(){
+          scr.classList.remove('boot'); scr.classList.add('on'); powered = true; mEl.classList.add('powered'); select(startIndex());
+        }, 350);
+      })();
     }
     coinBtn.addEventListener('click', insertCoin);
     function startIndex(){
@@ -944,7 +1216,7 @@
       if (o.dataset.soon){ document.getElementById('soon').classList.add('on'); return; }
       try{ localStorage.setItem('lycaas_lastgame', o.dataset.game); }catch(x){}
       try{ sessionStorage.setItem('arcade_in', '1'); sessionStorage.setItem('arcade_at', '1'); }catch(x){}
-      body.classList.add('leaving'); mEl.classList.add('go');
+      body.classList.add('leaving'); mEl.classList.add('go'); if (Hall.dive) Hall.dive();
       setTimeout(function(){ location.href = o.href; }, 1500);
     }
     opts.forEach(function(o, n){
