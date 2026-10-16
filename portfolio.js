@@ -19,6 +19,16 @@
     });
   });
 
+  /* ---- back link: go to the page you came from, else to the fallback href ---- */
+  document.querySelectorAll('a[data-back]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      var same = false;
+      try{ same = document.referrer && new URL(document.referrer).origin === location.origin; }catch(x){}
+      if (same && history.length > 1){ e.preventDefault(); history.back(); }
+    });
+  });
+
   /* ---- scroll reveal: one shape, staggered per sibling ---- */
   document.body.classList.remove('nojs');
   var els = document.querySelectorAll('.rv');

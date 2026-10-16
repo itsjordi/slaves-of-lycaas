@@ -455,3 +455,6 @@ section.dark-band h2 small{color:var(--accent)}
 .stop .node .sprite{width:100%;max-width:36px}
 .next .ico{width:40px}
 .tile{padding-top:1.4rem}
+
+footer .wrap.foot{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:baseline;justify-content:space-between}
+footer .fine{margin:0;max-width:70ch;font-size:var(--type-small);color:var(--muted)}

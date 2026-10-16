@@ -25,7 +25,7 @@
     if (__l === 'nl') document.documentElement.lang = 'nl';
   }catch(e){}
 </script>
-<link rel="stylesheet" href="portfolio.css?v=3">
+<link rel="stylesheet" href="portfolio.css?v=4">
 </head>
 <body class="nojs">
 <a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
@@ -33,7 +33,7 @@
 <div class="bar">
   <div class="wrap">
     <nav>
-      <a class="nav back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+      <a class="nav back" href="portfolio.html" data-back><span lang="en">&lsaquo; Back</span><span lang="nl">&lsaquo; Terug</span></a>
     </nav>
     <div class="right">
       <button class="themebtn" type="button" aria-label="Switch between light and dark theme" title="Light / dark"></button>
@@ -339,10 +339,10 @@
 </main>
 
 <footer>
-  <div class="wrap"><span lang="en">Clubbie is built for SCG'18 Zaterdag 4. Screenshots are from the demo mode, with made-up names and scores.</span><span lang="nl">Clubbie is gebouwd voor SCG'18 Zaterdag 4. Screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</span></div>
+  <div class="wrap foot"><a class="tlink" href="index.html"><span lang="en">Back to the arcade</span><span lang="nl">Terug naar de arcade</span></a><p class="fine"><span lang="en">Clubbie is built for SCG'18 Zaterdag 4. Screenshots are from the demo mode, with made-up names and scores.</span><span lang="nl">Clubbie is gebouwd voor SCG'18 Zaterdag 4. Screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</span></p></div>
 </footer>
 
-<script src="portfolio.js"></script>
+<script src="portfolio.js?v=4"></script>
 <script>
   document.body.classList.remove('nojs');
   (function(){
