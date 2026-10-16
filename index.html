@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Game Arcade</title>
+<title>Jordi's Arcade</title>
 <style>
   :root{--neon-pink:#ff4fb8;--neon-cyan:#4fe6ff;--neon-gold:#ffd24f;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
   *{box-sizing:border-box}
@@ -38,19 +38,20 @@
   body.arrived #machine{display:block}
   .stage{position:absolute;transform-origin:49.9% 39.9%;animation:approach .8s cubic-bezier(.2,.8,.2,1)}
   @keyframes approach{0%{transform:translateX(40vw) scale(.6);opacity:0}100%{transform:none;opacity:1}}
-  .stage>img{display:block;width:100%;height:100%}
-  .screen{position:absolute;left:0;top:0;width:560px;height:320px;transform-origin:0 0;transform:scale(var(--k,1));background:#070b16;border-radius:30px/24px;overflow:hidden;padding:18px 26px;box-shadow:inset 0 0 50px rgba(0,0,0,.65)}
+  .stage>img{display:block;width:100%;height:100%;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(to bottom,transparent 0,#000 9%,#000 91%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(to bottom,transparent 0,#000 9%,#000 91%,transparent 100%);mask-composite:intersect}
+  .screen{position:absolute;left:0;top:0;width:560px;height:320px;transform-origin:0 0;transform:scale(var(--k,1));background:#070b16;border-radius:30px/24px;overflow:hidden;padding:14px 26px;box-shadow:inset 0 0 50px rgba(0,0,0,.65)}
   .screen::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
-  .screen h2{margin:0 0 12px;text-align:center;font-size:13px;font-weight:400;letter-spacing:.35em;color:#9fb3d9}
-  .opt{position:relative;display:block;width:100%;margin:0 0 9px;padding:11px 14px 11px 40px;text-align:left;font:inherit;color:inherit;text-decoration:none;background:#0b1226;border:2px solid #2c3a6b;cursor:pointer;transition:background .12s,border-color .12s}
-  .opt b{display:block;font-size:22px;letter-spacing:.06em}
-  .opt small{display:block;margin-top:3px;font-size:12px;color:#8aa0c4}
+  .screen h2{margin:0 0 8px;text-align:center;font-size:13px;font-weight:400;letter-spacing:.35em;color:#9fb3d9}
+  .opt{position:relative;display:block;width:100%;margin:0 0 6px;padding:7px 14px 7px 40px;text-align:left;font:inherit;color:inherit;text-decoration:none;background:#0b1226;border:2px solid #2c3a6b;cursor:pointer;transition:background .12s,border-color .12s}
+  .opt b{display:block;font-size:18px;line-height:1.15;letter-spacing:.06em}
+  .opt small{display:block;margin-top:2px;font-size:11px;color:#8aa0c4}
   .opt::before{content:"";position:absolute;left:14px;top:50%;margin-top:-7px;border:7px solid transparent;border-left:11px solid currentColor;border-right:0;opacity:0}
   .opt .st{position:absolute;right:14px;top:50%;margin-top:-8px;font-size:12px;letter-spacing:.2em;opacity:0}
   .opt.sel .st{opacity:1;animation:press 1s steps(1) infinite}
   .opt.sel::before{opacity:1}
   .opt.ffxiv{color:#cdb57a}.opt.ffxiv b{color:#ffd24f}.opt.ffxiv.sel{background:#2a2208;border-color:#ffd24f;color:#ffd24f}
   .opt.aion{color:#6f8fb0}.opt.aion b{color:#8fd8ff}.opt.aion.sel{background:#0e1c3a;border-color:#8fd8ff;color:#8fd8ff}
+  .opt.club{color:#7d9fe8}.opt.club b{color:#8fb0ff}.opt.club.sel{background:#0d1a44;border-color:#4f7bff;color:#bcd0ff}
   .opt.portfolio{color:#b9a8e8}.opt.portfolio b{color:#e0d0ff}.opt.portfolio.sel{background:#1e1442;border-color:#c9a8ff;color:#e6d8ff}
   .opt.soon{color:#5a6078;border-style:dashed}.opt.soon b{color:#7a809a}.opt.soon.sel{border-color:#9aa2c0;color:#cfd6ee;background:#12162a}
   .opt .last{display:inline-block;margin-left:10px;font-size:11px;letter-spacing:.15em;color:#ffd24f;border:1px solid #ffd24f;padding:0 6px;vertical-align:3px}
@@ -111,6 +112,9 @@
   #soon p{margin:26px 0 0;color:var(--neon-gold);letter-spacing:.3em;font-size:13px;animation:press 1s steps(1) infinite}
   @keyframes crton{0%{transform:scaleY(.02);opacity:0}60%{transform:scaleY(1);opacity:.6}100%{opacity:1}}
 
+  #skipArcade{position:fixed;right:14px;top:14px;z-index:60;font:inherit;font-size:12px;letter-spacing:.2em;color:#cfd6ee;text-decoration:none;background:rgba(8,5,18,.7);border:2px solid #4a4478;padding:8px 12px}
+  #skipArcade:hover,#skipArcade:focus-visible{border-color:var(--neon-cyan);color:#fff;outline:none}
+  body.leaving #skipArcade{display:none}
   /* phones and small windows: the machine screen takes over the whole display, with a menu you can scroll and tap */
   body.compact .sign{margin-top:22px;padding:0 14px}
   body.compact .sign h1{font-size:clamp(30px,10vw,52px)}
@@ -140,14 +144,16 @@
 
   <div id="hud">
     <div class="sign">
-      <h1>Game <span>Arcade</span></h1>
-      <p>Walk in &middot; pick a machine &middot; one coin</p>
+      <h1>Jordi's <span>Arcade</span></h1>
+      <p>Two game tools &middot; a team app &middot; my portfolio</p>
       <div class="open">OPEN</div>
     </div>
   </div>
   <button id="walkBtn" type="button">WALK IN</button>
   <div id="walkHint">or press Enter</div>
   <div id="walkCaption">WALKING TO A MACHINE...</div>
+
+  <a id="skipArcade" href="portfolio.html" data-file="portfolio.html">SKIP TO PORTFOLIO &rsaquo;</a>
 
   <button id="back" type="button">&lsaquo; WALK BACK</button>
 
@@ -160,9 +166,10 @@
         <div class="loading">LOADING...</div>
         <div class="menu">
           <h2>SELECT YOUR GAME</h2>
-          <a class="opt ffxiv" href="ffxiv.html" data-game="ffxiv" data-file="ffxiv.html"><b>FFXIV</b><small>Craft costs, profit, watchlist</small><span class="st">PRESS START</span></a>
-          <a class="opt aion" href="aion2.html" data-game="aion2" data-file="aion2.html"><b>AION 2</b><small>Dailies, timers, alts</small><span class="st">PRESS START</span></a>
-          <a class="opt portfolio" href="portfolio.html" data-game="portfolio" data-file="portfolio.html"><b>JORDI'S PORTFOLIO</b><small>What I built, why, and how</small><span class="st">PRESS START</span></a>
+          <a class="opt ffxiv" href="ffxiv.html" data-game="ffxiv" data-file="ffxiv.html"><b>RETAINER'S LEDGER</b><small>FFXIV: craft costs, profit, gil per hour</small><span class="st">PRESS START</span></a>
+          <a class="opt aion" href="aion2.html" data-game="aion2" data-file="aion2.html"><b>AION 2 BOARD</b><small>Dailies, timers and alts</small><span class="st">PRESS START</span></a>
+          <a class="opt club" href="case-clubbie.html" data-game="clubbie" data-file="case-clubbie.html"><b>CLUBBIE</b><small>A team app for my football team</small><span class="st">PRESS START</span></a>
+          <a class="opt portfolio" href="portfolio.html" data-game="portfolio" data-file="portfolio.html"><b>JORDI'S PORTFOLIO</b><small>Projects, about me, career</small><span class="st">PRESS START</span></a>
           <div class="foot"><span>UP / DOWN: MOVE</span><span>ENTER: START</span><span>CREDIT 01</span></div>
         </div>
       </div>
@@ -180,7 +187,7 @@
     var p = location.pathname;
     if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(p)) p += '/';
     var dir = p.replace(/[^\/]*$/, '');
-    document.querySelectorAll('a.opt[data-file]').forEach(function(a){ a.href = location.origin + dir + a.getAttribute('data-file'); });
+    document.querySelectorAll('a[data-file]').forEach(function(a){ a.href = location.origin + dir + a.getAttribute('data-file'); });
   })();
 
   // The hall is three pixel-art pictures (entrance, halfway, at the machines). Walking = zoom into the pair of machines at the end
@@ -258,7 +265,7 @@
 
     // size the close-up picture like the hall (cover), and place the menu on its screen
     function fit(){
-      var vw = innerWidth, vh = innerHeight, IW = 1672, IH = 941, cs = Math.max(vw/IW, vh/IH), ox = (vw - IW*cs)/2, oy = (vh - IH*cs)/2;
+      var vw = innerWidth, vh = innerHeight, IW = 1672, IH = 941, z = (vw < 760 || vh < 560) ? 0.6 : 0.78, cs = Math.max(vw/IW, vh/IH)*z, ox = (vw - IW*cs)/2, oy = (vh - IH*cs)/2;
       var st = document.getElementById('m'), sc = document.getElementById('scr');
       st.style.left = ox + 'px'; st.style.top = oy + 'px'; st.style.width = (IW*cs) + 'px'; st.style.height = (IH*cs) + 'px';
       sc.style.left = (520*cs) + 'px'; sc.style.top = (195*cs) + 'px'; st.style.setProperty('--k', (630*cs/560).toFixed(4)); st.style.setProperty('--hs', (cs*1.3).toFixed(3));
@@ -282,7 +289,7 @@
       inserting = true; coinBtn.classList.remove('ready'); coinBtn.classList.add('used'); mEl.classList.add('ins');
       setTimeout(function(){
         scr.classList.add('boot');
-        var lines = ['GAME ARCADE BIOS v1.0', 'CHECKING MEMORY ........ OK', 'LOADING CABINET ......... OK', 'CREDIT 01', '', 'READY.'], i = 0;
+        var lines = ['JORDI\'S ARCADE BIOS v1.0', 'CHECKING MEMORY ........ OK', 'LOADING CABINET ......... OK', 'CREDIT 01', '', 'READY.'], i = 0;
         (function nextLine(){
           if (i < lines.length){ boot.textContent += (i ? '\n' : '') + lines[i++]; setTimeout(nextLine, 170); }
           else setTimeout(function(){
