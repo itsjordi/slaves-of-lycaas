@@ -8,117 +8,24 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Jordi Mutsaers - Project Manager &amp; Technology Enthusiast">
 <meta property="og:description" content="Project Manager in cybersecurity, with a strong curiosity for technology, AI and digital experiences. Projects I built, why I built them, and how.">
-<!-- ASSUMPTION: the og:image URL assumes this site is published at https://jordimutsaers.nl/ . Add public/images/portfolio-og.jpg (1200 x 630). -->
-<meta property="og:image" content="https://jordimutsaers.nl/public/images/portfolio-og.jpg">
+<!-- ASSUMPTION: the og:image URL assumes this site is published at https://jordimutsaers.nl/ . Add images/portfolio-og.jpg (1200 x 630). -->
+<meta property="og:image" content="https://jordimutsaers.nl/images/portfolio-og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   try{
+    var __t = localStorage.getItem('theme');
+    if (__t !== 'dark' && __t !== 'light') __t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', __t);
     var __l = localStorage.getItem('clubbie_lang') || ((navigator.language || '').toLowerCase().indexOf('nl') === 0 ? 'nl' : 'en');
     if (__l === 'nl') document.documentElement.lang = 'nl';
   }catch(e){}
 </script>
-<style>
-  :root{--bg:#0b0a1e;--panel:#15122e;--panel2:#201b4a;--line:#7a68e8;--line2:#2f2a74;--text:#f2edff;--muted:#aaa2dc;--pink:#ff4fb8;--cyan:#4fe6ff;--gold:#ffd24f;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth;scroll-padding-top:70px}
-  html:not([lang="nl"]) [lang="nl"], html[lang="nl"] [lang="en"]{display:none!important}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--mono);
-    background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 4px,transparent 4px 8px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 4px,transparent 4px 8px)}
-  a{color:var(--cyan)}
-  a:hover{color:#fff}
-  :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
-  .narrow{max-width:720px}
-  .skip{position:absolute;left:-999px;top:8px;background:var(--gold);color:#0b0a1e;padding:8px 14px;z-index:30}
-  .skip:focus{left:8px}
-  .bar{position:sticky;top:0;z-index:20;background:rgba(11,10,30,.9);border-bottom:3px solid var(--line2);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-  .bar .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:10px;padding-bottom:10px}
-  .bar nav{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-  .bar a.nav{color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
-  .bar a.nav:hover{color:#fff}
-  .langs{display:flex;gap:10px}
-  .langbtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--muted);background:var(--panel);border:3px solid var(--line2);padding:5px 10px 5px 8px;cursor:pointer;box-shadow:3px 3px 0 #000}
-  .langbtn:hover{color:#fff}
-  .langbtn[aria-pressed="true"]{color:#fff;border-color:var(--cyan)}
-  .langbtn svg{width:26px;height:17px;display:block}
-  @media(max-width:640px){.bar a.nav.opt{display:none}}
-
-  .hero{padding:64px 0 36px;text-align:center}
-  .kicker{font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin:0 0 16px;text-shadow:0 0 10px rgba(255,210,79,.5)}
-  h1{margin:0;font-size:clamp(34px,7vw,72px);line-height:1.05;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:#ffd9f1;text-shadow:0 0 6px #fff,0 0 14px var(--pink),0 0 30px var(--pink),4px 4px 0 #6b2bd2}
-  .role{margin:14px 0 0;font-size:clamp(15px,2.2vw,20px);letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);text-shadow:0 0 10px rgba(79,230,255,.5)}
-  .intro{max-width:660px;margin:22px auto 0;font-size:17px;color:#e2dcf7}
-  .philo{max-width:700px;margin:26px auto 0;font-size:16px;color:var(--muted)}
-
-  h2{font-size:clamp(20px,3vw,28px);letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;color:var(--gold)}
-  h2 small{display:block;font-size:12px;letter-spacing:.3em;color:var(--cyan);margin-bottom:6px}
-  .sub{margin:0 0 28px;color:var(--muted)}
-  section{padding:48px 0}
-  section + section{border-top:3px solid var(--line2)}
-
-  .grid{display:grid;gap:26px}
-  @media(min-width:860px){.grid{grid-template-columns:repeat(3,1fr)}}
-  .cart{position:relative;display:flex;flex-direction:column;background:var(--panel);border:4px solid var(--line);box-shadow:8px 8px 0 #000;transition:transform .15s,box-shadow .15s}
-  .cart:hover{transform:translate(-2px,-2px);box-shadow:10px 10px 0 #000}
-  .cart .top{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--panel2);border-bottom:4px solid var(--line);font-size:13px;letter-spacing:.2em;font-weight:700}
-  .cart .top b{color:var(--gold)}
-  .cart .art{height:120px;border-bottom:4px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:800;letter-spacing:.06em}
-  .cart.club .art{background:#0d1a44;color:#8fb0ff;text-shadow:4px 4px 0 #2358E6}
-  .cart.ffxiv .art{background:#2a1a12;color:#e8a07f;text-shadow:4px 4px 0 #a8452f}
-  .cart.aion .art{background:#0d1626;color:#cdb070;text-shadow:4px 4px 0 #3a4a6a}
-  .cart .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:12px;flex:1}
-  .cart h3{margin:0;font-size:20px;line-height:1.25}
-  .cart p{margin:0;color:#ddd7f3;font-size:15px}
-  .cart .why{color:var(--muted);font-size:14px}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;padding:0;margin:0;list-style:none}
-  .tags li{font-size:12px;border:2px solid var(--line2);padding:1px 8px;color:#cbc5ea}
-  .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:6px}
-  .btn{display:inline-block;font:inherit;font-weight:800;font-size:14px;letter-spacing:.06em;text-decoration:none;color:#0b0a1e;background:var(--gold);border:3px solid #000;padding:9px 14px;box-shadow:4px 4px 0 #000}
-  .btn:hover{background:#fff;color:#0b0a1e;transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-  .btn.alt{background:var(--panel2);color:var(--text);border-color:var(--line)}
-  .btn.alt:hover{background:var(--line);color:#fff}
-
-  .more{margin-top:34px;display:grid;gap:18px}
-  @media(min-width:760px){.more{grid-template-columns:1fr 1fr}}
-  .more div{background:var(--panel);border:3px solid var(--line2);padding:16px 18px;box-shadow:5px 5px 0 #000}
-  .more h3{margin:0 0 4px;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)}
-  .more p{margin:0;color:#ddd7f3;font-size:15px}
-  .more-title{margin:0 0 -14px;font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
-
-  .cards{display:grid;gap:20px}
-  @media(min-width:760px){.cards.four{grid-template-columns:repeat(4,1fr)}.cards.five{grid-template-columns:repeat(5,1fr)}.cards.two{grid-template-columns:1fr 1fr}}
-  @media(min-width:520px) and (max-width:759px){.cards.four,.cards.five,.cards.two{grid-template-columns:1fr 1fr}}
-  .card{background:var(--panel);border:3px solid var(--line2);padding:16px 18px;box-shadow:6px 6px 0 #000}
-  .card h3{margin:0 0 6px;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan)}
-  .card h3 b{display:block;font-size:12px;letter-spacing:.2em;color:var(--gold);margin-bottom:2px}
-  .card p{margin:0;color:#ddd7f3;font-size:14.5px;line-height:1.6}
-  .prose p{color:#e2dcf7;margin:0 0 16px}
-  .prose p.first{font-size:18px;color:#fff}
-  .sectionhead{margin-bottom:26px}
-  .block-title{margin:40px 0 16px;font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
-
-  .work{list-style:none;margin:0;padding:0;display:grid;gap:14px}
-  .work li{background:var(--panel);border:3px solid var(--line2);padding:14px 18px}
-  .work h3{margin:0;font-size:16px}
-  .work h3 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px}
-  .work p{margin:4px 0 0;color:#ddd7f3;font-size:15px}
-  .edu{display:grid;gap:14px}
-  @media(min-width:760px){.edu{grid-template-columns:1fr 1fr}}
-  .edu ul{margin:0;padding-left:20px;color:#ddd7f3}
-  .edu li{margin:6px 0}
-  .edu h3{margin:0 0 6px;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan)}
-
-  .contact{text-align:center}
-  .contact .cta{font-size:clamp(20px,3vw,28px);font-weight:800;margin:0 0 6px;color:#fff}
-  .contact .cta2{margin:0 0 26px;color:var(--muted)}
-  footer{padding:36px 0 60px;color:var(--muted);font-size:14px;text-align:center;border-top:3px solid var(--line2)}
-  .rv{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
-  .rv.in{opacity:1;transform:none}
-  .nojs .rv{opacity:1;transform:none}
-  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}.rv{opacity:1;transform:none}}
-</style>
+<link rel="stylesheet" href="portfolio.css">
 </head>
 <body class="nojs">
 <a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
@@ -126,104 +33,126 @@
 <div class="bar">
   <div class="wrap">
     <nav>
-      <a class="nav" href="index.html"><span lang="en">&lsaquo; Arcade</span><span lang="nl">&lsaquo; Arcade</span></a>
+      <a class="nav back" href="index.html"><span lang="en">&lsaquo; Arcade</span><span lang="nl">&lsaquo; Arcade</span></a>
       <a class="nav opt" href="#projects"><span lang="en">Projects</span><span lang="nl">Projecten</span></a>
       <a class="nav opt" href="#about"><span lang="en">About</span><span lang="nl">Over mij</span></a>
       <a class="nav opt" href="#contact"><span lang="en">Contact</span><span lang="nl">Contact</span></a>
     </nav>
-    <div class="langs">
-      <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
-      <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+    <div class="right">
+      <button class="themebtn" type="button" aria-label="Switch between light and dark theme" title="Light / dark"></button>
+      <div class="langs">
+        <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
+        <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+      </div>
     </div>
   </div>
+  <div class="progress" aria-hidden="true"></div>
 </div>
 
-<header class="hero">
+<header class="p-hero">
   <div class="wrap">
-    <p class="kicker"><span lang="en">Player one</span><span lang="nl">Speler één</span></p>
-    <h1>Jordi<br>Mutsaers</h1>
-    <p class="role">Project Manager &amp; Technology Enthusiast</p>
-    <p class="intro" lang="en">Project Manager in cybersecurity, with a strong curiosity for technology, AI and digital experiences. Based in the Netherlands.</p>
-    <p class="intro" lang="nl">Projectmanager in cybersecurity, met een sterke nieuwsgierigheid naar technologie, AI en digitale ervaringen. Gevestigd in Nederland.</p>
-    <p class="philo" lang="en">I like turning ideas into things that actually work. I'm curious about technology, and I'd rather experiment and build than just talk about ideas. Curiosity, experimentation, building, learning: that loop is the throughline of how I work.</p>
-    <p class="philo" lang="nl">Ik zet ideeën graag om in dingen die echt werken. Ik ben nieuwsgierig naar technologie en experimenteer en bouw liever dan alleen over ideeën te praten. Nieuwsgierigheid, experimenteren, bouwen, leren: die cirkel is de rode draad in hoe ik werk.</p>
+    <a class="cab" href="index.html" aria-label="Insert coin: back to the arcade"><span class="sprite" aria-hidden="true"><svg viewBox="0 0 16 19" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="2" y="0" width="12" height="1"/><rect class="i" x="1" y="1" width="1" height="1"/><rect class="a" x="2" y="1" width="12" height="1"/><rect class="i" x="14" y="1" width="1" height="1"/><rect class="i" x="1" y="2" width="1" height="1"/><rect class="a" x="2" y="2" width="12" height="1"/><rect class="i" x="14" y="2" width="1" height="1"/><rect class="i" x="1" y="3" width="14" height="1"/><rect class="i" x="1" y="4" width="1" height="1"/><rect class="i" x="14" y="4" width="1" height="1"/><rect class="i" x="1" y="5" width="1" height="1"/><rect class="i" x="3" y="5" width="10" height="1"/><rect class="i" x="14" y="5" width="1" height="1"/><rect class="i" x="1" y="6" width="1" height="1"/><rect class="i" x="3" y="6" width="3" height="1"/><rect class="a blink" x="6" y="6" width="1" height="1"/><rect class="i" x="7" y="6" width="1" height="1"/><rect class="a blink" x="8" y="6" width="1" height="1"/><rect class="i" x="9" y="6" width="4" height="1"/><rect class="i" x="14" y="6" width="1" height="1"/><rect class="i" x="1" y="7" width="1" height="1"/><rect class="i" x="3" y="7" width="2" height="1"/><rect class="a blink" x="5" y="7" width="5" height="1"/><rect class="i" x="10" y="7" width="3" height="1"/><rect class="i" x="14" y="7" width="1" height="1"/><rect class="i" x="1" y="8" width="1" height="1"/><rect class="i" x="3" y="8" width="2" height="1"/><rect class="a blink" x="5" y="8" width="1" height="1"/><rect class="i" x="6" y="8" width="1" height="1"/><rect class="a blink" x="7" y="8" width="1" height="1"/><rect class="i" x="8" y="8" width="1" height="1"/><rect class="a blink" x="9" y="8" width="1" height="1"/><rect class="i" x="10" y="8" width="3" height="1"/><rect class="i" x="14" y="8" width="1" height="1"/><rect class="i" x="1" y="9" width="1" height="1"/><rect class="i" x="3" y="9" width="10" height="1"/><rect class="i" x="14" y="9" width="1" height="1"/><rect class="i" x="1" y="10" width="1" height="1"/><rect class="i" x="14" y="10" width="1" height="1"/><rect class="i" x="1" y="11" width="1" height="1"/><rect class="m" x="3" y="11" width="10" height="1"/><rect class="i" x="14" y="11" width="1" height="1"/><rect class="i" x="1" y="12" width="1" height="1"/><rect class="a" x="4" y="12" width="1" height="1"/><rect class="i" x="9" y="12" width="1" height="1"/><rect class="i" x="11" y="12" width="1" height="1"/><rect class="i" x="14" y="12" width="1" height="1"/><rect class="i" x="1" y="13" width="1" height="1"/><rect class="i" x="14" y="13" width="1" height="1"/><rect class="i" x="1" y="14" width="14" height="1"/><rect class="i" x="1" y="15" width="1" height="1"/><rect class="i" x="6" y="15" width="1" height="1"/><rect class="a" x="7" y="15" width="2" height="1"/><rect class="i" x="9" y="15" width="1" height="1"/><rect class="i" x="14" y="15" width="1" height="1"/><rect class="i" x="1" y="16" width="1" height="1"/><rect class="i" x="6" y="16" width="4" height="1"/><rect class="i" x="14" y="16" width="1" height="1"/><rect class="i" x="1" y="17" width="1" height="1"/><rect class="i" x="14" y="17" width="1" height="1"/><rect class="i" x="1" y="18" width="14" height="1"/></svg></span><span class="cap mono"><span lang="en">Insert coin</span><span lang="nl">Voer munt in</span></span></a>
+    <div class="grid">
+      <p class="counter">S.01</p>
+      <div>
+        <h1>Jordi<br>Mutsaers</h1>
+        <p class="role mono">Project Manager &amp; Technology Enthusiast</p>
+        <p class="intro" lang="en">Project Manager in cybersecurity, with a strong curiosity for technology, AI and digital experiences. Based in the Netherlands.</p>
+        <p class="intro" lang="nl">Projectmanager in cybersecurity, met een sterke nieuwsgierigheid naar technologie, AI en digitale ervaringen. Gevestigd in Nederland.</p>
+        <p class="philo" lang="en">I like turning ideas into things that actually work. I'm curious about technology, and I'd rather experiment and build than just talk about ideas. Curiosity, experimentation, building, learning: that loop is the throughline of how I work.</p>
+        <p class="philo" lang="nl">Ik zet ideeën graag om in dingen die echt werken. Ik ben nieuwsgierig naar technologie en experimenteer en bouw liever dan alleen over ideeën te praten. Nieuwsgierigheid, experimenteren, bouwen, leren: die cirkel is de rode draad in hoe ik werk.</p>
+        <dl class="now">
+          <div><dt><span lang="en">Working at</span><span lang="nl">Werkt bij</span></dt><dd>ON2IT Cybersecurity<small><span lang="en">Project Manager</span><span lang="nl">Projectmanager</span></small></dd></div>
+          <div><dt><span lang="en">Building</span><span lang="nl">Bouwt</span></dt><dd>Clubbie<small>Retainer's Ledger, Aion 2 Daily Board</small></dd></div>
+          <div><dt><span lang="en">Exploring</span><span lang="nl">Verkent</span></dt><dd><span lang="en">AI and the browser as a platform</span><span lang="nl">AI en de browser als platform</span><small><span lang="en">Network security at home</span><span lang="nl">Netwerkbeveiliging thuis</span></small></dd></div>
+        </dl>
+      </div>
+    </div>
   </div>
 </header>
+
+<div class="ticker" aria-hidden="true"><div class="track"><span>Curiosity</span><span>Experimentation</span><span>Building</span><span>Learning</span><span>Curiosity</span><span>Experimentation</span><span>Building</span><span>Learning</span><span>Curiosity</span><span>Experimentation</span><span>Building</span><span>Learning</span><span>Curiosity</span><span>Experimentation</span><span>Building</span><span>Learning</span></div></div>
 
 <main id="main">
 
 <section id="projects">
   <div class="wrap">
-    <div class="rv sectionhead">
-      <h2><small>01</small><span lang="en">Select a project</span><span lang="nl">Kies een project</span></h2>
-      <p class="sub" lang="en">Each cartridge opens a case study with screenshots. The live version is one click further. All three were built as product owner together with an AI coding assistant, and each page says so.</p>
-      <p class="sub" lang="nl">Elke cartridge opent een casestudy met screenshots. De live versie is één klik verder. Alle drie zijn gebouwd als product owner, samen met een AI-codeerassistent, en elke pagina zegt dat.</p>
-    </div>
-    <div class="grid rv">
-
-      <article class="cart club">
-        <div class="top"><b>01</b><span>TEAM APP</span></div>
-        <div class="art">CLUBBIE</div>
-        <div class="body">
-          <h3><span lang="en">A team manager for an amateur football team</span><span lang="nl">Een teammanager voor een amateurvoetbalteam</span></h3>
-          <p lang="en">Agenda, live match, standings, player cards and a season recap in one installable app.</p>
-          <p lang="nl">Agenda, live wedstrijd, ranglijst, spelerskaarten en een seizoensterugblik in één installeerbare app.</p>
-          <p class="why" lang="en">Why: the team lived in a WhatsApp group, and chats lose information.</p>
-          <p class="why" lang="nl">Waarom: het team leefde in een WhatsApp-groep, en chats verliezen informatie.</p>
-          <ul class="tags"><li>React</li><li>TypeScript</li><li>Supabase</li><li>PWA</li></ul>
-          <div class="acts">
-            <a class="btn" href="case-clubbie.html"><span lang="en">Case study</span><span lang="nl">Casestudy</span></a>
-            <a class="btn alt" href="https://clubbie.net/demo" rel="noopener"><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></a>
-          </div>
-        </div>
-      </article>
-
-      <article class="cart ffxiv">
-        <div class="top"><b>02</b><span>GAME TOOL</span></div>
-        <div class="art">FFXIV</div>
-        <div class="body">
-          <h3>Lycaa's Slave</h3>
-          <p lang="en">Paste a link to a craftable item and see what it really costs to make, with live market prices.</p>
-          <p lang="nl">Plak de link van een craftbaar item en zie wat het echt kost om te maken, met live marktprijzen.</p>
-          <p class="why" lang="en">Why: working out a craft by hand means three sites and a calculator.</p>
-          <p class="why" lang="nl">Waarom: een craft met de hand uitrekenen kost drie sites en een rekenmachine.</p>
-          <ul class="tags"><li>JavaScript</li><li>Universalis</li><li>Garland Tools</li><li>One file</li></ul>
-          <div class="acts">
-            <a class="btn" href="case-ffxiv.html"><span lang="en">Case study</span><span lang="nl">Casestudy</span></a>
-            <a class="btn alt" href="ffxiv.html"><span lang="en">Open tool</span><span lang="nl">Open tool</span></a>
-          </div>
-        </div>
-      </article>
-
-      <article class="cart aion">
-        <div class="top"><b>03</b><span>GAME TOOL</span></div>
-        <div class="art">AION 2</div>
-        <div class="body">
-          <h3>Aion 2 Daily Board</h3>
-          <p lang="en">A checklist with live timers for a main and alts, built to sit on a second screen.</p>
-          <p lang="nl">Een checklist met live timers voor een main en alts, gebouwd voor een tweede scherm.</p>
-          <p class="why" lang="en">Why: dailies differ between a main and an alt, and I kept losing track.</p>
-          <p class="why" lang="nl">Waarom: dailies verschillen tussen een main en een alt, en ik raakte het overzicht kwijt.</p>
-          <ul class="tags"><li>JavaScript</li><li>Timers</li><li>Alerts</li><li>One file</li></ul>
-          <div class="acts">
-            <a class="btn" href="case-aion2.html"><span lang="en">Case study</span><span lang="nl">Casestudy</span></a>
-            <a class="btn alt" href="aion2.html"><span lang="en">Open board</span><span lang="nl">Open bord</span></a>
-          </div>
-        </div>
-      </article>
+    <div class="rv sec-head lg">
+      <h2><small>01 <i>/ 04</i></small><span lang="en">Selected work</span><span lang="nl">Geselecteerd werk</span></h2>
+      <p class="lead" lang="en">Each project opens a case study with screenshots. The live version is one click further.</p>
+      <p class="lead" lang="nl">Elk project opent een casestudy met screenshots. De live versie is één klik verder.</p>
+      <p lang="en">All three were built as product owner together with an AI coding assistant, and each page says so.</p>
+      <p lang="nl">Alle drie zijn gebouwd als product owner, samen met een AI-codeerassistent, en elke pagina zegt dat.</p>
     </div>
 
-    <p class="more-title rv" style="margin-top:44px"><span lang="en">More from the workshop</span><span lang="nl">Meer uit de werkplaats</span></p>
-    <div class="more rv">
-      <div>
+    <div class="projects rv">
+
+      <article class="card-p">
+        <div class="art"><span class="sprite" role="img" aria-label="A pixel art football"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="7" y="0" width="2" height="1"/><rect class="i" x="4" y="1" width="8" height="1"/><rect class="i" x="3" y="2" width="2" height="1"/><rect class="m" x="8" y="2" width="1" height="1"/><rect class="i" x="11" y="2" width="2" height="1"/><rect class="i" x="2" y="3" width="2" height="1"/><rect class="a" x="4" y="3" width="2" height="1"/><rect class="m" x="8" y="3" width="1" height="1"/><rect class="a" x="11" y="3" width="1" height="1"/><rect class="i" x="12" y="3" width="2" height="1"/><rect class="i" x="1" y="4" width="2" height="1"/><rect class="a" x="4" y="4" width="1" height="1"/><rect class="m" x="8" y="4" width="1" height="1"/><rect class="a" x="11" y="4" width="1" height="1"/><rect class="i" x="13" y="4" width="2" height="1"/><rect class="i" x="1" y="5" width="1" height="1"/><rect class="a" x="7" y="5" width="2" height="1"/><rect class="i" x="14" y="5" width="1" height="1"/><rect class="i" x="1" y="6" width="1" height="1"/><rect class="m" x="2" y="6" width="3" height="1"/><rect class="a" x="6" y="6" width="4" height="1"/><rect class="m" x="11" y="6" width="3" height="1"/><rect class="i" x="14" y="6" width="1" height="1"/><rect class="i" x="0" y="7" width="2" height="1"/><rect class="a" x="5" y="7" width="6" height="1"/><rect class="i" x="14" y="7" width="2" height="1"/><rect class="i" x="0" y="8" width="2" height="1"/><rect class="a" x="6" y="8" width="4" height="1"/><rect class="i" x="14" y="8" width="2" height="1"/><rect class="i" x="1" y="9" width="1" height="1"/><rect class="a" x="2" y="9" width="2" height="1"/><rect class="a" x="6" y="9" width="4" height="1"/><rect class="a" x="13" y="9" width="1" height="1"/><rect class="i" x="14" y="9" width="1" height="1"/><rect class="i" x="1" y="10" width="1" height="1"/><rect class="a" x="2" y="10" width="1" height="1"/><rect class="m" x="5" y="10" width="2" height="1"/><rect class="m" x="9" y="10" width="2" height="1"/><rect class="a" x="13" y="10" width="1" height="1"/><rect class="i" x="14" y="10" width="1" height="1"/><rect class="i" x="1" y="11" width="2" height="1"/><rect class="m" x="5" y="11" width="1" height="1"/><rect class="m" x="10" y="11" width="1" height="1"/><rect class="i" x="13" y="11" width="2" height="1"/><rect class="i" x="2" y="12" width="2" height="1"/><rect class="m" x="4" y="12" width="2" height="1"/><rect class="m" x="10" y="12" width="2" height="1"/><rect class="i" x="12" y="12" width="2" height="1"/><rect class="i" x="3" y="13" width="2" height="1"/><rect class="a" x="8" y="13" width="2" height="1"/><rect class="i" x="11" y="13" width="2" height="1"/><rect class="i" x="4" y="14" width="8" height="1"/><rect class="i" x="7" y="15" width="2" height="1"/></svg></span></div>
+        <div class="metarow"><span class="n mono">01</span><span class="c mono">Team app</span></div>
+        <h3>Clubbie</h3>
+        <p class="type"><span lang="en">A team manager for an amateur football team</span><span lang="nl">Een teammanager voor een amateurvoetbalteam</span></p>
+        <p lang="en">Agenda, live match, standings, player cards and a season recap in one installable app.</p>
+        <p lang="nl">Agenda, live wedstrijd, ranglijst, spelerskaarten en een seizoensterugblik in één installeerbare app.</p>
+        <p class="why" lang="en">Why: the team lived in a WhatsApp group, and chats lose information.</p>
+        <p class="why" lang="nl">Waarom: het team leefde in een WhatsApp-groep, en chats verliezen informatie.</p>
+        <div class="specs"><ul class="chips"><li>React</li><li>TypeScript</li><li>Supabase</li><li>PWA</li></ul></div>
+        <div class="acts">
+          <a class="tlink" href="case-clubbie.html"><span lang="en">Case study</span><span lang="nl">Casestudy</span></a>
+          <a class="tlink" href="https://clubbie.net/demo" rel="noopener"><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></a>
+        </div>
+      </article>
+
+      <article class="card-p">
+        <div class="art"><span class="sprite" role="img" aria-label="A pixel art crystal"><svg viewBox="0 0 16 13" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="7" y="0" width="2" height="1"/><rect class="i" x="6" y="1" width="1" height="1"/><rect class="a" x="7" y="1" width="2" height="1"/><rect class="i" x="9" y="1" width="1" height="1"/><rect class="i" x="5" y="2" width="1" height="1"/><rect class="a" x="6" y="2" width="2" height="1"/><rect class="m" x="8" y="2" width="2" height="1"/><rect class="i" x="10" y="2" width="1" height="1"/><rect class="i" x="4" y="3" width="1" height="1"/><rect class="a" x="5" y="3" width="2" height="1"/><rect class="m" x="7" y="3" width="3" height="1"/><rect class="m" x="10" y="3" width="1" height="1"/><rect class="i" x="11" y="3" width="1" height="1"/><rect class="i" x="3" y="4" width="1" height="1"/><rect class="a" x="4" y="4" width="2" height="1"/><rect class="m" x="6" y="4" width="4" height="1"/><rect class="m" x="10" y="4" width="2" height="1"/><rect class="i" x="12" y="4" width="1" height="1"/><rect class="i" x="3" y="5" width="1" height="1"/><rect class="a" x="4" y="5" width="1" height="1"/><rect class="m" x="5" y="5" width="5" height="1"/><rect class="m" x="10" y="5" width="2" height="1"/><rect class="i" x="12" y="5" width="1" height="1"/><rect class="i" x="3" y="6" width="1" height="1"/><rect class="a" x="4" y="6" width="1" height="1"/><rect class="m" x="5" y="6" width="5" height="1"/><rect class="m" x="10" y="6" width="2" height="1"/><rect class="i" x="12" y="6" width="1" height="1"/><rect class="i" x="3" y="7" width="1" height="1"/><rect class="a" x="4" y="7" width="1" height="1"/><rect class="m" x="5" y="7" width="5" height="1"/><rect class="m" x="10" y="7" width="2" height="1"/><rect class="i" x="12" y="7" width="1" height="1"/><rect class="i" x="3" y="8" width="1" height="1"/><rect class="a" x="4" y="8" width="1" height="1"/><rect class="m" x="5" y="8" width="5" height="1"/><rect class="m" x="10" y="8" width="2" height="1"/><rect class="i" x="12" y="8" width="1" height="1"/><rect class="i" x="4" y="9" width="1" height="1"/><rect class="a" x="5" y="9" width="1" height="1"/><rect class="m" x="6" y="9" width="4" height="1"/><rect class="m" x="10" y="9" width="1" height="1"/><rect class="i" x="11" y="9" width="1" height="1"/><rect class="i" x="5" y="10" width="1" height="1"/><rect class="a" x="6" y="10" width="1" height="1"/><rect class="m" x="7" y="10" width="3" height="1"/><rect class="i" x="10" y="10" width="1" height="1"/><rect class="i" x="6" y="11" width="1" height="1"/><rect class="a" x="7" y="11" width="1" height="1"/><rect class="m" x="8" y="11" width="1" height="1"/><rect class="i" x="9" y="11" width="1" height="1"/><rect class="i" x="7" y="12" width="2" height="1"/></svg></span></div>
+        <div class="metarow"><span class="n mono">02</span><span class="c mono">Game tool</span></div>
+        <h3>Retainer's Ledger</h3>
+        <p class="type"><span lang="en">A crafting and market tool for Final Fantasy XIV</span><span lang="nl">Een craft- en markttool voor Final Fantasy XIV</span></p>
+        <p lang="en">Paste a link to a craftable item and see what it really costs to make, with live market prices.</p>
+        <p lang="nl">Plak de link van een craftbaar item en zie wat het echt kost om te maken, met live marktprijzen.</p>
+        <p class="why" lang="en">Why: working out a craft by hand means three sites and a calculator.</p>
+        <p class="why" lang="nl">Waarom: een craft met de hand uitrekenen kost drie sites en een rekenmachine.</p>
+        <div class="specs"><ul class="chips"><li>JavaScript</li><li>Universalis</li><li>Garland Tools</li><li>One file</li></ul></div>
+        <div class="acts">
+          <a class="tlink" href="case-ffxiv.html"><span lang="en">Case study</span><span lang="nl">Casestudy</span></a>
+          <a class="tlink" href="ffxiv.html"><span lang="en">Open tool</span><span lang="nl">Open tool</span></a>
+        </div>
+      </article>
+
+      <article class="card-p">
+        <div class="art"><span class="sprite" role="img" aria-label="A pixel art hourglass"><svg viewBox="0 0 16 15" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="0" y="0" width="16" height="1"/><rect class="i" x="1" y="1" width="1" height="1"/><rect class="a" x="2" y="1" width="12" height="1"/><rect class="i" x="14" y="1" width="1" height="1"/><rect class="i" x="2" y="2" width="1" height="1"/><rect class="a" x="3" y="2" width="10" height="1"/><rect class="i" x="13" y="2" width="1" height="1"/><rect class="i" x="3" y="3" width="1" height="1"/><rect class="a" x="4" y="3" width="8" height="1"/><rect class="i" x="12" y="3" width="1" height="1"/><rect class="i" x="4" y="4" width="1" height="1"/><rect class="a" x="5" y="4" width="6" height="1"/><rect class="i" x="11" y="4" width="1" height="1"/><rect class="i" x="5" y="5" width="1" height="1"/><rect class="a" x="6" y="5" width="4" height="1"/><rect class="i" x="10" y="5" width="1" height="1"/><rect class="i" x="6" y="6" width="1" height="1"/><rect class="a" x="7" y="6" width="2" height="1"/><rect class="i" x="9" y="6" width="1" height="1"/><rect class="i" x="7" y="7" width="2" height="1"/><rect class="i" x="6" y="8" width="1" height="1"/><rect class="m" x="7" y="8" width="2" height="1"/><rect class="i" x="9" y="8" width="1" height="1"/><rect class="i" x="5" y="9" width="1" height="1"/><rect class="m" x="6" y="9" width="4" height="1"/><rect class="i" x="10" y="9" width="1" height="1"/><rect class="i" x="4" y="10" width="1" height="1"/><rect class="m" x="5" y="10" width="6" height="1"/><rect class="i" x="11" y="10" width="1" height="1"/><rect class="i" x="3" y="11" width="1" height="1"/><rect class="m" x="4" y="11" width="8" height="1"/><rect class="i" x="12" y="11" width="1" height="1"/><rect class="i" x="2" y="12" width="1" height="1"/><rect class="m" x="3" y="12" width="10" height="1"/><rect class="i" x="13" y="12" width="1" height="1"/><rect class="i" x="1" y="13" width="1" height="1"/><rect class="m" x="2" y="13" width="12" height="1"/><rect class="i" x="14" y="13" width="1" height="1"/><rect class="i" x="0" y="14" width="16" height="1"/></svg></span></div>
+        <div class="metarow"><span class="n mono">03</span><span class="c mono">Game tool</span></div>
+        <h3>Aion 2 Daily Board</h3>
+        <p class="type"><span lang="en">A daily checklist with live timers</span><span lang="nl">Een dagelijkse checklist met live timers</span></p>
+        <p lang="en">A checklist with live timers for a main and alts, built to sit on a second screen.</p>
+        <p lang="nl">Een checklist met live timers voor een main en alts, gebouwd voor een tweede scherm.</p>
+        <p class="why" lang="en">Why: dailies differ between a main and an alt, and I kept losing track.</p>
+        <p class="why" lang="nl">Waarom: dailies verschillen tussen een main en een alt, en ik raakte het overzicht kwijt.</p>
+        <div class="specs"><ul class="chips"><li>JavaScript</li><li>Timers</li><li>Alerts</li><li>One file</li></ul></div>
+        <div class="acts">
+          <a class="tlink" href="case-aion2.html"><span lang="en">Case study</span><span lang="nl">Casestudy</span></a>
+          <a class="tlink" href="aion2.html"><span lang="en">Open board</span><span lang="nl">Open bord</span></a>
+        </div>
+      </article>
+    </div>
+
+    <h3 class="block-title rv"><span lang="en">More from the workshop</span><span lang="nl">Meer uit de werkplaats</span></h3>
+    <div class="rows rv full">
+      <div class="row">
+        <span class="lab">W.01</span>
         <h3>Inventaris systeem JWM</h3>
-        <p lang="en">An inventory system for Bandencenter JWM, the tyre and scooter business where keeping stock and ordering parts was part of my daily work.</p>
-        <p lang="nl">Een voorraadsysteem voor Bandencenter JWM, het band- en scooterbedrijf waar voorraad bijhouden en onderdelen bestellen onderdeel was van mijn dagelijks werk.</p>
+        <div>
+          <p lang="en">An inventory system for Bandencenter JWM, the tyre and scooter business where keeping stock and ordering parts was part of my daily work.</p>
+          <p lang="nl">Een voorraadsysteem voor Bandencenter JWM, het band- en scooterbedrijf waar voorraad bijhouden en onderdelen bestellen onderdeel was van mijn dagelijks werk.</p>
+        </div>
       </div>
-      <div>
+      <div class="row">
+        <span class="lab">W.02</span>
         <h3><span lang="en">Securing my own network</span><span lang="nl">Mijn eigen netwerk beveiligen</span></h3>
-        <p lang="en">A personal experiment in understanding network security beyond theory, by introducing a dedicated firewall into my own home network. The point isn't the firewall, it's learning by building.</p>
-        <p lang="nl">Een persoonlijk experiment om netwerkbeveiliging verder te begrijpen dan theorie, door een eigen firewall in mijn thuisnetwerk te zetten. Het gaat niet om de firewall, maar om leren door te bouwen.</p>
+        <div>
+          <p lang="en">A personal experiment in understanding network security beyond theory, by introducing a dedicated firewall into my own home network. The point isn't the firewall, it's learning by building.</p>
+          <p lang="nl">Een persoonlijk experiment om netwerkbeveiliging verder te begrijpen dan theorie, door een eigen firewall in mijn thuisnetwerk te zetten. Het gaat niet om de firewall, maar om leren door te bouwen.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -231,10 +160,10 @@
 
 <section id="about">
   <div class="wrap">
-    <div class="rv sectionhead">
-      <h2><small>02</small><span lang="en">About me</span><span lang="nl">Over mij</span></h2>
+    <div class="rv sec-head lg">
+      <h2><small>02 <i>/ 04</i></small><span lang="en">About me</span><span lang="nl">Over mij</span></h2>
     </div>
-    <div class="prose narrow rv">
+    <div class="prose rv lg">
       <p class="first" lang="en">I'm Jordi Mutsaers, a Project Manager from the Netherlands with a strong curiosity for technology.</p>
       <p class="first" lang="nl">Ik ben Jordi Mutsaers, een projectmanager uit Nederland met een sterke nieuwsgierigheid naar technologie.</p>
       <p lang="en">I currently work at ON2IT Cybersecurity, in an environment focused on protecting organisations and critical digital infrastructure. Technology isn't something I only interact with at work, though. I like experimenting with it myself. Whether it's cybersecurity, AI, browser technology or building digital products, I enjoy understanding how things work by actually trying them.</p>
@@ -244,119 +173,128 @@
     </div>
 
     <h3 class="block-title rv"><span lang="en">What I do</span><span lang="nl">Wat ik doe</span></h3>
-    <div class="cards four rv">
-      <div class="card"><h3><b>A.01</b><span lang="en">Project Management</span><span lang="nl">Projectmanagement</span></h3>
-        <p lang="en">Running cybersecurity and network projects end to end, from planning to delivery.</p>
-        <p lang="nl">Cybersecurity- en netwerkprojecten van begin tot eind leiden, van planning tot oplevering.</p></div>
-      <div class="card"><h3><b>A.02</b>Cybersecurity</h3>
-        <p lang="en">Working daily with Palo Alto Networks technology and real operational security challenges.</p>
-        <p lang="nl">Dagelijks werken met technologie van Palo Alto Networks en echte operationele securityvraagstukken.</p></div>
-      <div class="card"><h3><b>A.03</b><span lang="en">AI &amp; experimentation</span><span lang="nl">AI en experimenteren</span></h3>
-        <p lang="en">Curious, hands-on exploration of what AI can and can't actually do.</p>
-        <p lang="nl">Nieuwsgierig en hands-on onderzoeken wat AI wel en niet kan.</p></div>
-      <div class="card"><h3><b>A.04</b><span lang="en">Building &amp; the web</span><span lang="nl">Bouwen en het web</span></h3>
-        <p lang="en">Learning by building: home network security, browser tech, small tools.</p>
-        <p lang="nl">Leren door te bouwen: beveiliging van het thuisnetwerk, browsertechnologie, kleine tools.</p></div>
+    <div class="rows rv full">
+      <div class="row"><span class="lab">A.01</span><h3><span lang="en">Project Management</span><span lang="nl">Projectmanagement</span></h3>
+        <div><p lang="en">Running cybersecurity and network projects end to end, from planning to delivery.</p><p lang="nl">Cybersecurity- en netwerkprojecten van begin tot eind leiden, van planning tot oplevering.</p></div></div>
+      <div class="row"><span class="lab">A.02</span><h3>Cybersecurity</h3>
+        <div><p lang="en">Working daily with Palo Alto Networks technology and real operational security challenges.</p><p lang="nl">Dagelijks werken met technologie van Palo Alto Networks en echte operationele securityvraagstukken.</p></div></div>
+      <div class="row"><span class="lab">A.03</span><h3><span lang="en">AI &amp; experimentation</span><span lang="nl">AI en experimenteren</span></h3>
+        <div><p lang="en">Curious, hands-on exploration of what AI can and can't actually do.</p><p lang="nl">Nieuwsgierig en hands-on onderzoeken wat AI wel en niet kan.</p></div></div>
+      <div class="row"><span class="lab">A.04</span><h3><span lang="en">Building &amp; the web</span><span lang="nl">Bouwen en het web</span></h3>
+        <div><p lang="en">Learning by building: home network security, browser tech, small tools.</p><p lang="nl">Leren door te bouwen: beveiliging van het thuisnetwerk, browsertechnologie, kleine tools.</p></div></div>
     </div>
 
     <h3 class="block-title rv"><span lang="en">How I think</span><span lang="nl">Hoe ik denk</span></h3>
-    <div class="cards five rv">
-      <div class="card"><h3><span lang="en">Stay curious</span><span lang="nl">Blijf nieuwsgierig</span></h3>
-        <p lang="en">If I don't understand something, I want to explore it.</p><p lang="nl">Als ik iets niet begrijp, wil ik het uitzoeken.</p></div>
-      <div class="card"><h3><span lang="en">Build to understand</span><span lang="nl">Bouw om te begrijpen</span></h3>
-        <p lang="en">Reading about technology helps. Building with it teaches more.</p><p lang="nl">Lezen over technologie helpt. Ermee bouwen leert meer.</p></div>
-      <div class="card"><h3><span lang="en">Make ideas real</span><span lang="nl">Maak ideeën echt</span></h3>
-        <p lang="en">Ideas get interesting once you turn them into something people can actually use.</p><p lang="nl">Ideeën worden interessant zodra je er iets van maakt dat mensen echt kunnen gebruiken.</p></div>
-      <div class="card"><h3><span lang="en">Keep experimenting</span><span lang="nl">Blijf experimenteren</span></h3>
-        <p lang="en">Technology moves too fast to assume you're done learning.</p><p lang="nl">Technologie gaat te snel om te denken dat je klaar bent met leren.</p></div>
-      <div class="card"><h3><span lang="en">Understand the context</span><span lang="nl">Begrijp de context</span></h3>
-        <p lang="en">In cybersecurity, in AI, in people. The surface rarely tells the whole story.</p><p lang="nl">In cybersecurity, in AI, in mensen. Het oppervlak vertelt zelden het hele verhaal.</p></div>
+    <div class="rows rv full">
+      <div class="row"><span class="lab">P.01</span><h3><span lang="en">Stay curious</span><span lang="nl">Blijf nieuwsgierig</span></h3>
+        <div><p lang="en">If I don't understand something, I want to explore it.</p><p lang="nl">Als ik iets niet begrijp, wil ik het uitzoeken.</p></div></div>
+      <div class="row"><span class="lab">P.02</span><h3><span lang="en">Build to understand</span><span lang="nl">Bouw om te begrijpen</span></h3>
+        <div><p lang="en">Reading about technology helps. Building with it teaches more.</p><p lang="nl">Lezen over technologie helpt. Ermee bouwen leert meer.</p></div></div>
+      <div class="row"><span class="lab">P.03</span><h3><span lang="en">Make ideas real</span><span lang="nl">Maak ideeën echt</span></h3>
+        <div><p lang="en">Ideas get interesting once you turn them into something people can actually use.</p><p lang="nl">Ideeën worden interessant zodra je er iets van maakt dat mensen echt kunnen gebruiken.</p></div></div>
+      <div class="row"><span class="lab">P.04</span><h3><span lang="en">Keep experimenting</span><span lang="nl">Blijf experimenteren</span></h3>
+        <div><p lang="en">Technology moves too fast to assume you're done learning.</p><p lang="nl">Technologie gaat te snel om te denken dat je klaar bent met leren.</p></div></div>
+      <div class="row"><span class="lab">P.05</span><h3><span lang="en">Understand the context</span><span lang="nl">Begrijp de context</span></h3>
+        <div><p lang="en">In cybersecurity, in AI, in people. The surface rarely tells the whole story.</p><p lang="nl">In cybersecurity, in AI, in mensen. Het oppervlak vertelt zelden het hele verhaal.</p></div></div>
     </div>
 
     <h3 class="block-title rv"><span lang="en">What keeps me curious</span><span lang="nl">Wat me nieuwsgierig houdt</span></h3>
-    <div class="cards two rv">
-      <div class="card"><h3><span lang="en">Current work</span><span lang="nl">Huidig werk</span></h3>
-        <p lang="en">At ON2IT Cybersecurity (Zaltbommel), I work where technology, security and real-world operational challenges meet. Cybersecurity has changed how I think about technology generally: instead of just seeing systems as things that work, I've become interested in how they work, how they fail, and how they're protected.</p>
-        <p lang="nl">Bij ON2IT Cybersecurity (Zaltbommel) werk ik op het snijvlak van technologie, security en operationele realiteit. Cybersecurity heeft veranderd hoe ik over technologie denk: ik zie systemen niet meer alleen als dingen die werken, maar ben geïnteresseerd geraakt in hoe ze werken, hoe ze falen en hoe ze beschermd worden.</p></div>
-      <div class="card"><h3><span lang="en">Cybersecurity curiosity</span><span lang="nl">Cybersecurity-nieuwsgierigheid</span></h3>
-        <p lang="en">Reading about network security only takes you so far, so I put a dedicated firewall into my own home network to see how it behaves in practice. The firewall itself is not the interesting part. Watching what it blocks, what it lets through, and what that says about the network is.</p>
-        <p lang="nl">Over netwerkbeveiliging lezen brengt je maar tot een bepaald punt, dus ik heb een eigen firewall in mijn thuisnetwerk gezet om te zien hoe die zich in de praktijk gedraagt. De firewall zelf is niet het interessante. Het gaat erom te zien wat hij blokkeert, wat hij doorlaat en wat dat zegt over het netwerk.</p></div>
-      <div class="card"><h3><span lang="en">On AI</span><span lang="nl">Over AI</span></h3>
-        <p lang="en">I'm curious about AI rather than fearful of it. A lot of the fear around AI comes from people seeing outputs without seeing the prompts or context behind them. That gap between what a technology can do and what people understand about it is what interests me. I'd rather explore these tools myself than form an opinion from headlines.</p>
-        <p lang="nl">Ik ben nieuwsgierig naar AI en niet bang ervoor. Veel van de angst rond AI komt doordat mensen de uitkomsten zien zonder de prompts of de context erachter. Dat gat tussen wat een technologie kan en wat mensen ervan begrijpen is wat mij interesseert. Ik verken deze tools liever zelf dan dat ik een mening vorm op basis van koppen.</p></div>
-      <div class="card"><h3><span lang="en">The browser as a platform</span><span lang="nl">De browser als platform</span></h3>
-        <p lang="en">I remember when browser games were simple pages on sites like Spele.nl, while something like RuneScape needed real setup. Today the browser can deliver increasingly complex experiences. Could the browser become the operating system for the next generation of digital experiences? WebGL, WebGPU, AI-powered interfaces: it is an area I find genuinely interesting.</p>
-        <p lang="nl">Ik herinner me dat browsergames simpele pagina's waren op sites als Spele.nl, terwijl iets als RuneScape echt opgezet moest worden. Tegenwoordig kan de browser steeds complexere ervaringen leveren. Kan de browser het besturingssysteem worden voor de volgende generatie digitale ervaringen? WebGL, WebGPU, AI-gestuurde interfaces: het is een gebied dat ik echt interessant vind.</p></div>
+    <div class="rows rv full">
+      <div class="row"><span class="lab">OV.01</span><h3><span lang="en">Current work</span><span lang="nl">Huidig werk</span></h3>
+        <div><p lang="en">At ON2IT Cybersecurity (Zaltbommel), I work where technology, security and real-world operational challenges meet. Cybersecurity has changed how I think about technology generally: instead of just seeing systems as things that work, I've become interested in how they work, how they fail, and how they're protected.</p>
+        <p lang="nl">Bij ON2IT Cybersecurity (Zaltbommel) werk ik op het snijvlak van technologie, security en operationele realiteit. Cybersecurity heeft veranderd hoe ik over technologie denk: ik zie systemen niet meer alleen als dingen die werken, maar ben geïnteresseerd geraakt in hoe ze werken, hoe ze falen en hoe ze beschermd worden.</p></div></div>
+      <div class="row"><span class="lab">OV.02</span><h3><span lang="en">Cybersecurity curiosity</span><span lang="nl">Cybersecurity-nieuwsgierigheid</span></h3>
+        <div><p lang="en">Reading about network security only takes you so far, so I put a dedicated firewall into my own home network to see how it behaves in practice. The firewall itself is not the interesting part. Watching what it blocks, what it lets through, and what that says about the network is.</p>
+        <p lang="nl">Over netwerkbeveiliging lezen brengt je maar tot een bepaald punt, dus ik heb een eigen firewall in mijn thuisnetwerk gezet om te zien hoe die zich in de praktijk gedraagt. De firewall zelf is niet het interessante. Het gaat erom te zien wat hij blokkeert, wat hij doorlaat en wat dat zegt over het netwerk.</p></div></div>
+      <div class="row"><span class="lab">OV.03</span><h3><span lang="en">On AI</span><span lang="nl">Over AI</span></h3>
+        <div><p lang="en">I'm curious about AI rather than fearful of it. A lot of the fear around AI comes from people seeing outputs without seeing the prompts or context behind them. That gap between what a technology can do and what people understand about it is what interests me. I'd rather explore these tools myself than form an opinion from headlines.</p>
+        <p lang="nl">Ik ben nieuwsgierig naar AI en niet bang ervoor. Veel van de angst rond AI komt doordat mensen de uitkomsten zien zonder de prompts of de context erachter. Dat gat tussen wat een technologie kan en wat mensen ervan begrijpen is wat mij interesseert. Ik verken deze tools liever zelf dan dat ik een mening vorm op basis van koppen.</p></div></div>
+      <div class="row"><span class="lab">OV.04</span><h3><span lang="en">The browser as a platform</span><span lang="nl">De browser als platform</span></h3>
+        <div><p lang="en">I remember when browser games were simple pages on sites like Spele.nl, while something like RuneScape needed real setup. Today the browser can deliver increasingly complex experiences. Could the browser become the operating system for the next generation of digital experiences? WebGL, WebGPU, AI-powered interfaces: it is an area I find genuinely interesting.</p>
+        <p lang="nl">Ik herinner me dat browsergames simpele pagina's waren op sites als Spele.nl, terwijl iets als RuneScape echt opgezet moest worden. Tegenwoordig kan de browser steeds complexere ervaringen leveren. Kan de browser het besturingssysteem worden voor de volgende generatie digitale ervaringen? WebGL, WebGPU, AI-gestuurde interfaces: het is een gebied dat ik echt interessant vind.</p></div></div>
     </div>
   </div>
 </section>
 
 <section id="path">
   <div class="wrap">
-    <div class="rv sectionhead">
-      <h2><small>03</small><span lang="en">Where I have worked</span><span lang="nl">Waar ik heb gewerkt</span></h2>
-      <p class="sub" lang="en">The short version. It started with tools instead of terminals.</p>
-      <p class="sub" lang="nl">De korte versie. Het begon met gereedschap in plaats van terminals.</p>
+    <div class="rv sec-head lg">
+      <h2><small>03 <i>/ 04</i></small><span lang="en">Where I have worked</span><span lang="nl">Waar ik heb gewerkt</span></h2>
+      <p lang="en">The short version. It started with tools instead of terminals.</p>
+      <p lang="nl">De korte versie. Het begon met gereedschap in plaats van terminals.</p>
     </div>
     <!-- Condensed from the approved career text. Nothing added beyond it. -->
-    <ul class="work rv">
+    <ol class="quest rv full">
       <li>
-        <h3>ON2IT Cybersecurity <span lang="en">Project Manager, Dec 2025 to now</span><span lang="nl">Projectmanager, dec 2025 tot nu</span></h3>
-        <p lang="en">Running cybersecurity and network projects, where technology, security and operational reality meet. Day to day I work with Palo Alto Networks technology.</p>
-        <p lang="nl">Cybersecurity- en netwerkprojecten leiden, op het snijvlak van technologie, security en operationele realiteit. Dagelijks werk ik met technologie van Palo Alto Networks.</p>
+        <div class="ico"><span class="sprite" aria-hidden="true"><svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="5" y="0" width="4" height="1"/><rect class="i" x="3" y="1" width="8" height="1"/><rect class="i" x="2" y="2" width="4" height="1"/><rect class="i" x="8" y="2" width="4" height="1"/><rect class="i" x="1" y="3" width="3" height="1"/><rect class="i" x="10" y="3" width="3" height="1"/><rect class="i" x="1" y="4" width="2" height="1"/><rect class="m" x="4" y="4" width="1" height="1"/><rect class="m" x="9" y="4" width="1" height="1"/><rect class="i" x="11" y="4" width="2" height="1"/><rect class="i" x="0" y="5" width="3" height="1"/><rect class="m" x="5" y="5" width="1" height="1"/><rect class="a" x="6" y="5" width="2" height="1"/><rect class="m" x="8" y="5" width="1" height="1"/><rect class="i" x="11" y="5" width="3" height="1"/><rect class="i" x="0" y="6" width="2" height="1"/><rect class="a" x="5" y="6" width="4" height="1"/><rect class="i" x="12" y="6" width="2" height="1"/><rect class="i" x="0" y="7" width="2" height="1"/><rect class="a" x="5" y="7" width="4" height="1"/><rect class="i" x="12" y="7" width="2" height="1"/><rect class="i" x="0" y="8" width="3" height="1"/><rect class="m" x="5" y="8" width="1" height="1"/><rect class="a" x="6" y="8" width="2" height="1"/><rect class="m" x="8" y="8" width="1" height="1"/><rect class="i" x="11" y="8" width="3" height="1"/><rect class="i" x="1" y="9" width="2" height="1"/><rect class="m" x="4" y="9" width="1" height="1"/><rect class="m" x="9" y="9" width="1" height="1"/><rect class="i" x="11" y="9" width="2" height="1"/><rect class="i" x="1" y="10" width="3" height="1"/><rect class="i" x="10" y="10" width="3" height="1"/><rect class="i" x="2" y="11" width="4" height="1"/><rect class="i" x="8" y="11" width="4" height="1"/><rect class="i" x="3" y="12" width="8" height="1"/><rect class="i" x="5" y="13" width="4" height="1"/></svg></span></div>
+        <p class="lv mono">LV.1 <span lang="en">2016 to 2019</span><span lang="nl">2016 tot 2019</span></p>
+        <h3>Bandencenter JWM<small><span lang="en">Helper</span><span lang="nl">Helper</span></small></h3>
+        <p lang="en">My father's company, full time and hands on: repairing scooters, changing and balancing tyres, advising customers. This is where figuring out how things work started, with tools instead of terminals.</p>
+        <p lang="nl">Het bedrijf van mijn vader, fulltime en hands-on: scooters repareren, banden wisselen en balanceren, klanten adviseren. Hier begon het uitzoeken hoe dingen werken, met gereedschap in plaats van terminals.</p>
       </li>
       <li>
-        <h3>Pomona Ltd. <span lang="en">Project Manager, May 2023 to Nov 2025, before that Front-End Developer</span><span lang="nl">Projectmanager, mei 2023 tot nov 2025, daarvoor Front-End Developer</span></h3>
-        <p lang="en">Cross-department IT projects across product development, data, marketing and SEO. I owned the company CMS and internal tools, helped scale the development function from Taiwan to the Netherlands past ten developers, and worked on an interactive live streaming platform reaching over 125 million monthly users.</p>
-        <p lang="nl">IT-projecten over afdelingen heen, van productontwikkeling tot data, marketing en SEO. Ik beheerde het bedrijfs-CMS en interne tools, hielp de ontwikkelfunctie van Taiwan naar Nederland op te schalen tot ruim tien ontwikkelaars, en werkte aan een interactief livestreamplatform met meer dan 125 miljoen maandelijkse gebruikers.</p>
-      </li>
-      <li>
-        <h3>Quadira <span lang="en">Software Developer, then Software Development Coordinator, 2017 to 2022</span><span lang="nl">Software Developer, daarna Software Development Coordinator, 2017 tot 2022</span></h3>
+        <div class="ico"><span class="sprite" aria-hidden="true"><svg viewBox="0 0 16 12" xmlns="http://www.w3.org/2000/svg"><rect class="a" x="9" y="0" width="1" height="1"/><rect class="i" x="5" y="1" width="1" height="1"/><rect class="a" x="9" y="1" width="1" height="1"/><rect class="i" x="10" y="1" width="1" height="1"/><rect class="i" x="4" y="2" width="1" height="1"/><rect class="a" x="8" y="2" width="1" height="1"/><rect class="i" x="11" y="2" width="1" height="1"/><rect class="i" x="3" y="3" width="1" height="1"/><rect class="a" x="8" y="3" width="1" height="1"/><rect class="i" x="12" y="3" width="1" height="1"/><rect class="i" x="2" y="4" width="1" height="1"/><rect class="a" x="8" y="4" width="1" height="1"/><rect class="i" x="13" y="4" width="1" height="1"/><rect class="i" x="1" y="5" width="1" height="1"/><rect class="a" x="8" y="5" width="1" height="1"/><rect class="i" x="14" y="5" width="1" height="1"/><rect class="i" x="1" y="6" width="1" height="1"/><rect class="a" x="7" y="6" width="1" height="1"/><rect class="i" x="14" y="6" width="1" height="1"/><rect class="i" x="2" y="7" width="1" height="1"/><rect class="a" x="7" y="7" width="1" height="1"/><rect class="i" x="13" y="7" width="1" height="1"/><rect class="i" x="3" y="8" width="1" height="1"/><rect class="a" x="7" y="8" width="1" height="1"/><rect class="i" x="12" y="8" width="1" height="1"/><rect class="i" x="4" y="9" width="1" height="1"/><rect class="a" x="7" y="9" width="1" height="1"/><rect class="i" x="11" y="9" width="1" height="1"/><rect class="i" x="5" y="10" width="1" height="1"/><rect class="a" x="6" y="10" width="1" height="1"/><rect class="i" x="10" y="10" width="1" height="1"/><rect class="a" x="6" y="11" width="1" height="1"/></svg></span></div>
+        <p class="lv mono">LV.2 <span lang="en">2017 to 2022</span><span lang="nl">2017 tot 2022</span></p>
+        <h3>Quadira<small><span lang="en">Software Developer, then Software Development Coordinator</span><span lang="nl">Software Developer, daarna Software Development Coordinator</span></small></h3>
         <p lang="en">I started building software, then moved into leading the development team: coaching, technical leadership, scrum master and internship coordinator.</p>
         <p lang="nl">Ik begon met software bouwen en ging daarna het ontwikkelteam leiden: coaching, technisch leiderschap, scrummaster en stagecoördinator.</p>
       </li>
       <li>
-        <h3>Bandencenter JWM <span lang="en">Helper, 2016 to 2019</span><span lang="nl">Helper, 2016 tot 2019</span></h3>
-        <p lang="en">My father's company, full time and hands on: repairing scooters, changing and balancing tyres, advising customers. This is where figuring out how things work started, with tools instead of terminals.</p>
-        <p lang="nl">Het bedrijf van mijn vader, fulltime en hands-on: scooters repareren, banden wisselen en balanceren, klanten adviseren. Hier begon het uitzoeken hoe dingen werken, met gereedschap in plaats van terminals.</p>
+        <div class="ico"><span class="sprite" aria-hidden="true"><svg viewBox="0 0 16 14" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="0" y="0" width="16" height="1"/><rect class="i" x="0" y="1" width="1" height="1"/><rect class="m" x="5" y="1" width="1" height="1"/><rect class="m" x="10" y="1" width="1" height="1"/><rect class="i" x="15" y="1" width="1" height="1"/><rect class="i" x="0" y="2" width="1" height="1"/><rect class="a" x="2" y="2" width="2" height="1"/><rect class="m" x="5" y="2" width="1" height="1"/><rect class="a" x="7" y="2" width="2" height="1"/><rect class="m" x="10" y="2" width="1" height="1"/><rect class="a" x="12" y="2" width="2" height="1"/><rect class="i" x="15" y="2" width="1" height="1"/><rect class="i" x="0" y="3" width="1" height="1"/><rect class="a" x="2" y="3" width="2" height="1"/><rect class="m" x="5" y="3" width="1" height="1"/><rect class="a" x="7" y="3" width="2" height="1"/><rect class="m" x="10" y="3" width="1" height="1"/><rect class="a" x="12" y="3" width="2" height="1"/><rect class="i" x="15" y="3" width="1" height="1"/><rect class="i" x="0" y="4" width="1" height="1"/><rect class="a" x="2" y="4" width="2" height="1"/><rect class="m" x="5" y="4" width="1" height="1"/><rect class="a" x="7" y="4" width="2" height="1"/><rect class="m" x="10" y="4" width="1" height="1"/><rect class="a" x="12" y="4" width="2" height="1"/><rect class="i" x="15" y="4" width="1" height="1"/><rect class="i" x="0" y="5" width="1" height="1"/><rect class="m" x="5" y="5" width="1" height="1"/><rect class="m" x="10" y="5" width="1" height="1"/><rect class="i" x="15" y="5" width="1" height="1"/><rect class="i" x="0" y="6" width="1" height="1"/><rect class="a" x="2" y="6" width="2" height="1"/><rect class="m" x="5" y="6" width="1" height="1"/><rect class="m" x="10" y="6" width="1" height="1"/><rect class="a" x="12" y="6" width="2" height="1"/><rect class="i" x="15" y="6" width="1" height="1"/><rect class="i" x="0" y="7" width="1" height="1"/><rect class="a" x="2" y="7" width="2" height="1"/><rect class="m" x="5" y="7" width="1" height="1"/><rect class="m" x="10" y="7" width="1" height="1"/><rect class="a" x="12" y="7" width="2" height="1"/><rect class="i" x="15" y="7" width="1" height="1"/><rect class="i" x="0" y="8" width="1" height="1"/><rect class="a" x="2" y="8" width="2" height="1"/><rect class="m" x="5" y="8" width="1" height="1"/><rect class="m" x="10" y="8" width="1" height="1"/><rect class="a" x="12" y="8" width="2" height="1"/><rect class="i" x="15" y="8" width="1" height="1"/><rect class="i" x="0" y="9" width="1" height="1"/><rect class="m" x="5" y="9" width="1" height="1"/><rect class="m" x="10" y="9" width="1" height="1"/><rect class="i" x="15" y="9" width="1" height="1"/><rect class="i" x="0" y="10" width="1" height="1"/><rect class="m" x="5" y="10" width="1" height="1"/><rect class="m" x="10" y="10" width="1" height="1"/><rect class="a" x="12" y="10" width="2" height="1"/><rect class="i" x="15" y="10" width="1" height="1"/><rect class="i" x="0" y="11" width="1" height="1"/><rect class="m" x="5" y="11" width="1" height="1"/><rect class="m" x="10" y="11" width="1" height="1"/><rect class="a" x="12" y="11" width="2" height="1"/><rect class="i" x="15" y="11" width="1" height="1"/><rect class="i" x="0" y="12" width="1" height="1"/><rect class="m" x="5" y="12" width="1" height="1"/><rect class="m" x="10" y="12" width="1" height="1"/><rect class="i" x="15" y="12" width="1" height="1"/><rect class="i" x="0" y="13" width="16" height="1"/></svg></span></div>
+        <p class="lv mono">LV.3 <span lang="en">May 2023 to Nov 2025</span><span lang="nl">Mei 2023 tot nov 2025</span></p>
+        <h3>Pomona Ltd.<small><span lang="en">Project Manager, before that Front-End Developer</span><span lang="nl">Projectmanager, daarvoor Front-End Developer</span></small></h3>
+        <p lang="en">Cross-department IT projects across product development, data, marketing and SEO. I owned the company CMS and internal tools, helped scale the development function from Taiwan to the Netherlands past ten developers, and worked on an interactive live streaming platform reaching over 125 million monthly users.</p>
+        <p lang="nl">IT-projecten over afdelingen heen, van productontwikkeling tot data, marketing en SEO. Ik beheerde het bedrijfs-CMS en interne tools, hielp de ontwikkelfunctie van Taiwan naar Nederland op te schalen tot ruim tien ontwikkelaars, en werkte aan een interactief livestreamplatform met meer dan 125 miljoen maandelijkse gebruikers.</p>
       </li>
-    </ul>
+      <li class="here">
+        <div class="ico"><span class="sprite" aria-hidden="true"><svg viewBox="0 0 14 16" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="1" y="1" width="11" height="1"/><rect class="i" x="1" y="2" width="1" height="1"/><rect class="m" x="2" y="2" width="9" height="1"/><rect class="i" x="11" y="2" width="1" height="1"/><rect class="i" x="1" y="3" width="1" height="1"/><rect class="m" x="2" y="3" width="9" height="1"/><rect class="i" x="11" y="3" width="1" height="1"/><rect class="i" x="1" y="4" width="1" height="1"/><rect class="m" x="2" y="4" width="9" height="1"/><rect class="i" x="11" y="4" width="1" height="1"/><rect class="i" x="1" y="5" width="1" height="1"/><rect class="m" x="2" y="5" width="4" height="1"/><rect class="a" x="6" y="5" width="2" height="1"/><rect class="m" x="8" y="5" width="3" height="1"/><rect class="i" x="11" y="5" width="1" height="1"/><rect class="i" x="1" y="6" width="1" height="1"/><rect class="m" x="2" y="6" width="4" height="1"/><rect class="a" x="6" y="6" width="2" height="1"/><rect class="m" x="8" y="6" width="3" height="1"/><rect class="i" x="11" y="6" width="1" height="1"/><rect class="i" x="1" y="7" width="1" height="1"/><rect class="m" x="2" y="7" width="4" height="1"/><rect class="a" x="6" y="7" width="2" height="1"/><rect class="m" x="8" y="7" width="3" height="1"/><rect class="i" x="11" y="7" width="1" height="1"/><rect class="i" x="1" y="8" width="1" height="1"/><rect class="m" x="2" y="8" width="4" height="1"/><rect class="a" x="6" y="8" width="2" height="1"/><rect class="m" x="8" y="8" width="3" height="1"/><rect class="i" x="11" y="8" width="1" height="1"/><rect class="i" x="2" y="9" width="1" height="1"/><rect class="m" x="3" y="9" width="7" height="1"/><rect class="i" x="10" y="9" width="1" height="1"/><rect class="i" x="3" y="10" width="1" height="1"/><rect class="m" x="4" y="10" width="5" height="1"/><rect class="i" x="9" y="10" width="1" height="1"/><rect class="i" x="4" y="11" width="1" height="1"/><rect class="m" x="5" y="11" width="3" height="1"/><rect class="i" x="8" y="11" width="1" height="1"/><rect class="i" x="5" y="12" width="1" height="1"/><rect class="m" x="6" y="12" width="1" height="1"/><rect class="i" x="7" y="12" width="1" height="1"/><rect class="i" x="6" y="13" width="1" height="1"/></svg></span></div>
+        <p class="lv mono">LV.4 <span lang="en">Dec 2025 to now</span><span lang="nl">Dec 2025 tot nu</span></p>
+        <h3>ON2IT Cybersecurity<small><span lang="en">Project Manager</span><span lang="nl">Projectmanager</span></small></h3>
+        <p lang="en">Running cybersecurity and network projects, where technology, security and operational reality meet. Day to day I work with Palo Alto Networks technology.</p>
+        <p lang="nl">Cybersecurity- en netwerkprojecten leiden, op het snijvlak van technologie, security en operationele realiteit. Dagelijks werk ik met technologie van Palo Alto Networks.</p>
+        <p class="you mono"><span lang="en">You are here</span><span lang="nl">Je bent hier</span></p>
+      </li>
+    </ol>
 
-    <div class="edu rv" style="margin-top:28px">
-      <div class="card"><h3><span lang="en">Education</span><span lang="nl">Opleiding</span></h3>
+    <div class="two rv" style="margin-top:3rem">
+      <div>
+        <h3 class="block-title" style="margin-top:0"><span lang="en">Education</span><span lang="nl">Opleiding</span></h3>
         <ul>
           <li>Koning Willem I College, Applicatie Ontwikkelaar, 2012 to 2016</li>
           <li>Van Maerlant, VMBO-T, 2008 to 2012</li>
-        </ul></div>
-      <div class="card"><h3><span lang="en">Recognition</span><span lang="nl">Erkenning</span></h3>
+        </ul>
+      </div>
+      <div>
+        <h3 class="block-title" style="margin-top:0"><span lang="en">Recognition</span><span lang="nl">Erkenning</span></h3>
         <ul>
           <li><span lang="en">Winner, Techniek Atelier 2016</span><span lang="nl">Winnaar, Techniek Atelier 2016</span></li>
           <li><span lang="en">Winner, Innovation in a Week 2016</span><span lang="nl">Winnaar, Innovation in a Week 2016</span></li>
-        </ul></div>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
 
 <section id="contact" class="contact">
-  <div class="wrap narrow">
-    <div class="rv">
-      <h2><small>04</small><span lang="en">Contact</span><span lang="nl">Contact</span></h2>
-      <p class="cta" lang="en">Have an interesting idea? Let's talk.</p>
-      <p class="cta" lang="nl">Een interessant idee? Laten we praten.</p>
-      <p class="cta2" lang="en">Building something interesting? I'd like to hear about it.</p>
-      <p class="cta2" lang="nl">Bouw je iets interessants? Ik hoor er graag over.</p>
-      <a class="btn" href="https://www.linkedin.com/in/jordi-mutsaers/" rel="noopener">LinkedIn</a>
+  <div class="wrap">
+    <div class="rv sec-head lg">
+      <h2><small>04 <i>/ 04</i></small><span lang="en">Contact</span><span lang="nl">Contact</span></h2>
+      <p class="big" lang="en">Have an interesting idea? Let's talk.</p>
+      <p class="big" lang="nl">Een interessant idee? Laten we praten.</p>
+      <p class="small" lang="en">Building something interesting? I'd like to hear about it.</p>
+      <p class="small" lang="nl">Bouw je iets interessants? Ik hoor er graag over.</p>
+      <p><a class="btn" href="https://www.linkedin.com/in/jordi-mutsaers/" rel="noopener">LinkedIn</a></p>
     </div>
   </div>
 </section>
 </main>
 
 <footer>
-  <div class="wrap"><a href="index.html"><span lang="en">Back to the arcade</span><span lang="nl">Terug naar de arcade</span></a></div>
+  <div class="wrap"><a class="tlink" href="index.html"><span lang="en">Back to the arcade</span><span lang="nl">Terug naar de arcade</span></a></div>
 </footer>
 
+<script src="portfolio.js"></script>
 <script>
-  document.body.classList.remove('nojs');
   (function(){
     var T = {
       en: { title: "Jordi Mutsaers - Project Manager & Technology Enthusiast", desc: "Project Manager in cybersecurity, with a strong curiosity for technology, AI and digital experiences. Projects I built, why I built them, and how." },
@@ -375,15 +313,6 @@
     }
     document.querySelectorAll('.langbtn').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang'), true); }); });
     setLang(document.documentElement.lang === 'nl' ? 'nl' : 'en', false);
-  })();
-  (function(){
-    var els = document.querySelectorAll('.rv');
-    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still || !('IntersectionObserver' in window)){ els.forEach(function(e){ e.classList.add('in'); }); return; }
-    var io = new IntersectionObserver(function(list){
-      list.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    els.forEach(function(e){ io.observe(e); });
   })();
   try{
     if (sessionStorage.getItem('arcade_in')){

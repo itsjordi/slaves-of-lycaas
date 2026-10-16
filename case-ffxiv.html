@@ -3,163 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lycaa's Slave - a crafting and market tool for Final Fantasy XIV</title>
+<title>Retainer's Ledger - a crafting and market tool for Final Fantasy XIV</title>
 <meta name="description" content="A single-file crafting and market-board tool for Final Fantasy XIV: craft costs, profit, watchlist and gil per hour. A case study by the builder.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Lycaa's Slave - a crafting and market tool for Final Fantasy XIV">
+<meta property="og:title" content="Retainer's Ledger - a crafting and market tool for Final Fantasy XIV">
 <meta property="og:description" content="A single-file crafting and market-board tool for Final Fantasy XIV: craft costs, profit, watchlist and gil per hour. A case study by the builder.">
-<meta property="og:image" content="https://jordimutsaers.nl/public/images/ffxiv-og.jpg">
+<meta property="og:image" content="https://jordimutsaers.nl/images/ffxiv-og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   try{
+    var __t = localStorage.getItem('theme');
+    if (__t !== 'dark' && __t !== 'light') __t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', __t);
     var __l = localStorage.getItem('clubbie_lang') || ((navigator.language || '').toLowerCase().indexOf('nl') === 0 ? 'nl' : 'en');
     if (__l === 'nl') document.documentElement.lang = 'nl';
   }catch(e){}
 </script>
-<style>
-  :root{
-    --bg:#15171A; --bg2:#1c1f24; --line:#2c3038; --text:#EFEEE8; --muted:#a9acb3;
-    --blue:#2358E6; --blueSoft:#8fb0ff; --accent:#8fb0ff;
-    --display:"Anton",Impact,"Arial Narrow Bold",sans-serif;
-    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  }
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth;scroll-padding-top:60px}
-  body{margin:0;background:var(--bg);color:var(--text);font:17px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
-  a{color:var(--accent);text-underline-offset:3px}
-  a:hover{color:#fff}
-  :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:2px}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
-  .narrow{max-width:700px}
-  .skip{position:absolute;left:-999px;top:8px;background:var(--blue);color:#fff;padding:8px 14px;z-index:10}
-  .skip:focus{left:8px}
-
-  /* hero */
-  .hero{padding:72px 0 56px;border-bottom:1px solid var(--line);background:radial-gradient(900px 340px at 20% -10%,rgba(35,88,230,.28),transparent 70%)}
-  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
-  h1{font-family:var(--display);font-weight:400;font-size:clamp(56px,11vw,120px);line-height:.95;letter-spacing:.01em;text-transform:uppercase;margin:0}
-  .pitch{font-size:clamp(19px,2.6vw,25px);line-height:1.45;max-width:640px;margin:20px 0 28px;color:#dfe4ee}
-  .meta{display:flex;flex-wrap:wrap;gap:12px 40px;margin:0 0 26px;padding:0}
-  .meta div{min-width:120px}
-  .meta dt{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-  .meta dd{margin:2px 0 0;font-size:16px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 30px;list-style:none}
-  .chips li{font-size:13px;border:1px solid var(--line);background:var(--bg2);padding:4px 12px;border-radius:999px;color:#d6dbe6}
-  .btn{display:inline-block;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:13px 24px;border-radius:4px;transition:transform .15s,background .15s}
-  .btn:hover{background:#fff;color:#15171A;transform:translateY(-2px)}
-
-  /* sections */
-  section{padding:72px 0;border-bottom:1px solid var(--line)}
-  section:last-of-type{border-bottom:0}
-  h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,52px);letter-spacing:.02em;text-transform:uppercase;margin:0 0 20px;line-height:1.05}
-  h2 small{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.18em;color:var(--accent);margin-bottom:8px}
-  h3{font-size:22px;line-height:1.25;margin:0 0 8px}
-  p{margin:0 0 16px}
-  .lead{font-size:19px;color:#e4e3dc}
-  .muted{color:var(--muted)}
-  ul.tight{padding-left:20px;margin:0 0 16px}
-  ul.tight li{margin:6px 0}
-  code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--bg2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
-
-  /* chapters */
-  .chapter{padding:36px 0;border-top:1px solid var(--line)}
-  .chapter:first-of-type{border-top:0;padding-top:12px}
-  .chapter .num{font-family:var(--display);color:var(--accent);font-size:18px;letter-spacing:.1em}
-  .chapter p{max-width:700px}
-
-  /* figures */
-  figure{margin:0}
-  figcaption{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.45}
-  .frame{position:relative;background:#101215;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .frame .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:12px ui-monospace,Menlo,Consolas,monospace;color:#5d6572}
-  .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-  .phone .frame{aspect-ratio:9/19.5}
-  .wide .frame{aspect-ratio:16/10}
-  .strip{display:flex;gap:18px;overflow-x:auto;padding:6px 2px 18px;margin:18px 0 0;scroll-snap-type:x proximity;scrollbar-color:#3a4050 transparent}
-  .strip figure{flex:0 0 clamp(190px,24vw,236px);scroll-snap-align:start}
-  .strip::-webkit-scrollbar{height:8px}
-  .strip::-webkit-scrollbar-thumb{background:#3a4050;border-radius:4px}
-  .wide{margin-top:24px}
-
-  /* stories */
-  .stories{display:grid;gap:18px;margin-top:24px}
-  @media(min-width:760px){.stories{grid-template-columns:1fr 1fr}}
-  .story{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
-  .story h3{font-size:19px;color:#fff}
-  .story p{margin:0 0 10px;color:#d3d8e2}
-  .story p:last-child{margin:0;color:var(--blueSoft)}
-  .pair{display:grid;gap:24px;margin-top:20px}
-  @media(min-width:760px){.pair{grid-template-columns:1fr 1fr}}
-  .box{border-left:3px solid var(--blue);padding:2px 0 2px 18px}
-  .box h3{font-size:18px}
-  footer{padding:36px 0 56px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
-
-  .next-grid{display:grid;gap:16px;margin-top:28px}
-  @media(min-width:760px){.next-grid{grid-template-columns:repeat(6,1fr)}.ncard.feature{grid-column:span 3}.ncard:not(.feature){grid-column:span 2}}
-  .ncard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:24px 26px;transition:border-color .2s,transform .2s}
-  .ncard:hover{border-color:var(--blue);transform:translateY(-3px)}
-  .ncard.feature{background:linear-gradient(160deg,rgba(35,88,230,.22),var(--bg2) 70%);border-color:#2f4a96}
-  .ncard h3{font-size:21px;color:#fff;margin-bottom:10px}
-  .ncard.feature h3{font-size:25px}
-  .ncard p{margin:0;color:#d3d3cc;font-size:16px}
-  .tag{display:inline-block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
-  /* reveal */
-  .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
-  .rv.in{opacity:1;transform:none}
-  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}.btn,.ncard,.langbtn{transition:none}}
-  .nojs .rv{opacity:1;transform:none}
-
-  /* language switch */
-  html:not([lang="nl"]) [lang="nl"], html[lang="nl"] [lang="en"]{display:none!important}
-  .langbar{position:sticky;top:0;z-index:20;background:rgba(21,23,26,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-  .langbar .wrap{display:flex;justify-content:flex-end;gap:10px;padding-top:10px;padding-bottom:10px}
-  .langbtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:13px;letter-spacing:.08em;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 12px 6px 8px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
-  .langbtn:hover{color:#fff;border-color:#4a5368}
-  .langbtn[aria-pressed="true"]{color:#fff;border-color:var(--blue);background:rgba(35,88,230,.2)}
-  .langbtn svg{width:26px;height:17px;display:block;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
-
-  .shots{display:grid;gap:18px;margin-top:20px}
-  @media(min-width:760px){.shots{grid-template-columns:1fr 1fr}}
-  .shots .frame{aspect-ratio:16/10}
-  .langbar .wrap{justify-content:space-between;align-items:center}
-  .langbar .back{color:var(--muted);text-decoration:none;font-size:14px;letter-spacing:.04em}
-  .langbar .back:hover{color:#fff}
-  .langbar .right{display:flex;gap:10px}
-  .linkrow{display:flex;flex-wrap:wrap;gap:12px;margin:0}
-  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-  .btn.ghost:hover{background:#fff;color:#15171A}
-
-  :root{--bg:#1c1712;--bg2:#272019;--line:#3d3326;--text:#efe3cc;--muted:#b9a98c;--blue:#a8452f;--blueSoft:#e0916f;--accent:#e8a07f;--display:Georgia,"Iowan Old Style",Palatino,serif}
-  body{font-family:Georgia,"Iowan Old Style",Palatino,serif}
-  h1,h2{text-transform:none;letter-spacing:0;font-weight:700}
-  h1{font-size:clamp(46px,8vw,92px)}
-  h2{font-size:clamp(30px,4.4vw,44px)}
-  .hero{background:radial-gradient(900px 340px at 20% -10%,rgba(168,69,47,.30),transparent 70%)}
-  .ncard.feature{background:linear-gradient(160deg,rgba(168,69,47,.25),var(--bg2) 70%);border-color:#6b3a2c}
-  .story p:last-child{color:var(--accent)}
-  .box{border-left-color:var(--blue)}
-</style>
+<link rel="stylesheet" href="portfolio.css">
 </head>
 <body class="nojs">
 <a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
-<div class="langbar">
+<div class="bar">
   <div class="wrap">
-    <a class="back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+    <nav>
+      <a class="nav back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+    </nav>
     <div class="right">
-      <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
-      <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+      <button class="themebtn" type="button" aria-label="Switch between light and dark theme" title="Light / dark"></button>
+      <div class="langs">
+        <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
+        <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+      </div>
     </div>
   </div>
+  <div class="progress" aria-hidden="true"></div>
 </div>
+
 <header class="hero">
   <div class="wrap">
+    <span class="sprite" role="img" aria-label="A pixel art crystal"><svg viewBox="0 0 16 13" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="7" y="0" width="2" height="1"/><rect class="i" x="6" y="1" width="1" height="1"/><rect class="a" x="7" y="1" width="2" height="1"/><rect class="i" x="9" y="1" width="1" height="1"/><rect class="i" x="5" y="2" width="1" height="1"/><rect class="a" x="6" y="2" width="2" height="1"/><rect class="m" x="8" y="2" width="2" height="1"/><rect class="i" x="10" y="2" width="1" height="1"/><rect class="i" x="4" y="3" width="1" height="1"/><rect class="a" x="5" y="3" width="2" height="1"/><rect class="m" x="7" y="3" width="3" height="1"/><rect class="m" x="10" y="3" width="1" height="1"/><rect class="i" x="11" y="3" width="1" height="1"/><rect class="i" x="3" y="4" width="1" height="1"/><rect class="a" x="4" y="4" width="2" height="1"/><rect class="m" x="6" y="4" width="4" height="1"/><rect class="m" x="10" y="4" width="2" height="1"/><rect class="i" x="12" y="4" width="1" height="1"/><rect class="i" x="3" y="5" width="1" height="1"/><rect class="a" x="4" y="5" width="1" height="1"/><rect class="m" x="5" y="5" width="5" height="1"/><rect class="m" x="10" y="5" width="2" height="1"/><rect class="i" x="12" y="5" width="1" height="1"/><rect class="i" x="3" y="6" width="1" height="1"/><rect class="a" x="4" y="6" width="1" height="1"/><rect class="m" x="5" y="6" width="5" height="1"/><rect class="m" x="10" y="6" width="2" height="1"/><rect class="i" x="12" y="6" width="1" height="1"/><rect class="i" x="3" y="7" width="1" height="1"/><rect class="a" x="4" y="7" width="1" height="1"/><rect class="m" x="5" y="7" width="5" height="1"/><rect class="m" x="10" y="7" width="2" height="1"/><rect class="i" x="12" y="7" width="1" height="1"/><rect class="i" x="3" y="8" width="1" height="1"/><rect class="a" x="4" y="8" width="1" height="1"/><rect class="m" x="5" y="8" width="5" height="1"/><rect class="m" x="10" y="8" width="2" height="1"/><rect class="i" x="12" y="8" width="1" height="1"/><rect class="i" x="4" y="9" width="1" height="1"/><rect class="a" x="5" y="9" width="1" height="1"/><rect class="m" x="6" y="9" width="4" height="1"/><rect class="m" x="10" y="9" width="1" height="1"/><rect class="i" x="11" y="9" width="1" height="1"/><rect class="i" x="5" y="10" width="1" height="1"/><rect class="a" x="6" y="10" width="1" height="1"/><rect class="m" x="7" y="10" width="3" height="1"/><rect class="i" x="10" y="10" width="1" height="1"/><rect class="i" x="6" y="11" width="1" height="1"/><rect class="a" x="7" y="11" width="1" height="1"/><rect class="m" x="8" y="11" width="1" height="1"/><rect class="i" x="9" y="11" width="1" height="1"/><rect class="i" x="7" y="12" width="2" height="1"/></svg></span>
     <p class="eyebrow"><span lang="en">Case study</span><span lang="nl">Casestudy</span></p>
-    <h1>Lycaa's Slave</h1>
+    <h1>Retainer's Ledger</h1>
     <p lang="en" class="pitch">Paste a link to a craftable Final Fantasy XIV item and see what it really costs to make, with live market prices from the Light data center.</p>
 <p lang="nl" class="pitch">Plak de link van een craftbaar Final Fantasy XIV-item en zie wat het echt kost om te maken, met live marktprijzen van het Light-datacenter.</p>
     <dl class="meta"><div><dt><span lang="en">Role</span><span lang="nl">Rol</span></dt><dd><span lang="en">Product owner and builder</span><span lang="nl">Product owner en bouwer</span></dd></div><div><dt><span lang="en">Year</span><span lang="nl">Jaar</span></dt><dd><span lang="en">2026</span><span lang="nl">2026</span></dd></div><div><dt><span lang="en">Game</span><span lang="nl">Game</span></dt><dd><span lang="en">Final Fantasy XIV, Light data center</span><span lang="nl">Final Fantasy XIV, Light-datacenter</span></dd></div><div><dt><span lang="en">Form</span><span lang="nl">Vorm</span></dt><dd><span lang="en">One HTML file, no account</span><span lang="nl">Eén HTML-bestand, geen account</span></dd></div></dl>
@@ -174,68 +63,68 @@
 
 <p lang="en" class="lead">In Final Fantasy XIV a craft is only worth it when the materials cost less than the result sells for, and that answer changes by the hour. Working it out by hand means opening a wiki, a recipe database and the market board, then adding it all up.</p>
 <p lang="nl" class="lead">In Final Fantasy XIV is een craft alleen de moeite waard als de materialen minder kosten dan het resultaat oplevert, en dat antwoord verandert per uur. Met de hand uitzoeken betekent een wiki openen, een receptendatabase en het marktbord, en dan alles optellen.</p><!-- ASSUMPTION: the motivation above is inferred from what the tool does. Rewrite it in your own words. -->
-<p lang="en">I wanted one place that does that in a few seconds, and that is honest about what it does not know. The tool fetches prices. It does not explain itself, which is also how it got its name.</p>
-<p lang="nl">Ik wilde één plek die dat in een paar seconden doet en eerlijk is over wat hij niet weet. De tool haalt prijzen op. Hij legt zichzelf niet uit, en zo kreeg hij ook zijn naam.</p>
+<p lang="en">I wanted one place that does that in a few seconds, and that is honest about what it does not know. The tool fetches prices. It does not explain itself, like the retainers in the game who work the Market Board for you. That is where the name comes from.</p>
+<p lang="nl">Ik wilde één plek die dat in een paar seconden doet en eerlijk is over wat hij niet weet. De tool haalt prijzen op. Hij legt zichzelf niet uit, net als de retainers in het spel die voor je op het Market Board werken. Daar komt de naam vandaan.</p>
 </div>
 </section>
 
 <section id="built">
 <div class="wrap">
-<div class="rv narrow"><h2><small>02</small><span lang="en">What it does</span><span lang="nl">Wat het doet</span></h2>
+<div class="rv narrow lg"><h2><small>02</small><span lang="en">What it does</span><span lang="nl">Wat het doet</span></h2>
 <p lang="en" class="lead narrow">Six areas. All screenshots are from the live tool.</p>
 <p lang="nl" class="lead narrow">Zes onderdelen. Alle screenshots komen uit de live tool.</p></div>
 <div class="chapter rv">
-<span class="num">A</span>
+<span class="num">W.01</span>
 <h3><span lang="en">Craft cost</span><span lang="nl">Craftkosten</span></h3>
 <p lang="en">You paste a link to an item on the FFXIV wiki, or type its name. The tool finds the item, asks Garland Tools for the recipe, and asks Universalis what every ingredient sells for on the Light data center. Anything that cannot be sold on the market board is labeled "Market prohibited" instead of getting a price.</p>
 <p lang="nl">Je plakt een link naar een item op de FFXIV-wiki, of typt de naam. De tool zoekt het item op, vraagt Garland Tools om het recept en vraagt Universalis wat elk ingrediënt kost op het Light-datacenter. Alles wat niet op het marktbord verkocht kan worden, krijgt het label "Market prohibited" in plaats van een prijs.</p>
 <p lang="en">The prices are not just the cheapest listing times the quantity. A listing is a whole lot you cannot split, so if the cheapest one has 8 for sale and you need 3, you are still buying 8. The tool spells out exactly what got bought, flags a cheapest listing that looks like a one-off fluke, splits elemental crystals into their own section, and marks Treasure Map ingredients. You can pin a home world and price only what is on your world.</p>
 <p lang="nl">De prijzen zijn niet gewoon de goedkoopste aanbieding maal het aantal. Een aanbieding is een heel pakket dat je niet kunt splitsen, dus als de goedkoopste er 8 heeft en jij er 3 nodig hebt, koop je toch 8. De tool laat precies zien wat er gekocht is, markeert een goedkoopste aanbieding die op een toevalstreffer lijkt, zet elementaire kristallen in een eigen blok en markeert Treasure Map-ingrediënten. Je kunt een thuiswereld vastzetten en alleen prijzen op jouw wereld bekijken.</p>
 <div class="shots">
-<figure><div class="frame"><span class="ph">public/images/ffxiv-craft-cost.jpg</span><img src="public/images/ffxiv-craft-cost.jpg" alt="The craft cost window showing a recipe with every ingredient priced" data-alt-en="The craft cost window showing a recipe with every ingredient priced" data-alt-nl="Het craftkosten-venster met een recept waarvan elk ingrediënt een prijs heeft" loading="lazy"></div><figcaption><span lang="en">Craft cost: the recipe, priced ingredient by ingredient.</span><span lang="nl">Craftkosten: het recept, per ingrediënt geprijsd.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/ffxiv-craft-cost.jpg</span><img src="images/ffxiv-craft-cost.jpg" alt="The craft cost window showing a recipe with every ingredient priced" data-alt-en="The craft cost window showing a recipe with every ingredient priced" data-alt-nl="Het craftkosten-venster met een recept waarvan elk ingrediënt een prijs heeft" loading="lazy"></div><figcaption><span lang="en">Craft cost: the recipe, priced ingredient by ingredient.</span><span lang="nl">Craftkosten: het recept, per ingrediënt geprijsd.</span></figcaption></figure>
 </div>
 </div>
 
 <div class="chapter rv">
-<span class="num">B</span>
+<span class="num">W.02</span>
 <h3><span lang="en">Windows you can arrange</span><span lang="nl">Vensters die je kunt indelen</span></h3>
 <p lang="en">Everything opens as its own draggable window, and a Presets button holds ready-made layouts. Ctrl+K (Cmd+K on a Mac) opens a quick search that jumps to any window. On narrow screens the windows fall back to plain stacked panels.</p>
 <p lang="nl">Alles opent als een eigen versleepbaar venster, en een Presets-knop bevat kant-en-klare indelingen. Ctrl+K (Cmd+K op een Mac) opent een snelzoeker die naar elk venster springt. Op smalle schermen vallen de vensters terug op gewone gestapelde panelen.</p>
 <div class="shots">
-<figure><div class="frame"><span class="ph">public/images/ffxiv-windows.jpg</span><img src="public/images/ffxiv-windows.jpg" alt="Several tool windows open side by side on a desktop screen" data-alt-en="Several tool windows open side by side on a desktop screen" data-alt-nl="Meerdere toolvensters naast elkaar open op een bureaubladscherm" loading="lazy"></div><figcaption><span lang="en">Several windows open at once.</span><span lang="nl">Meerdere vensters tegelijk open.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/ffxiv-windows.jpg</span><img src="images/ffxiv-windows.jpg" alt="Several tool windows open side by side on a desktop screen" data-alt-en="Several tool windows open side by side on a desktop screen" data-alt-nl="Meerdere toolvensters naast elkaar open op een bureaubladscherm" loading="lazy"></div><figcaption><span lang="en">Several windows open at once.</span><span lang="nl">Meerdere vensters tegelijk open.</span></figcaption></figure>
 </div>
 </div>
 
 <div class="chapter rv">
-<span class="num">C</span>
+<span class="num">W.03</span>
 <h3><span lang="en">Profit, shopping and the watchlist</span><span lang="nl">Winst, boodschappen en de watchlist</span></h3>
 <p lang="en">Profit Calc puts material cost against what the finished item sells for, with a rough 5 percent market board tax. The Shopping List combines everything in the basket into one buy list. The Watchlist keeps an eye on ingredients, with low-price alerts and auto-refresh.</p>
 <p lang="nl">Profit Calc zet materiaalkosten tegenover wat het eindproduct oplevert, met een grove 5 procent marktbordbelasting. De Shopping List combineert alles in de mand tot één koplijst. De Watchlist houdt ingrediënten in de gaten, met meldingen bij lage prijzen en automatisch verversen.</p>
 <div class="shots">
-<figure><div class="frame"><span class="ph">public/images/ffxiv-profit-watchlist.jpg</span><img src="public/images/ffxiv-profit-watchlist.jpg" alt="The profit calculator next to the watchlist" data-alt-en="The profit calculator next to the watchlist" data-alt-nl="De winstcalculator naast de watchlist" loading="lazy"></div><figcaption><span lang="en">Profit calculator and watchlist.</span><span lang="nl">Winstcalculator en watchlist.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/ffxiv-profit-watchlist.jpg</span><img src="images/ffxiv-profit-watchlist.jpg" alt="The profit calculator next to the watchlist" data-alt-en="The profit calculator next to the watchlist" data-alt-nl="De winstcalculator naast de watchlist" loading="lazy"></div><figcaption><span lang="en">Profit calculator and watchlist.</span><span lang="nl">Winstcalculator en watchlist.</span></figcaption></figure>
 </div>
 </div>
 
 <div class="chapter rv">
-<span class="num">D</span>
+<span class="num">W.04</span>
 <h3><span lang="en">Gil per hour</span><span lang="nl">Gil per uur</span></h3>
 <p lang="en">Gil/Hour shows how much you earn by gathering or crafting something and selling it, with the whole material chain and recent sale volume, so a price that looks great but never sells does not fool you.</p>
 <p lang="nl">Gil/Hour laat zien hoeveel je verdient door iets te verzamelen of te craften en te verkopen, met de hele materiaalketen en recente verkoopcijfers, zodat een prijs die er geweldig uitziet maar nooit verkoopt je niet misleidt.</p>
 <div class="shots">
-<figure><div class="frame"><span class="ph">public/images/ffxiv-gil-hour.jpg</span><img src="public/images/ffxiv-gil-hour.jpg" alt="The gil per hour window with a material chain and sale volume" data-alt-en="The gil per hour window with a material chain and sale volume" data-alt-nl="Het gil-per-uur-venster met een materiaalketen en verkoopcijfers" loading="lazy"></div><figcaption><span lang="en">Gil per hour, with the material chain.</span><span lang="nl">Gil per uur, met de materiaalketen.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/ffxiv-gil-hour.jpg</span><img src="images/ffxiv-gil-hour.jpg" alt="The gil per hour window with a material chain and sale volume" data-alt-en="The gil per hour window with a material chain and sale volume" data-alt-nl="Het gil-per-uur-venster met een materiaalketen en verkoopcijfers" loading="lazy"></div><figcaption><span lang="en">Gil per hour, with the material chain.</span><span lang="nl">Gil per uur, met de materiaalketen.</span></figcaption></figure>
 </div>
 </div>
 
 <div class="chapter rv">
-<span class="num">E</span>
+<span class="num">W.05</span>
 <h3><span lang="en">Glamour, collection and daily life</span><span lang="nl">Glamour, collectie en dagelijks gebruik</span></h3>
 <p lang="en">Paste an Eorzea Collection link and get every piece named, priced and explained. Unlockables lists mounts, minions, emotes and more with how to get them (data from FFXIV Collect). Character Look shows a Lodestone portrait and lets you save looks. Daily Tasks and To-Do hold a recurring checklist that resets itself, and the Gold Saucer window has a Mini Cactpot solver.</p>
 <p lang="nl">Plak een Eorzea Collection-link en krijg elk onderdeel met naam, prijs en uitleg. Unlockables toont mounts, minions, emotes en meer met hoe je ze krijgt (data van FFXIV Collect). Character Look toont een Lodestone-portret en laat je looks bewaren. Daily Tasks en To-Do bevatten een terugkerende checklist die zichzelf reset, en het Gold Saucer-venster heeft een Mini Cactpot-oplosser.</p>
 <p lang="en">There are two themes of aged paper, light and dark, and a Pixel theme with hard edges and neon colors.</p>
 <p lang="nl">Er zijn twee thema's van verouderd papier, licht en donker, en een Pixel-thema met harde randen en neonkleuren.</p>
 <div class="shots">
-<figure><div class="frame"><span class="ph">public/images/ffxiv-glamour.jpg</span><img src="public/images/ffxiv-glamour.jpg" alt="The glamour window listing priced pieces from an outfit" data-alt-en="The glamour window listing priced pieces from an outfit" data-alt-nl="Het glamourvenster met geprijsde onderdelen van een outfit" loading="lazy"></div><figcaption><span lang="en">Glamour: an outfit, piece by piece.</span><span lang="nl">Glamour: een outfit, stuk voor stuk.</span></figcaption></figure>
-<figure><div class="frame"><span class="ph">public/images/ffxiv-themes.jpg</span><img src="public/images/ffxiv-themes.jpg" alt="The tool in its aged paper theme and in the pixel theme" data-alt-en="The tool in its aged paper theme and in the pixel theme" data-alt-nl="De tool in het verouderd-papier-thema en in het pixel-thema" loading="lazy"></div><figcaption><span lang="en">Paper, dark and pixel themes.</span><span lang="nl">Papier-, donker- en pixelthema.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/ffxiv-glamour.jpg</span><img src="images/ffxiv-glamour.jpg" alt="The glamour window listing priced pieces from an outfit" data-alt-en="The glamour window listing priced pieces from an outfit" data-alt-nl="Het glamourvenster met geprijsde onderdelen van een outfit" loading="lazy"></div><figcaption><span lang="en">Glamour: an outfit, piece by piece.</span><span lang="nl">Glamour: een outfit, stuk voor stuk.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/ffxiv-themes.jpg</span><img src="images/ffxiv-themes.jpg" alt="The tool in its aged paper theme and in the pixel theme" data-alt-en="The tool in its aged paper theme and in the pixel theme" data-alt-nl="De tool in het verouderd-papier-thema en in het pixel-thema" loading="lazy"></div><figcaption><span lang="en">Paper, dark and pixel themes.</span><span lang="nl">Papier-, donker- en pixelthema.</span></figcaption></figure>
 </div>
 </div>
 </div>
@@ -265,7 +154,7 @@
 
 <section id="lessons">
 <div class="wrap">
-<div class="rv narrow"><h2><small>05</small><span lang="en">Challenges and what I learned</span><span lang="nl">Uitdagingen en wat ik leerde</span></h2>
+<div class="rv narrow lg"><h2><small>05</small><span lang="en">Challenges and what I learned</span><span lang="nl">Uitdagingen en wat ik leerde</span></h2>
 <p lang="en" class="lead">Four short stories.</p>
 <p lang="nl" class="lead">Vier korte verhalen.</p></div>
 <div class="stories rv">
@@ -313,10 +202,11 @@
 <footer>
   <div class="wrap"><span lang="en">Fan tool, not affiliated with Square Enix. FINAL FANTASY XIV is a trademark of SQUARE ENIX. Screenshots are from the live tool.</span><span lang="nl">Fantool, niet verbonden aan Square Enix. FINAL FANTASY XIV is een handelsmerk van SQUARE ENIX. Screenshots komen uit de live tool.</span></div>
 </footer>
+<script src="portfolio.js"></script>
 <script>
   document.body.classList.remove('nojs');
   (function(){
-    var T = {"en": {"title": "Lycaa's Slave - a crafting and market tool for Final Fantasy XIV", "desc": "A single-file crafting and market-board tool for Final Fantasy XIV: craft costs, profit, watchlist and gil per hour. A case study by the builder."}, "nl": {"title": "Lycaa's Slave - een craft- en markttool voor Final Fantasy XIV", "desc": "Een craft- en marktbordtool in één bestand voor Final Fantasy XIV: craftkosten, winst, watchlist en gil per uur. Een casestudy door de bouwer."}};
+    var T = {"en": {"title": "Retainer's Ledger - a crafting and market tool for Final Fantasy XIV", "desc": "A single-file crafting and market-board tool for Final Fantasy XIV: craft costs, profit, watchlist and gil per hour. A case study by the builder."}, "nl": {"title": "Retainer's Ledger - een craft- en markttool voor Final Fantasy XIV", "desc": "Een craft- en marktbordtool in één bestand voor Final Fantasy XIV: craftkosten, winst, watchlist en gil per uur. Een casestudy door de bouwer."}};
     function meta(sel, v){ var m = document.querySelector(sel); if (m) m.setAttribute('content', v); }
     function setLang(l, save){
       if (l !== 'nl') l = 'en';
@@ -334,15 +224,6 @@
     }
     document.querySelectorAll('.langbtn').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang'), true); }); });
     setLang(document.documentElement.lang === 'nl' ? 'nl' : 'en', false);
-  })();
-  (function(){
-    var els = document.querySelectorAll('.rv');
-    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still || !('IntersectionObserver' in window)){ els.forEach(function(e){ e.classList.add('in'); }); return; }
-    var io = new IntersectionObserver(function(list){
-      list.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    els.forEach(function(e){ io.observe(e); });
   })();
   try{
     if (sessionStorage.getItem('arcade_in')){

@@ -7,9 +7,9 @@ Live site: https://jordimutsaers.nl/
 | Page | File | What it is |
 |---|---|---|
 | Game arcade | `index.html` | Landing page styled as an arcade shop. Each tool is a cabinet, click it to insert a coin and play. |
-| FFXIV | `ffxiv.html` | Lycaa's Slave: crafting costs, market profit, watchlist, gil per hour and more. Pinned to the Light data center. |
-| Portfolio | `portfolio.html` | About me and a project list in arcade style, reached from the arcade screen. |
-| Case studies | `case-clubbie.html`, `case-ffxiv.html`, `case-aion2.html` | One page per project, in English and Dutch. Screenshots go in `public/images/`: Clubbie in `images/clubbie/`, the others directly in `public/images/` as `ffxiv-<name>.jpg` and `aion2-<name>.jpg`. |
+| FFXIV | `ffxiv.html` | Retainer's Ledger: crafting costs, market profit, watchlist, gil per hour and more. Pinned to the Light data center. |
+| Portfolio | `portfolio.html`, `portfolio.css`, `portfolio.js` | About me, a project list and a career quest log in a minimal editorial style with three-colour pixel art. The CSS and JS are shared with the case studies, so upload all three. |
+| Case studies | `case-clubbie.html`, `case-ffxiv.html`, `case-aion2.html` | One page per project, in English and Dutch. Screenshots go in `images/`: Clubbie in `images/clubbie/`, the others directly in `images/` as `ffxiv-<name>.jpg` and `aion2-<name>.jpg`. |
 | Aion 2 | `aion2.html` | Daily and weekly board for your main and alts, timers, and a to-do list. Set up for Global Europe (Yustiel). |
 
 Each tool has a "Switch game" link to jump to the other one.
@@ -31,9 +31,9 @@ A checklist and timer page you can keep open on a second screen.
 
 Reset times are 07:00 UTC daily, and on Wednesday weekly (09:00 CEST for Europe, probably 08:00 CET after October 25). Limits and event times come from community guides and game-file readers for the Global launch, so they can change with patches. Siege, Abyss boss and Arena times are assumed to follow Berlin server time and are not confirmed for Europe. Check the in-game countdowns when something looks off.
 
-## FFXIV: Lycaa's Slave
+## FFXIV: Retainer's Ledger
 
-*"the slave fetches; the slave does not explain itself."*
+*"the retainer fetches; the retainer does not explain itself."*
 
 You give it a link to a craftable item on the FFXIV wiki, and it tells you how many gil that item is going to bleed out of you before it's even in your inventory. It does not care about your glamour choices. It fetches prices. That is its entire personality.
 
@@ -44,7 +44,7 @@ You give it a link to a craftable item on the FFXIV wiki, and it tells you how m
 3. It asks [Universalis](https://universalis.app) what those ingredients currently sell for on the **Light** data center and works out a realistic price for however many you need. No extra button, it just happens.
 4. It adds it all up. Anything that can't be sold on the market board is labeled **Market prohibited** instead of a price.
 
-Prices are not just "cheapest listing x quantity". A listing is a whole lot you can't split, so if the cheapest one has 8 for sale and you need 3, you are still buying all 8. The slave spells out exactly what got bought, flags a cheapest listing that looks like a one-off fluke, splits elemental crystals into their own section, and marks Treasure Map ingredients. You can pin a home world and price only what is on your world.
+Prices are not just "cheapest listing x quantity". A listing is a whole lot you can't split, so if the cheapest one has 8 for sale and you need 3, you are still buying all 8. The retainer spells out exactly what got bought, flags a cheapest listing that looks like a one-off fluke, splits elemental crystals into their own section, and marks Treasure Map ingredients. You can pin a home world and price only what is on your world.
 
 ### The windows
 
@@ -69,13 +69,13 @@ Press Ctrl+K (Cmd+K on Mac) for a quick search that jumps to any window.
 
 - It shows current listings at the moment you ask. Prices move.
 - The "fluke listing" and "lot-limited" detection are heuristics, not guarantees. Sanity-check against the Universalis link before buying.
-- It relies on a public wiki and public APIs, routed through public CORS proxies. If all of them are down at once, that is not the slave's fault. If a lookup fails, the log panel shows which attempt failed and why. Wait a few seconds and try again.
+- It relies on a public wiki and public APIs, routed through public CORS proxies. If all of them are down at once, that is not the retainer's fault. If a lookup fails, the log panel shows which attempt failed and why. Wait a few seconds and try again.
 - Host it somewhere such as GitHub Pages. Some browsers refuse to let a local file phone home.
 - Your basket, watchlist, tasks and settings live in your own browser's storage. Clearing browser data clears them too, so use the backup buttons now and then.
 
 ## Hosting
 
-Plain static files, no build step. Put `index.html`, `ffxiv.html` and `aion2.html` in the root of the repository and turn on GitHub Pages for the main branch.
+Plain static files, no build step. Put all the `.html` files plus `portfolio.css` and `portfolio.js` in the root of the repository and turn on GitHub Pages for the main branch.
 
 ## Credits
 

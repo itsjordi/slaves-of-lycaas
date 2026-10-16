@@ -15,146 +15,40 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   try{
+    var __t = localStorage.getItem('theme');
+    if (__t !== 'dark' && __t !== 'light') __t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', __t);
     var __l = localStorage.getItem('clubbie_lang') || ((navigator.language || '').toLowerCase().indexOf('nl') === 0 ? 'nl' : 'en');
     if (__l === 'nl') document.documentElement.lang = 'nl';
   }catch(e){}
 </script>
-<style>
-  :root{
-    --bg:#15171A; --bg2:#1c1f24; --line:#2c3038; --text:#EFEEE8; --muted:#a9acb3;
-    --blue:#2358E6; --blueSoft:#8fb0ff; --accent:#8fb0ff;
-    --display:"Anton",Impact,"Arial Narrow Bold",sans-serif;
-    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  }
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth;scroll-padding-top:60px}
-  body{margin:0;background:var(--bg);color:var(--text);font:17px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
-  a{color:var(--accent);text-underline-offset:3px}
-  a:hover{color:#fff}
-  :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:2px}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
-  .narrow{max-width:700px}
-  .skip{position:absolute;left:-999px;top:8px;background:var(--blue);color:#fff;padding:8px 14px;z-index:10}
-  .skip:focus{left:8px}
-
-  /* hero */
-  .hero{padding:72px 0 56px;border-bottom:1px solid var(--line);background:radial-gradient(900px 340px at 20% -10%,rgba(35,88,230,.28),transparent 70%)}
-  .eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
-  h1{font-family:var(--display);font-weight:400;font-size:clamp(56px,11vw,120px);line-height:.95;letter-spacing:.01em;text-transform:uppercase;margin:0}
-  .pitch{font-size:clamp(19px,2.6vw,25px);line-height:1.45;max-width:640px;margin:20px 0 28px;color:#dfe4ee}
-  .meta{display:flex;flex-wrap:wrap;gap:12px 40px;margin:0 0 26px;padding:0}
-  .meta div{min-width:120px}
-  .meta dt{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-  .meta dd{margin:2px 0 0;font-size:16px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0 0 30px;list-style:none}
-  .chips li{font-size:13px;border:1px solid var(--line);background:var(--bg2);padding:4px 12px;border-radius:999px;color:#d6dbe6}
-  .btn{display:inline-block;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:13px 24px;border-radius:4px;transition:transform .15s,background .15s}
-  .btn:hover{background:#fff;color:#15171A;transform:translateY(-2px)}
-
-  /* sections */
-  section{padding:72px 0;border-bottom:1px solid var(--line)}
-  section:last-of-type{border-bottom:0}
-  h2{font-family:var(--display);font-weight:400;font-size:clamp(34px,5vw,52px);letter-spacing:.02em;text-transform:uppercase;margin:0 0 20px;line-height:1.05}
-  h2 small{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.18em;color:var(--accent);margin-bottom:8px}
-  h3{font-size:22px;line-height:1.25;margin:0 0 8px}
-  p{margin:0 0 16px}
-  .lead{font-size:19px;color:#e4e3dc}
-  .muted{color:var(--muted)}
-  ul.tight{padding-left:20px;margin:0 0 16px}
-  ul.tight li{margin:6px 0}
-  code{font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--bg2);border:1px solid var(--line);padding:1px 6px;border-radius:3px}
-
-  /* chapters */
-  .chapter{padding:36px 0;border-top:1px solid var(--line)}
-  .chapter:first-of-type{border-top:0;padding-top:12px}
-  .chapter .num{font-family:var(--display);color:var(--accent);font-size:18px;letter-spacing:.1em}
-  .chapter p{max-width:700px}
-
-  /* figures */
-  figure{margin:0}
-  figcaption{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.45}
-  .frame{position:relative;background:#101215;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .frame .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:12px ui-monospace,Menlo,Consolas,monospace;color:#5d6572}
-  .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-  .phone .frame{aspect-ratio:9/19.5}
-  .wide .frame{aspect-ratio:16/10}
-  .strip{display:flex;gap:18px;overflow-x:auto;padding:6px 2px 18px;margin:18px 0 0;scroll-snap-type:x proximity;scrollbar-color:#3a4050 transparent}
-  .strip figure{flex:0 0 clamp(190px,24vw,236px);scroll-snap-align:start}
-  .strip::-webkit-scrollbar{height:8px}
-  .strip::-webkit-scrollbar-thumb{background:#3a4050;border-radius:4px}
-  .wide{margin-top:24px}
-
-  /* stories */
-  .stories{display:grid;gap:18px;margin-top:24px}
-  @media(min-width:760px){.stories{grid-template-columns:1fr 1fr}}
-  .story{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
-  .story h3{font-size:19px;color:#fff}
-  .story p{margin:0 0 10px;color:#d3d8e2}
-  .story p:last-child{margin:0;color:var(--blueSoft)}
-  .pair{display:grid;gap:24px;margin-top:20px}
-  @media(min-width:760px){.pair{grid-template-columns:1fr 1fr}}
-  .box{border-left:3px solid var(--blue);padding:2px 0 2px 18px}
-  .box h3{font-size:18px}
-  footer{padding:36px 0 56px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
-
-  .next-grid{display:grid;gap:16px;margin-top:28px}
-  @media(min-width:760px){.next-grid{grid-template-columns:repeat(6,1fr)}.ncard.feature{grid-column:span 3}.ncard:not(.feature){grid-column:span 2}}
-  .ncard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:24px 26px;transition:border-color .2s,transform .2s}
-  .ncard:hover{border-color:var(--blue);transform:translateY(-3px)}
-  .ncard.feature{background:linear-gradient(160deg,rgba(35,88,230,.22),var(--bg2) 70%);border-color:#2f4a96}
-  .ncard h3{font-size:21px;color:#fff;margin-bottom:10px}
-  .ncard.feature h3{font-size:25px}
-  .ncard p{margin:0;color:#d3d3cc;font-size:16px}
-  .tag{display:inline-block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
-  /* reveal */
-  .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
-  .rv.in{opacity:1;transform:none}
-  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}.btn,.ncard,.langbtn{transition:none}}
-  .nojs .rv{opacity:1;transform:none}
-
-  /* language switch */
-  html:not([lang="nl"]) [lang="nl"], html[lang="nl"] [lang="en"]{display:none!important}
-  .langbar{position:sticky;top:0;z-index:20;background:rgba(21,23,26,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-  .langbar .wrap{display:flex;justify-content:flex-end;gap:10px;padding-top:10px;padding-bottom:10px}
-  .langbtn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:13px;letter-spacing:.08em;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 12px 6px 8px;cursor:pointer;transition:border-color .15s,color .15s,background .15s}
-  .langbtn:hover{color:#fff;border-color:#4a5368}
-  .langbtn[aria-pressed="true"]{color:#fff;border-color:var(--blue);background:rgba(35,88,230,.2)}
-  .langbtn svg{width:26px;height:17px;display:block;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
-
-  .shots{display:grid;gap:18px;margin-top:20px}
-  @media(min-width:760px){.shots{grid-template-columns:1fr 1fr}}
-  .shots .frame{aspect-ratio:16/10}
-  .langbar .wrap{justify-content:space-between;align-items:center}
-  .langbar .back{color:var(--muted);text-decoration:none;font-size:14px;letter-spacing:.04em}
-  .langbar .back:hover{color:#fff}
-  .langbar .right{display:flex;gap:10px}
-  .linkrow{display:flex;flex-wrap:wrap;gap:12px;margin:0}
-  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-  .btn.ghost:hover{background:#fff;color:#15171A}
-  .demo{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px 28px;margin:26px 0 8px;padding:22px 26px;border:1px solid #2f4a96;border-left:4px solid var(--blue);border-radius:12px;background:linear-gradient(160deg,rgba(35,88,230,.2),var(--bg2) 70%)}
-  .demo h3{margin:0 0 6px;font-size:22px;color:#fff}
-  .demo p{margin:0;max-width:560px;color:#d9d8d1}
-  .note{margin:14px 0 0;font-size:14px;color:var(--muted)}
-</style>
+<link rel="stylesheet" href="portfolio.css">
 </head>
 <body class="nojs">
 <a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
 
-<div class="langbar">
+<div class="bar">
   <div class="wrap">
-    <a class="back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+    <nav>
+      <a class="nav back" href="portfolio.html"><span lang="en">&lsaquo; Portfolio</span><span lang="nl">&lsaquo; Portfolio</span></a>
+    </nav>
     <div class="right">
-    <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
-    <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+      <button class="themebtn" type="button" aria-label="Switch between light and dark theme" title="Light / dark"></button>
+      <div class="langs">
+        <button class="langbtn" type="button" data-lang="nl" aria-pressed="false" aria-label="Nederlands"><svg viewBox="0 0 9 6" aria-hidden="true"><rect width="9" height="2" fill="#AE1C28"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#21468B"/></svg><span>NL</span></button>
+        <button class="langbtn" type="button" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 30" aria-hidden="true"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0V30M0,15H60" stroke="#fff" stroke-width="10"/><path d="M30,0V30M0,15H60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+      </div>
     </div>
   </div>
+  <div class="progress" aria-hidden="true"></div>
 </div>
 
 <header class="hero">
   <div class="wrap">
+    <span class="sprite" role="img" aria-label="A pixel art football"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect class="i" x="7" y="0" width="2" height="1"/><rect class="i" x="4" y="1" width="8" height="1"/><rect class="i" x="3" y="2" width="2" height="1"/><rect class="m" x="8" y="2" width="1" height="1"/><rect class="i" x="11" y="2" width="2" height="1"/><rect class="i" x="2" y="3" width="2" height="1"/><rect class="a" x="4" y="3" width="2" height="1"/><rect class="m" x="8" y="3" width="1" height="1"/><rect class="a" x="11" y="3" width="1" height="1"/><rect class="i" x="12" y="3" width="2" height="1"/><rect class="i" x="1" y="4" width="2" height="1"/><rect class="a" x="4" y="4" width="1" height="1"/><rect class="m" x="8" y="4" width="1" height="1"/><rect class="a" x="11" y="4" width="1" height="1"/><rect class="i" x="13" y="4" width="2" height="1"/><rect class="i" x="1" y="5" width="1" height="1"/><rect class="a" x="7" y="5" width="2" height="1"/><rect class="i" x="14" y="5" width="1" height="1"/><rect class="i" x="1" y="6" width="1" height="1"/><rect class="m" x="2" y="6" width="3" height="1"/><rect class="a" x="6" y="6" width="4" height="1"/><rect class="m" x="11" y="6" width="3" height="1"/><rect class="i" x="14" y="6" width="1" height="1"/><rect class="i" x="0" y="7" width="2" height="1"/><rect class="a" x="5" y="7" width="6" height="1"/><rect class="i" x="14" y="7" width="2" height="1"/><rect class="i" x="0" y="8" width="2" height="1"/><rect class="a" x="6" y="8" width="4" height="1"/><rect class="i" x="14" y="8" width="2" height="1"/><rect class="i" x="1" y="9" width="1" height="1"/><rect class="a" x="2" y="9" width="2" height="1"/><rect class="a" x="6" y="9" width="4" height="1"/><rect class="a" x="13" y="9" width="1" height="1"/><rect class="i" x="14" y="9" width="1" height="1"/><rect class="i" x="1" y="10" width="1" height="1"/><rect class="a" x="2" y="10" width="1" height="1"/><rect class="m" x="5" y="10" width="2" height="1"/><rect class="m" x="9" y="10" width="2" height="1"/><rect class="a" x="13" y="10" width="1" height="1"/><rect class="i" x="14" y="10" width="1" height="1"/><rect class="i" x="1" y="11" width="2" height="1"/><rect class="m" x="5" y="11" width="1" height="1"/><rect class="m" x="10" y="11" width="1" height="1"/><rect class="i" x="13" y="11" width="2" height="1"/><rect class="i" x="2" y="12" width="2" height="1"/><rect class="m" x="4" y="12" width="2" height="1"/><rect class="m" x="10" y="12" width="2" height="1"/><rect class="i" x="12" y="12" width="2" height="1"/><rect class="i" x="3" y="13" width="2" height="1"/><rect class="a" x="8" y="13" width="2" height="1"/><rect class="i" x="11" y="13" width="2" height="1"/><rect class="i" x="4" y="14" width="8" height="1"/><rect class="i" x="7" y="15" width="2" height="1"/></svg></span>
     <p class="eyebrow"><span lang="en">Case study</span><span lang="nl">Casestudy</span></p>
     <h1>Clubbie</h1>
     <p lang="en" class="pitch">One place for an amateur football team that knows who is coming, what the score is and who scored, with as little admin as possible for the people who run the team.</p>
@@ -190,10 +84,10 @@
 
 <section id="built">
   <div class="wrap">
-    <div class="rv">
+    <div class="rv lg">
       <h2><small>02</small><span lang="en">What I built</span><span lang="nl">Wat ik heb gebouwd</span></h2>
-<p lang="en" class="lead narrow">A tour in six chapters. All screenshots come from the demo mode, with made-up names and scores.</p>
-<p lang="nl" class="lead narrow">Een rondleiding in zes hoofdstukken. Alle screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</p>
+<p lang="en" class="lead narrow">A tour in six chapters, with 40 screenshots. All screenshots come from the demo mode, with made-up names and scores.</p>
+<p lang="nl" class="lead narrow">Een rondleiding in zes hoofdstukken, met 40 screenshots. Alle screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</p>
       <div class="demo rv">
         <div>
           <h3><span lang="en">Try the demo</span><span lang="nl">Probeer de demo</span></h3>
@@ -205,7 +99,7 @@
     </div>
 
 <div class="chapter rv">
-<span class="num">A</span>
+<span class="num">W.01</span>
 <h3><span lang="en">Agenda and attendance</span><span lang="nl">Agenda en aanwezigheid</span></h3>
 <p lang="en">The agenda shows trainings, matches and team outings, with filters and a list and calendar view. Matches arrive automatically from the official club schedule feed (iCal). Trainings and outings are added by hand.</p>
 <p lang="nl">De agenda toont trainingen, wedstrijden en teamuitjes, met filters en een lijst- en kalenderweergave. Wedstrijden komen automatisch binnen via de officiële clubplanning (iCal). Trainingen en uitjes worden met de hand toegevoegd.</p>
@@ -213,11 +107,11 @@
 <p lang="nl">De aanwezigheid wordt per dag door de trainer ingevoerd op een "Start check"-scherm, dus spelers hoeven niets te beantwoorden. Geblesseerde spelers tellen als aanwezig. Een uitje is een gewone incheck-lijst die naar WhatsApp gekopieerd kan worden. Zelf aan- en afmelden (RSVP) is gebouwd en staat gepauzeerd achter een feature flag, tot het team eraan toe is.</p>
 <div class="strip phone" role="region" aria-label="Agenda screenshots" data-alt-en="Agenda screenshots" data-alt-nl="Screenshots van de agenda" data-aria="1" tabindex="0">
 <figure><div class="frame"><span class="ph">images/clubbie/agenda.jpg</span><img src="images/clubbie/agenda.jpg" alt="The agenda as a list of trainings and matches with filter chips at the top" data-alt-en="The agenda as a list of trainings and matches with filter chips at the top" data-alt-nl="De agenda als lijst met trainingen en wedstrijden en filters bovenaan" loading="lazy"></div><figcaption><span lang="en">The agenda in list view.</span><span lang="nl">De agenda in lijstweergave.</span></figcaption></figure>
-</div>
+<figure><div class="frame"><span class="ph">images/clubbie/attendance-training.jpg</span><img src="images/clubbie/attendance-training.jpg" alt="The start check screen for a training, with a button per player" data-alt-en="The start check screen for a training, with a button per player" data-alt-nl="Het start check-scherm voor een training, met een knop per speler" loading="lazy"></div><figcaption><span lang="en">The start check for a training.</span><span lang="nl">De start check voor een training.</span></figcaption></figure><figure><div class="frame"><span class="ph">images/clubbie/attendance-match.jpg</span><img src="images/clubbie/attendance-match.jpg" alt="The start check screen for a match with players marked present" data-alt-en="The start check screen for a match with players marked present" data-alt-nl="Het start check-scherm voor een wedstrijd met aanwezige spelers" loading="lazy"></div><figcaption><span lang="en">The start check for a match.</span><span lang="nl">De start check voor een wedstrijd.</span></figcaption></figure><figure><div class="frame"><span class="ph">images/clubbie/rsvp.jpg</span><img src="images/clubbie/rsvp.jpg" alt="A match page where the player can choose present or absent" data-alt-en="A match page where the player can choose present or absent" data-alt-nl="Een wedstrijdpagina waar de speler aanwezig of afwezig kan kiezen" loading="lazy"></div><figcaption><span lang="en">Self-service RSVP as a player would see it. Built, and paused in the real app for now.</span><span lang="nl">Zelf aan- en afmelden zoals een speler het zou zien. Gebouwd, en in de echte app voorlopig gepauzeerd.</span></figcaption></figure><figure><div class="frame"><span class="ph">images/clubbie/guests.jpg</span><img src="images/clubbie/guests.jpg" alt="A dialog for adding a guest player with name, number and positions" data-alt-en="A dialog for adding a guest player with name, number and positions" data-alt-nl="Een venster om een gastspeler toe te voegen met naam, nummer en posities" loading="lazy"></div><figcaption><span lang="en">Adding a guest player to a match.</span><span lang="nl">Een gastspeler aan een wedstrijd toevoegen.</span></figcaption></figure><figure><div class="frame"><span class="ph">images/clubbie/fines.jpg</span><img src="images/clubbie/fines.jpg" alt="The fines screen with outstanding fines and a list of players" data-alt-en="The fines screen with outstanding fines and a list of players" data-alt-nl="Het boetescherm met openstaande boetes en een lijst met spelers" loading="lazy"></div><figcaption><span lang="en">The fines screen (the boetepot). Built and tested, paused in the real app for now.</span><span lang="nl">Het boetescherm (de boetepot). Gebouwd en getest, in de echte app voorlopig gepauzeerd.</span></figcaption></figure><figure><div class="frame"><span class="ph">images/clubbie/fines-add.jpg</span><img src="images/clubbie/fines-add.jpg" alt="A dialog for adding a fine with player, type, amount and reason" data-alt-en="A dialog for adding a fine with player, type, amount and reason" data-alt-nl="Een venster om een boete toe te voegen met speler, type, bedrag en reden" loading="lazy"></div><figcaption><span lang="en">Adding a fine by hand. Also paused for now.</span><span lang="nl">Een boete met de hand toevoegen. Ook voorlopig gepauzeerd.</span></figcaption></figure></div>
 </div>
 
 <div class="chapter rv">
-<span class="num">B</span>
+<span class="num">W.02</span>
 <h3><span lang="en">Match day</span><span lang="nl">Wedstrijddag</span></h3>
 <p lang="en">The trainer runs the match live: a timer, goals with scorer and assist, opponent goals, cards, substitutions with the minute, half-time and full-time. Everyone sees the live score. People who are not logged in can follow along on a public page.</p>
 <p lang="nl">De trainer bestuurt de wedstrijd live: een timer, doelpunten met schutter en assist, tegendoelpunten, kaarten, wissels met de minuut, rust en eindsignaal. Iedereen ziet de live stand. Wie niet is ingelogd, kan meekijken op een openbare pagina.</p>
@@ -232,7 +126,7 @@
 </div>
 
 <div class="chapter rv">
-<span class="num">C</span>
+<span class="num">W.03</span>
 <h3><span lang="en">Competition</span><span lang="nl">Competitie</span></h3>
 <p lang="en">The league table and the programme of the whole poule, plus an opponent preview with form, head-to-head and a forecast.</p>
 <p lang="nl">De ranglijst en het programma van de hele poule, plus een voorbeschouwing op de tegenstander met vorm, onderlinge resultaten en een verwachting.</p>
@@ -244,7 +138,7 @@
 </div>
 
 <div class="chapter rv">
-<span class="num">D</span>
+<span class="num">W.04</span>
 <h3><span lang="en">Player cards and ratings</span><span lang="nl">Spelerskaarten en ratings</span></h3>
 <p lang="en">FIFA-style player cards with a rating per player. The model is documented inside the app, in a screen I called the rating bot. Attendance counts for 60 percent (trainings and matches, injured counts as present). What you do on the pitch counts for 40 percent, per position, so a goalkeeper is scored differently from a striker. The result is shrunk towards a neutral value when there are few matches, so one lucky game cannot give a 99. Competition matches only.</p>
 <p lang="nl">FIFA-achtige spelerskaarten met een rating per speler. Het model wordt in de app zelf uitgelegd, op een scherm dat ik de rating bot heb genoemd. Aanwezigheid telt voor 60 procent mee (trainingen en wedstrijden, geblesseerd telt als aanwezig). Wat je op het veld doet telt voor 40 procent, per positie, dus een keeper wordt anders beoordeeld dan een spits. Het resultaat wordt bij weinig wedstrijden richting een neutrale waarde getrokken, zodat één gelukkige wedstrijd geen 99 kan opleveren. Alleen competitiewedstrijden.</p>
@@ -259,7 +153,7 @@
 </div>
 
 <div class="chapter rv">
-<span class="num">E</span>
+<span class="num">W.05</span>
 <h3><span lang="en">Statistics</span><span lang="nl">Statistieken</span></h3>
 <p lang="en">Team and player statistics, and a "Het seizoen" page with results, home against away, form, training attendance, who plays the most, goals per half and cards.</p>
 <p lang="nl">Team- en spelersstatistieken, en een "Het seizoen"-pagina met uitslagen, thuis tegen uit, vorm, trainingsaanwezigheid, wie de meeste minuten speelt, doelpunten per helft en kaarten.</p>
@@ -270,17 +164,33 @@
 </div>
 
 <div class="chapter rv">
-<span class="num">F</span>
+<span class="num">W.06</span>
 <h3><span lang="en">Season recap, "Terugblik"</span><span lang="nl">Seizoensterugblik, "Terugblik"</span></h3>
-<p lang="en">A Spotify-Wrapped-style recap of the season, as full-screen story slides with one statistic each: goal balance, top scorers, assists, minutes, strongest cards, Man of the Match, most loyal trainers, team attendance, clean sheets, biggest win, win streak, comebacks, supersub, cards, home against away, most matches, guest players and funny moments the trainers noted down. Then a browsable squad slide with every player's shareable card, and a closing "Bedankt mannen" slide.</p>
-<p lang="nl">Een terugblik op het seizoen in de stijl van Spotify Wrapped, als schermvullende verhaalslides met elk één statistiek: doelsaldo, topscorers, assists, minuten, sterkste kaarten, Man of the Match, trouwste trainers, teamaanwezigheid, clean sheets, grootste zege, winstreeks, comebacks, supersub, kaarten, thuis tegen uit, meeste wedstrijden, gastspelers en grappige momenten die de trainers hebben genoteerd. Daarna een bladerbare selectieslide met de deelbare kaart van elke speler, en een afsluitende "Bedankt mannen"-slide.</p>
+<p lang="en">A Spotify-Wrapped-style recap of the season, as 21 full-screen story slides with one statistic each: goal balance, top scorers, assists, minutes, strongest cards, Man of the Match, most loyal trainers, team attendance, clean sheets, biggest win, win streak, comebacks, supersub, cards, home against away, most matches, guest players and funny moments the trainers noted down. Then a browsable squad slide with every player's shareable card, and a closing "Bedankt mannen" slide.</p>
+<p lang="nl">Een terugblik op het seizoen in de stijl van Spotify Wrapped, als 21 schermvullende verhaalslides met elk één statistiek: doelsaldo, topscorers, assists, minuten, sterkste kaarten, Man of the Match, trouwste trainers, teamaanwezigheid, clean sheets, grootste zege, winstreeks, comebacks, supersub, kaarten, thuis tegen uit, meeste wedstrijden, gastspelers en grappige momenten die de trainers hebben genoteerd. Daarna een bladerbare selectieslide met de deelbare kaart van elke speler, en een afsluitende "Bedankt mannen"-slide.</p>
 <p lang="en">Each slide can have a generated background picture. I wrote the image prompts, and the pictures are uploaded in the app. Music starts after a "Start met muziek" tap, from an uploaded track or a YouTube link. Slides push over each other with a swipe that follows the finger, an automatic timer with a visible progress bar and a pause, staged entrances and count-up numbers. A public share link, a frozen snapshot, lets people outside the team watch it, with a proper link preview in WhatsApp.</p>
 <p lang="nl">Elke slide kan een gegenereerde achtergrondafbeelding hebben. Ik schreef de afbeeldingsprompts, en de plaatjes worden in de app geüpload. De muziek start na een tik op "Start met muziek", van een geüploade track of een YouTube-link. Slides schuiven over elkaar met een swipe die de vinger volgt, een automatische timer met zichtbare voortgangsbalk en een pauzeknop, gefaseerde entrees en optellende getallen. Met een openbare deellink, een bevroren momentopname, kunnen mensen buiten het team meekijken, met een nette linkvoorbeeld in WhatsApp.</p>
+<figure class="wide sq"><div class="frame"><span class="ph">images/clubbie/recap-overview.jpg</span><img src="images/clubbie/recap-overview.jpg" alt="An overview grid of all 21 recap slides" data-alt-en="An overview grid of all 21 recap slides" data-alt-nl="Een overzicht van alle 21 terugblik-slides" loading="lazy"></div><figcaption><span lang="en">All 21 slides at a glance.</span><span lang="nl">Alle 21 slides in één overzicht.</span></figcaption></figure>
 <div class="strip phone" role="region" aria-label="Season recap screenshots" data-alt-en="Season recap screenshots" data-alt-nl="Screenshots van de seizoensterugblik" data-aria="1" tabindex="0">
 <figure><div class="frame"><span class="ph">images/clubbie/recap-intro.jpg</span><img src="images/clubbie/recap-intro.jpg" alt="The opening slide of the season recap" data-alt-en="The opening slide of the season recap" data-alt-nl="De openingsslide van de seizoensterugblik" loading="lazy"></div><figcaption><span lang="en">The recap opens.</span><span lang="nl">De terugblik opent.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-doelsaldo.jpg</span><img src="images/clubbie/recap-doelsaldo.jpg" alt="The goal balance slide" data-alt-en="The goal balance slide" data-alt-nl="De slide met het doelsaldo" loading="lazy"></div><figcaption><span lang="en">Goal balance.</span><span lang="nl">Doelsaldo.</span></figcaption></figure>
 <figure><div class="frame"><span class="ph">images/clubbie/recap-homeaway.jpg</span><img src="images/clubbie/recap-homeaway.jpg" alt="A recap slide comparing home and away results" data-alt-en="A recap slide comparing home and away results" data-alt-nl="Een slide die thuis- en uitwaartse resultaten vergelijkt" loading="lazy"></div><figcaption><span lang="en">Home against away.</span><span lang="nl">Thuis tegen uit.</span></figcaption></figure>
-<figure><div class="frame"><span class="ph">images/clubbie/recap-topscorers.jpg</span><img src="images/clubbie/recap-topscorers.jpg" alt="A recap slide showing the top scorers of the season" data-alt-en="A recap slide showing the top scorers of the season" data-alt-nl="Een slide met de topscorers van het seizoen" loading="lazy"></div><figcaption><span lang="en">One statistic per slide.</span><span lang="nl">Eén statistiek per slide.</span></figcaption></figure>
-<figure><div class="frame"><span class="ph">images/clubbie/recap-moments.jpg</span><img src="images/clubbie/recap-moments.jpg" alt="A recap slide with funny moments noted down by the trainers" data-alt-en="A recap slide with funny moments noted down by the trainers" data-alt-nl="Een slide met grappige momenten die de trainers hebben genoteerd" loading="lazy"></div><figcaption><span lang="en">Funny moments, noted by the trainers.</span><span lang="nl">Grappige momenten, genoteerd door de trainers.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-topscorers.jpg</span><img src="images/clubbie/recap-topscorers.jpg" alt="A recap slide showing the top scorers of the season" data-alt-en="A recap slide showing the top scorers of the season" data-alt-nl="Een slide met de topscorers van het seizoen" loading="lazy"></div><figcaption><span lang="en">Top scorers.</span><span lang="nl">Topscorers.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-assists.jpg</span><img src="images/clubbie/recap-assists.jpg" alt="A recap slide with the players with the most assists" data-alt-en="A recap slide with the players with the most assists" data-alt-nl="Een slide met de spelers met de meeste assists" loading="lazy"></div><figcaption><span lang="en">Most assists.</span><span lang="nl">Meeste assists.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-minutes.jpg</span><img src="images/clubbie/recap-minutes.jpg" alt="A recap slide with the players with the most minutes" data-alt-en="A recap slide with the players with the most minutes" data-alt-nl="Een slide met de spelers met de meeste minuten" loading="lazy"></div><figcaption><span lang="en">Most minutes.</span><span lang="nl">Meeste minuten.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-matches.jpg</span><img src="images/clubbie/recap-matches.jpg" alt="A recap slide with the players with the most matches" data-alt-en="A recap slide with the players with the most matches" data-alt-nl="Een slide met de spelers met de meeste wedstrijden" loading="lazy"></div><figcaption><span lang="en">Most matches.</span><span lang="nl">Meeste wedstrijden.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-strongest.jpg</span><img src="images/clubbie/recap-strongest.jpg" alt="A recap slide with the highest rated player cards" data-alt-en="A recap slide with the highest rated player cards" data-alt-nl="Een slide met de hoogst gewaardeerde spelerskaarten" loading="lazy"></div><figcaption><span lang="en">The strongest cards.</span><span lang="nl">De sterkste kaarten.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-motm.jpg</span><img src="images/clubbie/recap-motm.jpg" alt="A recap slide with who won Man of the Match most often" data-alt-en="A recap slide with who won Man of the Match most often" data-alt-nl="Een slide met wie het vaakst Man of the Match werd" loading="lazy"></div><figcaption><span lang="en">Man of the Match.</span><span lang="nl">Man of the Match.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-trainers.jpg</span><img src="images/clubbie/recap-trainers.jpg" alt="A recap slide with the best training attendance" data-alt-en="A recap slide with the best training attendance" data-alt-nl="Een slide met de beste trainingsaanwezigheid" loading="lazy"></div><figcaption><span lang="en">The most loyal trainers.</span><span lang="nl">De trouwste trainers.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-attendance.jpg</span><img src="images/clubbie/recap-attendance.jpg" alt="A recap slide with the average training attendance" data-alt-en="A recap slide with the average training attendance" data-alt-nl="Een slide met de gemiddelde trainingsopkomst" loading="lazy"></div><figcaption><span lang="en">Team attendance.</span><span lang="nl">Opkomst van het team.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-cleansheets.jpg</span><img src="images/clubbie/recap-cleansheets.jpg" alt="A recap slide with the number of clean sheets" data-alt-en="A recap slide with the number of clean sheets" data-alt-nl="Een slide met het aantal keren de nul gehouden" loading="lazy"></div><figcaption><span lang="en">Clean sheets.</span><span lang="nl">De nul gehouden.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-biggestwin.jpg</span><img src="images/clubbie/recap-biggestwin.jpg" alt="A recap slide with the biggest win of the season" data-alt-en="A recap slide with the biggest win of the season" data-alt-nl="Een slide met de grootste zege van het seizoen" loading="lazy"></div><figcaption><span lang="en">The biggest win.</span><span lang="nl">De grootste zege.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-streak.jpg</span><img src="images/clubbie/recap-streak.jpg" alt="A recap slide with the longest winning streak" data-alt-en="A recap slide with the longest winning streak" data-alt-nl="Een slide met de langste winstreeks" loading="lazy"></div><figcaption><span lang="en">The win streak.</span><span lang="nl">De winstreeks.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-comeback.jpg</span><img src="images/clubbie/recap-comeback.jpg" alt="A recap slide with comebacks" data-alt-en="A recap slide with comebacks" data-alt-nl="Een slide met comebacks" loading="lazy"></div><figcaption><span lang="en">Comebacks.</span><span lang="nl">Comebacks.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-cards.jpg</span><img src="images/clubbie/recap-cards.jpg" alt="A recap slide with the players with the most cards" data-alt-en="A recap slide with the players with the most cards" data-alt-nl="Een slide met de spelers met de meeste kaarten" loading="lazy"></div><figcaption><span lang="en">Most cards.</span><span lang="nl">Meeste kaarten.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-moments.jpg</span><img src="images/clubbie/recap-moments.jpg" alt="A recap slide with angry moments noted down by the trainers" data-alt-en="A recap slide with angry moments noted down by the trainers" data-alt-nl="Een slide met boze momenten die de trainers hebben genoteerd" loading="lazy"></div><figcaption><span lang="en">Angry moments, noted by the trainers.</span><span lang="nl">Boze momenten, genoteerd door de trainers.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-funny.jpg</span><img src="images/clubbie/recap-funny.jpg" alt="A recap slide with funny moments noted down by the trainers" data-alt-en="A recap slide with funny moments noted down by the trainers" data-alt-nl="Een slide met leuke momenten die de trainers hebben genoteerd" loading="lazy"></div><figcaption><span lang="en">Funny moments, noted by the trainers.</span><span lang="nl">Leuke momenten, genoteerd door de trainers.</span></figcaption></figure>
+<figure><div class="frame"><span class="ph">images/clubbie/recap-guests.jpg</span><img src="images/clubbie/recap-guests.jpg" alt="A recap slide about guest players" data-alt-en="A recap slide about guest players" data-alt-nl="Een slide over gastspelers" loading="lazy"></div><figcaption><span lang="en">Guest players.</span><span lang="nl">Hulptroepen.</span></figcaption></figure>
 <figure><div class="frame"><span class="ph">images/clubbie/recap-squad.jpg</span><img src="images/clubbie/recap-squad.jpg" alt="The squad slide with a browsable player card" data-alt-en="The squad slide with a browsable player card" data-alt-nl="De selectieslide met een bladerbare spelerskaart" loading="lazy"></div><figcaption><span lang="en">The squad slide.</span><span lang="nl">De selectieslide.</span></figcaption></figure>
 <figure><div class="frame"><span class="ph">images/clubbie/recap-closing.jpg</span><img src="images/clubbie/recap-closing.jpg" alt="The closing slide thanking the team" data-alt-en="The closing slide thanking the team" data-alt-nl="De afsluitende slide waarin het team wordt bedankt" loading="lazy"></div><figcaption><span lang="en">The closing slide.</span><span lang="nl">De afsluitende slide.</span></figcaption></figure>
 </div>
@@ -345,7 +255,7 @@
 
 <section id="lessons">
   <div class="wrap">
-    <div class="rv narrow">
+    <div class="rv narrow lg">
       <h2><small>05</small><span lang="en">Challenges and what I learned</span><span lang="nl">Uitdagingen en wat ik leerde</span></h2>
 <p lang="en" class="lead">Four short stories.</p>
 <p lang="nl" class="lead">Vier korte verhalen.</p>
@@ -385,7 +295,7 @@
 
 <section id="next">
   <div class="wrap">
-    <div class="rv narrow">
+    <div class="rv narrow lg">
       <h2><small>06</small><span lang="en">What is next</span><span lang="nl">Wat nu komt</span></h2>
 <p lang="en" class="lead">Two big steps, and a few smaller ones behind them.</p>
 <p lang="nl" class="lead">Twee grote stappen, met een paar kleinere erachter.</p>
@@ -432,6 +342,7 @@
   <div class="wrap"><span lang="en">Clubbie is built for SCG'18 Zaterdag 4. Screenshots are from the demo mode, with made-up names and scores.</span><span lang="nl">Clubbie is gebouwd voor SCG'18 Zaterdag 4. Screenshots komen uit de demomodus, met verzonnen namen en uitslagen.</span></div>
 </footer>
 
+<script src="portfolio.js"></script>
 <script>
   document.body.classList.remove('nojs');
   (function(){
@@ -462,15 +373,6 @@
     setLang(document.documentElement.lang === 'nl' ? 'nl' : 'en', false);
   })();
 
-  (function(){
-    var els = document.querySelectorAll('.rv');
-    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (still || !('IntersectionObserver' in window)){ els.forEach(function(e){ e.classList.add('in'); }); return; }
-    var io = new IntersectionObserver(function(list){
-      list.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    els.forEach(function(e){ io.observe(e); });
-  })();
   try{
     if (sessionStorage.getItem('arcade_in')){
       sessionStorage.removeItem('arcade_in');
