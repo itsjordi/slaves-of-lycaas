@@ -862,14 +862,14 @@
 
     function walk(to, dur, done){
       cancelAnimationFrame(raf);
-      if (still){ cam = to; paint(0); done(); return; }
+      if (still) dur = Math.min(dur, 2600);   // reduced motion: a short, steady walk instead of a jump
       var from = cam, t0 = null;
       function step(t){
         if (t0 === null) t0 = t;
         var k = Math.min(1, (t - t0)/dur), e = k < .5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;
         cam = from + (to - from)*e;
         f = Math.floor(t/220);
-        paint(Math.sin(cam*9)*2);
+        paint(still ? 0 : Math.sin(cam*9)*2);
         if (k < 1) raf = requestAnimationFrame(step); else done();
       }
       raf = requestAnimationFrame(step);
@@ -985,8 +985,15 @@
         setTimeout(function(){ body.classList.remove('restoring'); fl.style.transition = ''; fl.style.animation = ''; fl.style.opacity = ''; }, 650);
       }); });
     }
+    // only when you really come back from one of the pages (back button or a link on the site), not on a fresh visit or a reload
     var returning = false;
-    try{ returning = sessionStorage.getItem('arcade_at') === '1'; }catch(x){}
+    try{
+      var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+      var ref = document.referrer ? new URL(document.referrer) : null;
+      var fromSite = !!ref && ref.origin === location.origin && !/\/(index\.html)?$/.test(ref.pathname);
+      returning = sessionStorage.getItem('arcade_at') === '1' && nav.type !== 'reload' && (nav.type === 'back_forward' || fromSite);
+      if (!returning) sessionStorage.removeItem('arcade_at');
+    }catch(x){}
     if (returning) restoreAtMachine();
     addEventListener('pageshow', function(e){
       var again = false;
