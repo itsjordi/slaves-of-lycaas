@@ -29,6 +29,12 @@
     });
   });
 
+  /* ---- portrait: tap toggles the pixel version on touch screens ---- */
+  document.querySelectorAll('.player .shot').forEach(function(s){
+    s.addEventListener('click', function(){ s.classList.toggle('px'); });
+    s.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); s.classList.toggle('px'); } });
+  });
+
   /* ---- scroll reveal: one shape, staggered per sibling ---- */
   document.body.classList.remove('nojs');
   var els = document.querySelectorAll('.rv');

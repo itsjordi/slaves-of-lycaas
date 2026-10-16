@@ -25,7 +25,7 @@
     if (__l === 'nl') document.documentElement.lang = 'nl';
   }catch(e){}
 </script>
-<link rel="stylesheet" href="portfolio.css?v=4">
+<link rel="stylesheet" href="portfolio.css?v=5">
 </head>
 <body class="nojs">
 <a class="skip" href="#main"><span lang="en">Skip to content</span><span lang="nl">Ga naar de inhoud</span></a>
@@ -52,6 +52,13 @@
 
 <header class="p-hero">
   <div class="wrap">
+    <figure class="player">
+      <div class="shot" tabindex="0" role="img" aria-label="Portrait of Jordi Mutsaers. Tap or hover to see the pixel version.">
+        <img class="real" src="images/jordi.jpg" width="800" height="800" alt="Jordi Mutsaers" fetchpriority="high">
+        <img class="pix" src="images/jordi-pixel.png" width="72" height="72" alt="" aria-hidden="true">
+      </div>
+      <figcaption class="mono"><span class="p">Player 1</span><span>Jordi M.</span><span class="lv">LV.4</span></figcaption>
+    </figure>
     <div class="grid">
       <p class="counter">S.01</p>
       <div>
@@ -209,7 +216,7 @@
   <div class="wrap"><a class="tlink" href="index.html"><span lang="en">Back to the arcade</span><span lang="nl">Terug naar de arcade</span></a></div>
 </footer>
 
-<script src="portfolio.js?v=4"></script>
+<script src="portfolio.js?v=5"></script>
 <script>
   (function(){
     var T = {
