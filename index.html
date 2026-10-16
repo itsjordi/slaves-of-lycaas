@@ -114,6 +114,9 @@
     54%{transform:scaleX(.5)}60%{transform:scaleX(.12)}66%{transform:scaleX(.5)}72%{transform:scaleX(1)}
     78%{transform:scaleX(.5)}84%{transform:scaleX(.12)}90%{transform:scaleX(.5)}100%{transform:scaleX(1)}}
   body.compact #toss .arc{width:72px;height:72px;left:-36px;bottom:-72px}
+  .stage.powered .hand,.stage.powered .hcoin{display:none}
+  body.restoring #bg,body.restoring .stage,body.restoring .screen,body.restoring .screen *{transition:none!important;animation:none!important}
+  body.restoring #toss{display:none!important}
   #flash{position:fixed;inset:0;z-index:20;pointer-events:none;background:#080e20;opacity:0}
   body.leaving #flash{animation:flashin .55s .8s forwards}
   @keyframes flashin{to{opacity:1}}
@@ -336,7 +339,7 @@
     var lastTagged = false;
     function resetMachine(){
       powered = false; inserting = false; body.classList.remove('tossing');
-      scr.classList.remove('on', 'boot'); mEl.classList.remove('ins', 'go'); body.classList.remove('leaving'); coinBtn.classList.add('ready'); coinBtn.classList.remove('used'); boot.textContent = '';
+      scr.classList.remove('on', 'boot'); mEl.classList.remove('ins', 'go', 'powered'); body.classList.remove('leaving'); coinBtn.classList.add('ready'); coinBtn.classList.remove('used'); boot.textContent = '';
     }
     function insertCoin(){
       if (powered || inserting) return;
@@ -350,7 +353,7 @@
         (function nextLine(){
           if (i < lines.length){ boot.textContent += (i ? '\n' : '') + lines[i++]; setTimeout(nextLine, 170); }
           else setTimeout(function(){
-            scr.classList.remove('boot'); scr.classList.add('on'); powered = true; select(startIndex());
+            scr.classList.remove('boot'); scr.classList.add('on'); powered = true; mEl.classList.add('powered'); select(startIndex());
           }, 350);
         })();
       }, tossMs + 700);
@@ -395,13 +398,21 @@
 
     // Coming back from a game or the portfolio: stand at the machine again with the menu on, no walk and no coin.
     function restoreAtMachine(){
+      var fl = document.getElementById('flash');
       cancelAnimationFrame(raf);
+      body.classList.add('restoring');
+      fl.style.transition = 'none'; fl.style.animation = 'none'; fl.style.opacity = '1';
       cam = TARGET; state = 'arrived'; fit();
       body.classList.remove('walking', 'leaving', 'tossing'); body.classList.add('arrived');
       paint(0); resetMachine();
       document.querySelectorAll('.opt .last').forEach(function(n){ n.remove(); }); lastTagged = false;
-      scr.classList.add('on'); coinBtn.classList.remove('ready'); coinBtn.classList.add('used');
+      scr.classList.add('on'); mEl.classList.add('powered'); coinBtn.classList.remove('ready'); coinBtn.classList.add('used');
       powered = true; select(startIndex());
+      // fade in from the same dark the page left on, then give animations back
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){
+        fl.style.transition = 'opacity .55s ease'; fl.style.opacity = '0';
+        setTimeout(function(){ body.classList.remove('restoring'); fl.style.transition = ''; fl.style.animation = ''; fl.style.opacity = ''; }, 650);
+      }); });
     }
     var returning = false;
     try{ returning = sessionStorage.getItem('arcade_at') === '1'; }catch(x){}
