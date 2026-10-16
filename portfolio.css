@@ -466,8 +466,9 @@ footer .fine{margin:0;max-width:70ch;font-size:var(--type-small);color:var(--mut
 .player .shot:hover,.player .shot:focus-visible{transform:translate(-2px,-2px);box-shadow:0 0 0 2px var(--ink),10px 10px 0 var(--accent)}
 .player img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .player .real{filter:contrast(1.06) saturate(.8)}
-.player .pix{image-rendering:pixelated;opacity:0;transition:opacity .2s steps(2)}
-.player .shot:hover .pix,.player .shot:focus-visible .pix,.player .shot.px .pix{opacity:1}
+.player .pix{image-rendering:pixelated;opacity:1;transition:opacity .2s steps(2)}
+.player .shot.on .pix,.player .shot:focus-visible .pix{opacity:0}
+@media(hover:hover){.player .shot:hover .pix{opacity:0}}
 .player .shot::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px),
   radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.28) 100%)}

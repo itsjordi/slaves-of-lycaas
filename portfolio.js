@@ -29,10 +29,11 @@
     });
   });
 
-  /* ---- portrait: tap toggles the pixel version on touch screens ---- */
+  /* ---- portrait: pixel by default, normal on hover (mouse) or on tap (touch), tap again to go back ---- */
   document.querySelectorAll('.player .shot').forEach(function(s){
-    s.addEventListener('click', function(){ s.classList.toggle('px'); });
-    s.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); s.classList.toggle('px'); } });
+    var touch = window.matchMedia && matchMedia('(hover: none)').matches;
+    if (touch) s.addEventListener('click', function(){ s.classList.toggle('on'); });
+    s.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); s.classList.toggle('on'); } });
   });
 
   /* ---- scroll reveal: one shape, staggered per sibling ---- */
