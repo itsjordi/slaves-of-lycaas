@@ -21,6 +21,27 @@
     --noise-light:.06; --noise-line1:.05; --noise-line2:.03;
   }
 
+  /* Pixel theme: dark navy, neon accents, blocky type, hard stepped shadows. */
+  html[data-theme="pixel"]{
+    --bg:#0b0a1e; --paper:#15122e; --panel:#15122e; --panel2:#201b4a;
+    --ink:#f2edff; --dim:#aaa2dc; --good:#5bff9a; --bad:#ff6b8b;
+    --border:#7a68e8; --accent:#ffd24f; --accent-dim:#ffb23f;
+    --noise-light:0; --noise-line1:0; --noise-line2:0;
+  }
+  html[data-theme="pixel"] *{border-radius:0!important}
+  html[data-theme="pixel"] body, html[data-theme="pixel"] button, html[data-theme="pixel"] input, html[data-theme="pixel"] select, html[data-theme="pixel"] textarea{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace!important}
+  html[data-theme="pixel"] body{
+    background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 4px,transparent 4px 8px),repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0 4px,transparent 4px 8px);
+  }
+  html[data-theme="pixel"] h1{text-transform:uppercase;letter-spacing:.08em;text-shadow:3px 3px 0 #6b2bd2}
+  html[data-theme="pixel"] .sub{font-style:normal}
+  html[data-theme="pixel"] .panel, html[data-theme="pixel"] .tab-panel, html[data-theme="pixel"] .window-launcher{border:3px solid var(--border)!important;box-shadow:6px 6px 0 #000}
+  html[data-theme="pixel"] .window-titlebar{border-bottom:3px solid var(--border);background:var(--panel2)}
+  html[data-theme="pixel"] .window-title{text-transform:uppercase;letter-spacing:.08em}
+  html[data-theme="pixel"] button, html[data-theme="pixel"] .launcher-btn{border-width:3px!important;font-weight:700}
+  html[data-theme="pixel"] button:hover{transform:translate(1px,1px)}
+  html[data-theme="pixel"] input, html[data-theme="pixel"] select, html[data-theme="pixel"] textarea{border-width:3px!important}
+
   *{box-sizing:border-box;}
   body{
     margin:0; font-family:Georgia,"Iowan Old Style","Palatino Linotype",Palatino,serif;
@@ -565,8 +586,9 @@
   // Applied immediately (before the rest of the page renders) so switching
   // back to a saved dark-mode preference doesn't flash light-mode first.
   try{
-    if (localStorage.getItem('lycaas_theme') === 'dark'){
-      document.documentElement.setAttribute('data-theme', 'dark');
+    var __t = localStorage.getItem('lycaas_theme');
+    if (__t === 'dark' || __t === 'pixel'){
+      document.documentElement.setAttribute('data-theme', __t);
     }
   }catch(e){}
 </script>
@@ -606,7 +628,7 @@
     </div>
     <button id="worldSettingsBtn" type="button" class="secondary" title="Set your home world (Light data center)">🌍 <span id="worldSettingsBtnLabel">Set world</span></button>
     <button id="infoBtn" type="button" class="secondary" title="What can this thing do?">ℹ️ Information</button>
-    <button id="themeToggleBtn" type="button" title="Switch between light and dark paper">🌙 Dark</button>
+    <button id="themeToggleBtn" type="button" title="Switch theme: light, dark, pixel">🌙 Dark</button>
   </div>
 
   <div id="worldSettingsPopover" class="settings-popover hidden">
@@ -1648,22 +1670,24 @@ document.addEventListener('keydown', (e)=>{
 // of daylight. The <head> already applied a saved preference before first
 // paint (to avoid a flash of the wrong theme) — this just wires the button. ---
 function applyTheme(theme){
-  if (theme === 'dark'){
-    document.documentElement.setAttribute('data-theme', 'dark');
+  if (theme === 'dark' || theme === 'pixel'){
+    document.documentElement.setAttribute('data-theme', theme);
   } else {
+    theme = 'light';
     document.documentElement.removeAttribute('data-theme');
   }
   localStorage.setItem('lycaas_theme', theme);
   const btn = document.getElementById('themeToggleBtn');
-  if (btn) btn.textContent = (theme === 'dark') ? '☀️ Light' : '🌙 Dark';
+  if (btn) btn.textContent = (theme === 'light') ? '\u{1F319} Dark' : (theme === 'dark') ? '\u{1F579} Pixel' : '\u2600 Light';
 }
-(function initTheme(){
-  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  applyTheme(current);
-})();
+function currentTheme(){
+  const t = document.documentElement.getAttribute('data-theme');
+  return (t === 'dark' || t === 'pixel') ? t : 'light';
+}
+(function initTheme(){ applyTheme(currentTheme()); })();
 document.getElementById('themeToggleBtn').addEventListener('click', ()=>{
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  applyTheme(isDark ? 'light' : 'dark');
+  const c = currentTheme();
+  applyTheme(c === 'light' ? 'dark' : c === 'dark' ? 'pixel' : 'light');
 });
 
 // --- Windows: every page (formerly a horizontal tab) is now its own
@@ -6797,5 +6821,17 @@ renderUnlockClaimedLinks();
 })();
 </script>
 <a href="index.html" id="gameSwitchPill" title="Switch game" style="position:fixed;bottom:12px;left:12px;z-index:9000;background:var(--panel2,#222);color:var(--text,#eee);border:1px solid var(--border,#444);border-radius:999px;padding:4px 12px;font-size:12px;text-decoration:none">Switch game: Aion 2</a>
+<script>
+// Arrived from the arcade: fade in from the dark screen colour.
+try{
+  if (sessionStorage.getItem('arcade_in')){
+    sessionStorage.removeItem('arcade_in');
+    var __d = document.createElement('div');
+    __d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#080e20;pointer-events:none;transition:opacity .8s ease';
+    document.body.appendChild(__d);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ __d.style.opacity = '0'; setTimeout(function(){ __d.remove(); }, 900); }); });
+  }
+}catch(e){}
+</script>
 </body>
 </html>
