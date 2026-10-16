@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Demo placeholder">
+  <!-- DEMO ASSET. Replace with a real screenshot, see TODO.md -->
+  <rect width="1200" height="900" fill="#1e1d19" />
+  <g stroke="#3a3830" stroke-width="2" fill="none">
+    <circle cx="600" cy="450" r="120" />
+    <circle cx="600" cy="450" r="220" />
+    <circle cx="600" cy="450" r="320" />
+  </g>
+  <g stroke="#4a473c" stroke-width="2">
+    <path d="M600 130v640M280 450h640M373 223l454 454M827 223L373 677" />
+  </g>
+  <g fill="#b7401f">
+    <circle cx="600" cy="230" r="14" />
+    <circle cx="820" cy="450" r="14" />
+    <circle cx="447" cy="603" r="14" />
+  </g>
+  <g fill="#f2f1ec">
+    <circle cx="600" cy="450" r="8" />
+  </g>
+  <text x="60" y="840" font-family="ui-monospace, monospace" font-size="26" letter-spacing="6" fill="#6f6c60">DEMO</text>
+</svg>

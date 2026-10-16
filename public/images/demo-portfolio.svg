@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Demo placeholder">
+  <!-- DEMO ASSET. Replace with a real screenshot, see TODO.md -->
+  <rect width="1200" height="900" fill="#f2f1ec" />
+  <rect x="90" y="90" width="1020" height="720" fill="#eae8e1" />
+  <g fill="#16150f">
+    <rect x="150" y="200" width="520" height="46" />
+    <rect x="150" y="266" width="380" height="46" />
+  </g>
+  <g fill="#c9c5b8">
+    <rect x="150" y="390" width="300" height="14" />
+    <rect x="150" y="424" width="420" height="14" />
+    <rect x="150" y="458" width="360" height="14" />
+  </g>
+  <rect x="700" y="390" width="350" height="290" fill="#d8d4c6" />
+  <g fill="#b7401f">
+    <rect x="150" y="150" width="70" height="12" />
+  </g>
+  <text x="60" y="855" font-family="ui-monospace, monospace" font-size="26" letter-spacing="6" fill="#8a8679">DEMO</text>
+</svg>

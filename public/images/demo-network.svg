@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Demo placeholder">
+  <!-- DEMO ASSET. Replace with a real photo, see TODO.md -->
+  <rect width="1200" height="900" fill="#e6e3da" />
+  <g stroke="#c2beb0" stroke-width="3" fill="none">
+    <path d="M600 450H200M600 450h400M600 450V180M600 450v270" />
+    <path d="M600 450 350 250M600 450l250-200M600 450 350 650M600 450l250 200" />
+  </g>
+  <g fill="#d8d4c6" stroke="#b3af9f" stroke-width="3">
+    <circle cx="200" cy="450" r="38" />
+    <circle cx="1000" cy="450" r="38" />
+    <circle cx="600" cy="180" r="38" />
+    <circle cx="600" cy="720" r="38" />
+    <circle cx="350" cy="250" r="30" />
+    <circle cx="850" cy="250" r="30" />
+    <circle cx="350" cy="650" r="30" />
+    <circle cx="850" cy="650" r="30" />
+  </g>
+  <rect x="520" y="390" width="160" height="120" fill="#b7401f" />
+  <g fill="#f2f1ec">
+    <rect x="550" y="425" width="100" height="8" />
+    <rect x="550" y="450" width="100" height="8" />
+    <rect x="550" y="475" width="60" height="8" />
+  </g>
+  <text x="60" y="840" font-family="ui-monospace, monospace" font-size="26" letter-spacing="6" fill="#8a8679">DEMO</text>
+</svg>
