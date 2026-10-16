@@ -3,54 +3,327 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Game tools</title>
+<title>Game Arcade</title>
 <style>
-  :root{--bg:#0e1118;--card:#171c28;--line:#2b3347;--text:#e8ebf5;--muted:#8d97b5}
+  :root{
+    --wall:#120a22; --wall2:#1a0f33; --floor:#0b0716; --neon-pink:#ff4fb8; --neon-cyan:#4fe6ff; --neon-gold:#ffd24f;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
   *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-  h1{margin:0 0 4px;font-size:26px}
-  p.sub{margin:0 0 28px;color:var(--muted)}
-  .cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
-  a.card{display:block;width:320px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;text-decoration:none;color:inherit;transition:transform .12s,border-color .12s}
-  a.card:hover{transform:translateY(-3px);border-color:var(--c)}
-  a.card h2{margin:0 0 6px;color:var(--c)}
-  a.card ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:13px}
-  .last{margin-top:22px;color:var(--muted);font-size:12px}
+  html,body{margin:0;height:100%}
+  body{
+    min-height:100vh; overflow-x:hidden; color:#f3eaff; font-family:var(--mono);
+    background:var(--wall);
+    display:flex; flex-direction:column; align-items:center;
+  }
+
+  /* neon sign */
+  .sign{margin-top:34px;text-align:center;position:relative;z-index:2}
+  .sign h1{
+    margin:0; font-size:clamp(34px,7vw,74px); letter-spacing:.14em; font-weight:800; text-transform:uppercase;
+    color:#ffd9f1; text-shadow:0 0 6px #fff,0 0 14px var(--neon-pink),0 0 30px var(--neon-pink),0 0 60px var(--neon-pink);
+    animation:neon 5s infinite;
+  }
+  .sign h1 span{color:#dffaff;text-shadow:0 0 6px #fff,0 0 14px var(--neon-cyan),0 0 30px var(--neon-cyan),0 0 60px var(--neon-cyan)}
+  .sign p{margin:10px 0 0;color:var(--neon-gold);letter-spacing:.35em;font-size:13px;text-transform:uppercase;text-shadow:0 0 10px rgba(255,210,79,.6)}
+  .open{position:absolute;right:-90px;top:6px;border:2px solid var(--neon-cyan);color:var(--neon-cyan);padding:2px 10px;font-size:13px;letter-spacing:.2em;text-shadow:0 0 8px var(--neon-cyan);box-shadow:0 0 10px var(--neon-cyan),inset 0 0 8px rgba(79,230,255,.4);animation:blink 2.4s steps(1) infinite}
+  @keyframes neon{0%,18%,22%,62%,64%,100%{opacity:1}20%,63%{opacity:.55}}
+  @keyframes blink{0%,70%{opacity:1}71%,76%{opacity:.25}77%,100%{opacity:1}}
+
+  /* the shop floor */
+  .shop{position:relative;width:100%;max-width:1100px;margin-top:70px;padding:0 20px 120px;display:flex;gap:clamp(20px,4vw,50px);justify-content:center;align-items:flex-end;flex-wrap:wrap;z-index:2}
+  #bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;object-fit:cover;image-rendering:pixelated;filter:saturate(.45) brightness(.72)}
+  .vig{position:fixed;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgba(7,4,15,.94) 0,rgba(7,4,15,.82) 170px,rgba(7,4,15,.35) 280px,transparent 380px),radial-gradient(ellipse at 50% 55%,transparent 35%,rgba(5,3,12,.6))}
+
+  /* cabinet */
+  .cab{--c1:#7c3bff;--c2:#ff4fb8;--glow:var(--neon-pink);
+    position:relative;display:block;width:270px;text-decoration:none;color:inherit;
+    transition:transform .2s ease, filter .2s ease; cursor:pointer;outline:none}
+  .cab{zoom:.72}
+  .cab.broken{zoom:.4;align-self:flex-start;margin-top:150px}
+  .cab:hover,.cab:focus-visible{transform:translateY(-8px);filter:drop-shadow(0 0 22px var(--glow))}
+  .cab.ffxiv{--c1:#d99a2b;--c2:#8c3a2b;--glow:var(--neon-gold)}
+  .cab.aion{--c1:#3b55c9;--c2:#8e5bff;--glow:var(--neon-cyan)}
+  .cab.broken{--c1:#59526e;--c2:#2f2a3f;--glow:#cfd6ee}
+  .body{position:relative;padding:12px 14px 0;background:linear-gradient(90deg, var(--c2), var(--c1) 18%, var(--c1) 82%, var(--c2));
+    clip-path:polygon(7% 0, 93% 0, 100% 100%, 0 100%); border-radius:6px 6px 0 0}
+  .marquee{margin:6px 8px 10px;padding:9px 6px;text-align:center;font-weight:800;letter-spacing:.2em;font-size:19px;text-transform:uppercase;
+    background:#0b0716;color:#fff;border:2px solid rgba(255,255,255,.18);text-shadow:0 0 10px var(--glow),0 0 22px var(--glow);
+    box-shadow:0 0 14px rgba(0,0,0,.6) inset}
+  .bezel{margin:0 4px;padding:14px;background:#08060f;border-radius:10px;box-shadow:0 0 0 3px rgba(255,255,255,.07),inset 0 0 20px #000}
+  .screen{position:relative;height:200px;overflow:hidden;border-radius:6px;background:#050912;font-size:12px;line-height:1.35}
+  .screen::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55));
+    animation:flick 3s infinite}
+  @keyframes flick{0%,100%{opacity:.9}50%{opacity:1}52%{opacity:.8}}
+  .attract{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:10px}
+  .attract .t{font-size:11px;letter-spacing:.2em;color:#9fb3d9}
+  .attract .big{font-size:30px;font-weight:800;letter-spacing:.04em;color:var(--glow);text-shadow:0 0 12px var(--glow);font-variant-numeric:tabular-nums}
+  .attract .s{font-size:11px;color:#c9d6ee}
+  .press{margin-top:6px;font-size:12px;letter-spacing:.25em;color:#fff;animation:press 1s steps(1) infinite}
+  @keyframes press{50%{opacity:0}}
+  /* ffxiv screen: falling coins */
+  .coinfall i{position:absolute;top:-14px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff3b0,#e8b030 55%,#a06c10);box-shadow:0 0 8px rgba(255,210,79,.8);animation:fall linear infinite}
+  @keyframes fall{to{transform:translateY(240px) rotateY(540deg)}}
+  /* aion screen: stars + diamond */
+  .stars i{position:absolute;width:2px;height:2px;background:#cfe6ff;border-radius:50%;animation:tw 2.4s ease-in-out infinite}
+  @keyframes tw{50%{opacity:.15}}
+  .gem{width:54px;height:54px;transform:rotate(45deg);border:3px solid var(--neon-gold);position:relative;box-shadow:0 0 14px rgba(255,210,79,.6);animation:gem 3s ease-in-out infinite}
+  .gem::after{content:"";position:absolute;inset:9px;border:2px solid var(--neon-cyan);box-shadow:0 0 10px var(--neon-cyan)}
+  @keyframes gem{50%{transform:rotate(45deg) scale(1.1)}}
+  .off{background:#0a0a10}
+  .off .attract{color:#4b4c5a}
+  .deck{margin:14px 6px 0;height:62px;background:linear-gradient(180deg,#161224,#0d0a18);border-top:3px solid rgba(255,255,255,.12);position:relative;transform:perspective(160px) rotateX(18deg);transform-origin:top}
+  .stick{position:absolute;left:34px;top:12px;width:12px;height:34px;background:#222;border-radius:4px}
+  .stick::before{content:"";position:absolute;left:-9px;top:-14px;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--neon-pink) 45%,#7a1058);box-shadow:0 0 12px var(--neon-pink)}
+  .btns{position:absolute;right:26px;top:14px;display:flex;gap:12px}
+  .btns i{width:22px;height:22px;border-radius:50%;box-shadow:0 3px 0 rgba(0,0,0,.5)}
+  .btns i:nth-child(1){background:var(--neon-cyan)}.btns i:nth-child(2){background:var(--neon-gold)}.btns i:nth-child(3){background:var(--neon-pink)}
+  .coinbox{position:relative;margin:0 10px;padding:12px 10px 14px;background:#0f0b1c;border-top:2px solid rgba(255,255,255,.08);text-align:center;font-size:11px;letter-spacing:.22em;color:var(--neon-gold);clip-path:polygon(0 0,100% 0,98% 100%,2% 100%)}
+  .slot{display:inline-block;width:46px;height:9px;margin:0 8px;background:#000;border:1px solid #444;vertical-align:middle;position:relative}
+  .slot::after{content:"";position:absolute;inset:-1px;box-shadow:0 0 8px var(--neon-gold);opacity:.7;animation:press 1.4s steps(1) infinite}
+  .legs{height:26px;background:linear-gradient(90deg,var(--c2),var(--c1) 25%,var(--c1) 75%,var(--c2));clip-path:polygon(0 0,100% 0,96% 100%,4% 100%);opacity:.9}
+  .shadow{height:14px;margin:0 -10px;background:radial-gradient(ellipse at center,rgba(0,0,0,.65),transparent 70%)}
+  .tag{position:absolute;top:-14px;right:-10px;z-index:3;background:var(--neon-gold);color:#1a1000;font-size:11px;font-weight:800;letter-spacing:.12em;padding:4px 10px;transform:rotate(6deg);box-shadow:0 3px 0 rgba(0,0,0,.4)}
+  .tag.hid{display:none}
+  .drop{position:absolute;left:50%;top:48%;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff3b0,#e8b030 55%,#a06c10);opacity:0;z-index:5}
+  .cab.go .drop{animation:insert .45s ease-in forwards}
+  @keyframes insert{0%{opacity:1;transform:translateY(-120px) scale(1.4)}100%{opacity:1;transform:translateY(190px) scale(.5)}}
+  .cab.go .screen{animation:shake .2s linear 2}
+  @keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+
+  #soon{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;text-align:center;background:rgba(5,3,12,.92);cursor:pointer;padding:24px}
+  #soon.on{display:flex;animation:crton .35s steps(6)}
+  #soon::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.35) 0 2px,transparent 2px 4px)}
+  #soon .in{position:relative;z-index:1}
+  #soon h2{margin:0;font-size:clamp(28px,6vw,64px);line-height:1.25;letter-spacing:.12em;color:#fff;text-transform:uppercase;text-shadow:0 0 8px #fff,0 0 22px var(--neon-cyan),0 0 46px var(--neon-cyan);animation:neon 3s infinite}
+  #soon p{margin:26px 0 0;color:var(--neon-gold);letter-spacing:.3em;font-size:13px;animation:press 1s steps(1) infinite}
+  @keyframes crton{0%{transform:scaleY(.02);opacity:0}60%{transform:scaleY(1);opacity:.6}100%{opacity:1}}
+  /* shop details */
+  .counter{position:relative;z-index:2;margin:6px 0 40px;display:flex;gap:26px;flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:.18em;color:#a99ac9;text-transform:uppercase}
+  .counter b{color:var(--neon-gold);font-weight:700}
+  @media (max-width:640px){.open{position:static;display:inline-block;margin-top:10px}.cab{width:240px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-  <h1>Game tools</h1>
-  <p class="sub">Pick a game. You can switch at any time from inside each tool.</p>
-  <div class="cards">
-    <a class="card" href="ffxiv.html" data-game="ffxiv" data-file="ffxiv.html" style="--c:#e0b050">
-      <h2>FFXIV</h2>
-      <div>Crafting costs, market profit, watchlist, gil per hour and more.</div>
-      <ul><li>Pinned to the Light data center</li><li>Floating windows and presets</li></ul>
-    </a>
-    <a class="card" href="aion2.html" data-game="aion2" data-file="aion2.html" style="--c:#7c8cff">
-      <h2>Aion 2</h2>
-      <div>Daily and weekly board for your main and alts, plus an event tracker.</div>
-      <ul><li>Shugo Festival, rifts and reset alerts</li><li>Pop-out tracker for your second screen</li></ul>
-    </a>
+  <canvas id="bg" width="240" height="135" aria-hidden="true"></canvas>
+  <div class="vig"></div>
+
+  <div class="sign">
+    <h1>Game <span>Arcade</span></h1>
+    <p>Pick a cabinet &middot; one coin &middot; no account</p>
+    <div class="open">OPEN</div>
   </div>
-  <div class="last" id="last"></div>
-<script>
-  try{
-    var g = localStorage.getItem('lycaas_lastgame');
-    document.querySelectorAll('a.card').forEach(function(a){
-      a.addEventListener('click', function(){ try{ localStorage.setItem('lycaas_lastgame', a.dataset.game); }catch(e){} });
-    });
-    if (g) document.getElementById('last').textContent = 'Last opened: ' + (g === 'aion2' ? 'Aion 2' : 'FFXIV');
-  }catch(e){}
-</script>
+
+  <div class="counter"><span>Players online: <b>you</b></span><span>High score: <b>whatever you did last</b></span><span>Tokens: <b>free</b></span></div>
+
+  <main class="shop">
+    <a class="cab ffxiv" href="ffxiv.html" data-game="ffxiv" data-file="ffxiv.html" aria-label="Play FFXIV tools">
+      <span class="tag hid" id="tag-ffxiv">Last played</span>
+      <div class="drop"></div>
+      <div class="body">
+        <div class="marquee">FFXIV</div>
+        <div class="bezel"><div class="screen">
+          <div class="coinfall" id="coins"></div>
+          <div class="attract"><span class="t">GIL PER HOUR</span><span class="big" id="gil">0</span><span class="s">CRAFT COSTS &middot; PROFIT &middot; WATCHLIST</span><span class="press">PRESS START</span></div>
+        </div></div>
+        <div class="deck"><div class="stick"></div><div class="btns"><i></i><i></i><i></i></div></div>
+        <div class="coinbox">INSERT <span class="slot"></span> COIN</div>
+      </div>
+      <div class="legs"></div><div class="shadow"></div>
+    </a>
+
+    <div class="cab broken" id="soonCab" role="button" tabindex="0" aria-label="Coming soon">
+      <div class="body">
+        <div class="marquee" style="font-size:24px;color:#fff">SOON</div>
+        <div class="bezel"><div class="screen off"><div class="attract"><span class="big" style="font-size:54px;color:#cfd6ee;text-shadow:0 0 12px #7f8cc0">?</span><span class="press" style="font-size:16px;letter-spacing:.2em">PRESS ME</span></div></div></div>
+        <div class="deck"><div class="stick"></div><div class="btns"><i></i><i></i><i></i></div></div>
+        <div class="coinbox" style="color:#cfd6ee">NEW GAME</div>
+      </div>
+      <div class="legs"></div><div class="shadow"></div>
+    </div>
+
+    <a class="cab aion" href="aion2.html" data-game="aion2" data-file="aion2.html" aria-label="Play Aion 2 board">
+      <span class="tag hid" id="tag-aion2">Last played</span>
+      <div class="drop"></div>
+      <div class="body">
+        <div class="marquee">AION 2</div>
+        <div class="bezel"><div class="screen">
+          <div class="stars" id="stars"></div>
+          <div class="attract"><div class="gem"></div><span class="t" style="margin-top:14px">NEXT UP</span><span class="big" id="clk">15:00</span><span class="s">DAILIES &middot; TIMERS &middot; ALTS</span><span class="press">PRESS START</span></div>
+        </div></div>
+        <div class="deck"><div class="stick"></div><div class="btns"><i></i><i></i><i></i></div></div>
+        <div class="coinbox">INSERT <span class="slot"></span> COIN</div>
+      </div>
+      <div class="legs"></div><div class="shadow"></div>
+    </a>
+
+  </main>
+
+<div id="soon" role="dialog" aria-label="Coming soon"><div class="in"><h2>Coming soon<br>to your local<br>arcade hall</h2><p>PRESS ANY KEY</p></div></div>
+
 <script>
   // Resolve links from the real folder of this page, so they still work when the URL has no trailing slash.
   (function(){
     var p = location.pathname;
     if (!/\/$/.test(p) && !/\.[a-z0-9]+$/i.test(p)) p += '/';
     var dir = p.replace(/[^\/]*$/, '');
-    document.querySelectorAll('a.card[data-file]').forEach(function(a){ a.href = location.origin + dir + a.getAttribute('data-file'); });
+    document.querySelectorAll('a.cab[data-file]').forEach(function(a){ a.href = location.origin + dir + a.getAttribute('data-file'); });
   })();
+
+  // Attract mode: falling coins, twinkling stars, a counting score, a ticking clock.
+  (function(){
+    var coins = document.getElementById('coins');
+    for (var i = 0; i < 9; i++){
+      var c = document.createElement('i');
+      c.style.left = (6 + i*10.5) + '%';
+      c.style.animationDuration = (2.2 + (i%4)*0.7) + 's';
+      c.style.animationDelay = (-i*0.5) + 's';
+      coins.appendChild(c);
+    }
+    var stars = document.getElementById('stars');
+    for (var j = 0; j < 26; j++){
+      var s = document.createElement('i');
+      s.style.left = (Math.random()*100) + '%'; s.style.top = (Math.random()*100) + '%';
+      s.style.animationDelay = (-Math.random()*2.4) + 's';
+      stars.appendChild(s);
+    }
+    var gil = 0, el = document.getElementById('gil');
+    setInterval(function(){ gil += 1000 + Math.floor(Math.random()*9000); if (gil > 9999999) gil = 0; el.textContent = gil.toLocaleString('en-US'); }, 120);
+    var t = 15*60, clk = document.getElementById('clk');
+    setInterval(function(){ t = t > 0 ? t - 1 : 15*60; var m = Math.floor(t/60), sec = t%60; clk.textContent = String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0'); }, 1000);
+  })();
+
+  // Pixel-art arcade hall: first-person view down the aisle, cabinets on both sides. 240x135 canvas, scaled up without smoothing.
+  (function(){
+    var cv = document.getElementById('bg'), g = cv.getContext('2d');
+    var W = 240, H = 135, VX = 120, VY = 60, K = 72, ZMAX = 14, PITCH = 0.66;
+    var pal = [[255,79,184],[79,230,255],[255,210,79],[142,91,255],[91,255,154],[255,122,61]];
+    function hash(a,b){ var h = (a*374761393 + b*668265263)|0; h = (h ^ (h>>>13)) * 1274126177 | 0; return ((h ^ (h>>>16))>>>0) / 4294967295; }
+    function R(x,y,w,h,c){ g.fillStyle = c; g.fillRect(x,y,w,h); }
+    function rgb(c,m){ return 'rgb(' + Math.round(c[0]*m) + ',' + Math.round(c[1]*m) + ',' + Math.round(c[2]*m) + ')'; }
+    function fl(v){ return Math.floor(v); }
+    function draw(f){
+      R(0,0,W,H,'#07040f');
+      var x, y, dx, dy, z, X, tx, tz, line, h, c;
+      // ceiling: tile grid, light panels, confetti lights
+      for (y = 0; y < VY; y++){
+        dy = VY - y; z = K*1.1/dy; if (z > 60) continue;
+        for (x = 0; x < W; x++){
+          dx = x - VX; X = dx*z/K; tx = X/0.7; tz = z/0.9;
+          line = (tx - fl(tx)) < 0.07 || (tz - fl(tz)) < 0.11;
+          var cell = hash(fl(tx), fl(tz));
+          if (line) c = '#2a1850';
+          else if (cell < 0.03) c = rgb(pal[fl(cell*60)%6], 0.85 + 0.15*Math.sin(f + fl(tx)));
+          else {
+            c = '#0c071d';
+            var hh = hash(fl(tx*4) + 9, fl(tz*4));
+            if (hh > 0.985) c = rgb(pal[fl(hh*100)%6], 0.7);
+          }
+          g.fillStyle = c; g.fillRect(x, y, 1, 1);
+        }
+      }
+      // floor: carpet aisle with neon edges
+      for (y = VY + 1; y < H; y++){
+        dy = y - VY; z = K*1.0/dy;
+        for (x = 0; x < W; x++){
+          dx = x - VX; X = dx*z/K; var aX = Math.abs(X);
+          if (aX > 0.95) continue;
+          var gx = fl(X*4), gz = fl(z*4);
+          if (aX > 0.80){
+            var seg = fl(z/PITCH);
+            var ec = pal[fl(hash(seg, 3 + (X > 0 ? 1 : 0))*6)];
+            c = aX > 0.86 ? rgb(ec, 0.9) : rgb(ec, 0.35);
+          } else {
+            c = ((gx + gz) & 1) ? '#1d1040' : '#150b2e';
+            if (aX < 0.32) c = ((gx + gz) & 1) ? '#2e1858' : '#25134a';
+            var sp = hash(fl(X*9), fl(z*9));
+            if (sp > 0.965) c = rgb(pal[fl(sp*1000)%6], 0.75);
+          }
+          g.fillStyle = c; g.fillRect(x, y, 1, 1);
+        }
+      }
+      // far end of the hall
+      R(VX-6, VY-7, 12, 13, '#1a0f33');
+      R(VX-5, VY-5, 3, 4, rgb(pal[0], 0.9)); R(VX-1, VY-5, 3, 4, rgb(pal[1], 0.9)); R(VX+3, VY-5, 3, 4, rgb(pal[2], 0.9));
+      // cabinets on both sides, drawn column by column
+      for (var side = -1; side <= 1; side += 2){
+        for (var d = 5; d < 120; d++){
+          x = VX + side*d; z = 0.9*K/d; if (z >= ZMAX) continue;
+          var idx = fl(z/PITCH), u = z/PITCH - idx, id = idx*2 + (side > 0 ? 1 : 0);
+          var col = pal[fl(hash(id, 3)*6)];
+          var m = Math.max(0.4, Math.min(1, 1.3 - z/9));
+          var Y = function(v){ return Math.round(VY + v*K/z); };
+          var top = Y(-0.95), bot = Y(1.0);
+          if (u < 0.06 || u > 0.97){ R(x, top, 1, bot - top, rgb(col, 0.8*m)); continue; }
+          R(x, top, 1, bot - top, rgb([34,22,70], m));
+          // marquee
+          if (u > 0.10 && u < 0.92) R(x, top + 1, 1, Y(-0.62) - top, rgb(col, m*(0.75 + 0.25*Math.sin(f*1.7 + id))));
+          // screen
+          var sT = Y(-0.55), sB = Y(-0.05);
+          if (u > 0.10 && u < 0.90){
+            R(x, sT, 1, sB - sT, '#06050e');
+            if (u > 0.16 && u < 0.84){
+              for (y = sT + 1; y < sB - 1; y++){
+                var v = (y - sT)/(sB - sT), nv = hash(fl(u*9) + id*7, fl(v*9) + fl(f*0.9 + id));
+                g.fillStyle = nv > 0.62 ? rgb(col, m) : nv > 0.30 ? rgb([col[2], col[0], col[1]], 0.7*m) : rgb([10,18,48], 1);
+                g.fillRect(x, y, 1, 1);
+              }
+            }
+          }
+          // control deck with buttons
+          var dT = Y(-0.05), dB = Y(0.12);
+          R(x, dT, 1, Math.max(1, dB - dT), rgb(col, 0.85*m));
+          if (u > 0.3 && u < 0.7 && ((fl(u*14)) % 2 === 0)) R(x, dT, 1, 1, rgb(pal[(id + fl(u*14)) % 6], 1));
+          // coin door
+          if (u > 0.30 && u < 0.70){
+            R(x, Y(0.42), 1, Math.max(1, Y(0.75) - Y(0.42)), rgb(col, 0.28*m));
+            if (u < 0.34 || u > 0.66) R(x, Y(0.42), 1, Math.max(1, Y(0.75) - Y(0.42)), rgb(col, 0.8*m));
+          }
+          // glow where the cabinet meets the carpet
+          R(x, bot - 1, 1, 1, rgb(col, 0.9*m));
+        }
+      }
+      // haze toward the far end
+      var grd = g.createRadialGradient(VX, VY, 2, VX, VY, 38);
+      grd.addColorStop(0, 'rgba(120,60,200,0.30)'); grd.addColorStop(1, 'rgba(120,60,200,0)');
+      g.fillStyle = grd; g.fillRect(0, 0, W, H);
+    }
+    var f = 0; draw(0);
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!still) setInterval(function(){ f++; draw(f); }, 450);
+  })();
+
+  // Back cabinet: coming soon screen.
+  (function(){
+    var cab = document.getElementById('soonCab'), ov = document.getElementById('soon');
+    function open(){ ov.classList.add('on'); }
+    function close(){ ov.classList.remove('on'); }
+    cab.addEventListener('click', open);
+    cab.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
+    ov.addEventListener('click', close);
+    document.addEventListener('keydown', function(e){ if (ov.classList.contains('on')) close(); });
+  })();
+
+  // Remember the last game, show a sticker on it.
+  try{
+    var last = localStorage.getItem('lycaas_lastgame');
+    var tag = last && document.getElementById('tag-' + last);
+    if (tag) tag.classList.remove('hid');
+  }catch(e){}
+
+  // Insert a coin, then go.
+  document.querySelectorAll('a.cab[data-game]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      try{ localStorage.setItem('lycaas_lastgame', a.dataset.game); }catch(x){}
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      a.classList.add('go');
+      setTimeout(function(){ location.href = a.href; }, 520);
+    });
+  });
 </script>
 </body>
 </html>
