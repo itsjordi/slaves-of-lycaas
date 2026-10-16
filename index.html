@@ -28,6 +28,17 @@
   #bg{transition:transform 1s cubic-bezier(.3,.7,.2,1),filter 1s,opacity 1s}
   body.arrived #bg{transform:translateX(-9%) scale(1.25);filter:brightness(.5) blur(3px)}
 
+  /* 3D hall: low-res canvas scaled up with hard pixels, plus a soft blurred copy on top for neon glow */
+  #bg canvas.three,#bg canvas.bloom{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #bg canvas.three{image-rendering:crisp-edges;image-rendering:pixelated}
+  #bg canvas.bloom{pointer-events:none;filter:contrast(2.2) brightness(1.2) blur(10px);mix-blend-mode:screen;opacity:.6}
+  body.three .hl{display:none}
+  body.three #bg{filter:none}
+  body.three.arrived #bg{transform:scale(1.08);filter:brightness(.5) blur(3px)}
+  body.three .stage:not(.go){animation-name:approach3}
+  @keyframes approach3{0%{transform:scale(.7);opacity:0}100%{transform:none;opacity:1}}
+  @media (max-width:1180px){.open{position:static;display:inline-block;margin-top:12px}}
+
   /* intro / hud */
   #hud{position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:opacity .6s}
   body.walking #hud,body.arrived #hud{opacity:0}
@@ -221,6 +232,7 @@
 
   <div id="soon" role="dialog" aria-label="Coming soon"><div class="in"><h2 data-i="soon">Coming soon<br>to your local<br>arcade hall</h2><p data-i="anykey">PRESS ANY KEY</p></div></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
   // Links resolve from the real folder of this page, so they work without a trailing slash too.
   (function(){
@@ -258,7 +270,7 @@
 
   // The hall is three pixel-art pictures (entrance, halfway, at the machines). Walking = zoom into the pair of machines at the end
   // of the aisle, fading to the sharper next picture so nothing is stretched too far.
-  var Hall = (function(){
+  function make2DHall(){
     var imgs = Array.prototype.slice.call(document.querySelectorAll('#bg .hl')), END = 12;
     var IW = 1672, IH = 941;
     var P = [[835,502],[838,485],[837,472]];      // centre of the two machines in each picture
@@ -289,6 +301,554 @@
       });
     }
     return { draw: draw, END: END };
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // 3D arcade hall. A real scene (Three.js) rendered at a low resolution and scaled up with hard
+  // pixels, so it matches the pixel art. Same interface as the 2D hall: draw(cam, f, bob) and END.
+  // Everything is built from boxes and tiny canvases; static parts are merged to keep draw calls low.
+  // ---------------------------------------------------------------------------------------------
+  function makeHall3D(host, END){
+    var T3 = window.THREE;
+    if (!T3) return null;
+    var cv = document.createElement('canvas');
+    var renderer;
+    try{ renderer = new T3.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: 'high-performance' }); }
+    catch(e){ return null; }
+    if (!renderer.getContext()) return null;
+    renderer.setPixelRatio(1);
+    renderer.setClearColor(0x06040e, 1);
+    cv.className = 'three';
+    var bloom = document.createElement('canvas'); bloom.className = 'bloom';
+    var bctx = bloom.getContext('2d');
+    host.appendChild(cv); host.appendChild(bloom);
+
+    var scene = new T3.Scene();
+    scene.fog = new T3.Fog(0x06040e, 9, 40);
+    var camera = new T3.PerspectiveCamera(58, 1, 0.05, 60);
+
+    // ---------- tiny pixel font (3x5) ----------
+    var F = {
+      A:'010101111101101',B:'110101110101110',C:'011100100100011',D:'110101101101110',E:'111100110100111',F:'111100110100100',
+      G:'011100101101011',H:'101101111101101',I:'111010010010111',J:'001001001101010',K:'101101110101101',L:'100100100100111',
+      M:'101111111101101',N:'110101101101101',O:'010101101101010',P:'110101110100100',Q:'010101101110011',R:'110101110101101',
+      S:'011100010001110',T:'111010010010010',U:'101101101101111',V:'101101101101010',W:'101101111111101',X:'101101010101101',
+      Y:'101101010010010',Z:'111001010100111','0':'111101101101111','1':'010110010010111','2':'110001010100111','3':'110001010001110',
+      '4':'101101111001001','5':'111100110001110','6':'011100111101111','7':'111001010010010','8':'111101111101111','9':'111101111001110',
+      ' ':'000000000000000','.':'000000000000010','!':'010010010000010','-':'000000111000000',':':'000010000010000',"'":'010010000000000',
+      '/':'001001010100100','?':'110001010000010'
+    };
+    function textW(s, k){ return s.length * 4 * k - k; }
+    function text(g, s, x, y, k, col){
+      g.fillStyle = col; s = s.toUpperCase();
+      for (var i = 0; i < s.length; i++){
+        var m = F[s[i]] || F[' '];
+        for (var b = 0; b < 15; b++) if (m[b] === '1') g.fillRect(x + i*4*k + (b%3)*k, y + Math.floor(b/3)*k, k, k);
+      }
+    }
+    function ctext(g, s, cx, y, k, col, shadow){
+      var x = Math.round(cx - textW(s, k)/2);
+      if (shadow) text(g, s, x + k, y + k, k, shadow);
+      text(g, s, x, y, k, col);
+    }
+    function canvas(w, h){ var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    function ctex(c, rep){
+      var t = new T3.CanvasTexture(c);
+      t.magFilter = T3.NearestFilter;
+      if (rep){ t.wrapS = t.wrapT = T3.RepeatWrapping; t.repeat.set(rep[0], rep[1]); t.minFilter = T3.NearestMipmapNearestFilter; }
+      else { t.minFilter = T3.NearestFilter; t.generateMipmaps = false; }
+      return t;
+    }
+    var seed = 7;
+    function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+
+    // ---------- palette ----------
+    var NEON = { orange:'#ff8a2a', pink:'#ff4fb8', cyan:'#4fe6ff', purple:'#a85cff', gold:'#ffd24f', green:'#5dff8a', red:'#ff4a4a', blue:'#4f7bff' };
+
+    // ---------- materials (by key) ----------
+    var mats = {};
+    function basic(key, color, opts){
+      if (!mats[key]){ var o = { color: color, fog: true }; for (var k in opts) o[k] = opts[k]; mats[key] = new T3.MeshBasicMaterial(o); mats[key].userData.glow = true; }
+      return key;
+    }
+    function lambert(key, color, opts){
+      if (!mats[key]){ var o = { color: color }; for (var k in opts) o[k] = opts[k]; mats[key] = new T3.MeshLambertMaterial(o); }
+      return key;
+    }
+    lambert('body', 0x17142c); lambert('dark', 0x0c0a18); lambert('panel', 0x231d40); lambert('metal', 0x6d6a86);
+    lambert('stoolSeat', 0xb3263a); lambert('pot', 0x5a3424); lambert('leaf', 0x2f8a4a); lambert('leaf2', 0x22663a);
+    lambert('ball', 0xe0303a); lambert('bin', 0x3a3c52);
+    Object.keys(NEON).forEach(function(n){ basic('n_' + n, NEON[n]); });
+    basic('btn_r', 0xff3b3b); basic('btn_b', 0x3b7bff); basic('btn_y', 0xffc83b); basic('btn_g', 0x3bff6a);
+    basic('coin', 0xff9a2a); basic('ceil', 0x9fefff); basic('ceilDim', 0x5aa8c0); basic('black', 0x05040b);
+
+    // side art: diagonal stripes in the trim colour
+    function sideKey(n){
+      var key = 'side_' + n;
+      if (!mats[key]){
+        var c = canvas(16, 32), g = c.getContext('2d');
+        g.fillStyle = '#17142c'; g.fillRect(0, 0, 16, 32);
+        g.fillStyle = NEON[n]; g.globalAlpha = .55;
+        for (var i = -32; i < 32; i += 6) for (var y = 0; y < 32; y++){ var x = i + y; if (x >= 0 && x < 16 && y > 18) g.fillRect(x, y, 2, 1); }
+        g.globalAlpha = .9; g.fillRect(0, 31, 16, 1);
+        mats[key] = new T3.MeshLambertMaterial({ map: ctex(c) });
+      }
+      return key;
+    }
+
+    // ---------- batching: everything static is merged per material ----------
+    var batches = {};
+    function put(geo, matrix, key){ (batches[key] = batches[key] || []).push({ g: geo, m: matrix.clone() }); }
+    function merge(list){
+      var parts = list.map(function(p){ var c = p.g.index ? p.g.toNonIndexed() : p.g.clone(); c.applyMatrix4(p.m); return c; });
+      var n = 0; parts.forEach(function(c){ n += c.attributes.position.count; });
+      var pos = new Float32Array(n*3), nor = new Float32Array(n*3), uv = new Float32Array(n*2), o = 0;
+      parts.forEach(function(c){
+        pos.set(c.attributes.position.array, o*3); nor.set(c.attributes.normal.array, o*3);
+        if (c.attributes.uv) uv.set(c.attributes.uv.array, o*2);
+        o += c.attributes.position.count; c.dispose();
+      });
+      var g = new T3.BufferGeometry();
+      g.setAttribute('position', new T3.BufferAttribute(pos, 3));
+      g.setAttribute('normal', new T3.BufferAttribute(nor, 3));
+      g.setAttribute('uv', new T3.BufferAttribute(uv, 2));
+      g.computeBoundingSphere();
+      return g;
+    }
+
+    // a builder works in a local frame (an Object3D) and drops parts into the batches
+    var G = {
+      box: function(w, h, d){ return new T3.BoxGeometry(w, h, d); },
+      plane: function(w, h){ return new T3.PlaneGeometry(w, h); },
+      cyl: function(rt, rb, h, s){ return new T3.CylinderGeometry(rt, rb, h, s || 8); },
+      sph: function(r){ return new T3.SphereGeometry(r, 8, 6); }
+    };
+    var tmp = new T3.Object3D();
+    function part(frame, geo, key, x, y, z, rx, ry, rz){
+      tmp.position.set(x, y, z); tmp.rotation.set(rx || 0, ry || 0, rz || 0); tmp.scale.set(1, 1, 1);
+      tmp.updateMatrix();
+      var m = new T3.Matrix4().multiplyMatrices(frame.matrixWorld, tmp.matrix);
+      put(geo, m, key);
+    }
+    function frameAt(x, y, z, ry, parent){
+      var f = new T3.Object3D(); f.position.set(x, y, z); f.rotation.y = ry || 0;
+      if (parent){ parent.add(f); parent.updateMatrixWorld(true); } else f.updateMatrixWorld(true);
+      return f;
+    }
+    function sub(frame, x, y, z, rx){
+      var f = new T3.Object3D(); f.position.set(x, y, z); f.rotation.x = rx || 0; frame.add(f); frame.updateMatrixWorld(true); return f;
+    }
+
+    // ---------- screens: a few animated 64x48 canvases, shared between cabinets ----------
+    var screens = [];
+    function screen(draw){
+      var c = canvas(64, 48), g = c.getContext('2d'), t = ctex(c);
+      var key = 'scr' + screens.length;
+      mats[key] = new T3.MeshBasicMaterial({ map: t, fog: true }); mats[key].userData.glow = true;
+      screens.push({ c: c, g: g, t: t, draw: draw });
+      return key;
+    }
+    var stars = []; for (var i = 0; i < 26; i++) stars.push([rnd()*64, rnd()*48, .4 + rnd()*1.2]);
+    function clr(g, c){ g.fillStyle = c; g.fillRect(0, 0, 64, 48); }
+    var S = {
+      shooter: screen(function(g, t){
+        clr(g, '#05030c');
+        g.fillStyle = '#7a86c8'; stars.forEach(function(s){ g.fillRect(Math.floor(s[0]), Math.floor((s[1] + t*s[2]*14) % 48), 1, 1); });
+        var ox = Math.round(Math.sin(t*1.3)*7);
+        for (var r = 0; r < 3; r++) for (var c = 0; c < 6; c++){
+          g.fillStyle = r === 0 ? NEON.pink : (r === 1 ? NEON.cyan : NEON.green);
+          var x = 10 + c*8 + ox, y = 7 + r*6, fr = Math.floor(t*3) % 2;
+          g.fillRect(x, y, 5, 3); g.fillRect(x + (fr ? 0 : 1), y + 3, 1, 1); g.fillRect(x + (fr ? 4 : 3), y + 3, 1, 1);
+        }
+        var sx = 32 + Math.round(Math.sin(t*.9)*18);
+        g.fillStyle = NEON.gold; g.fillRect(sx - 3, 42, 7, 2); g.fillRect(sx - 1, 40, 3, 2);
+        g.fillStyle = '#fff'; var by = 39 - Math.floor((t*40) % 30); g.fillRect(sx, by, 1, 3);
+        text(g, 'HI 42190', 2, 1, 1, '#c9d2ff');
+      }),
+      maze: screen(function(g, t){
+        clr(g, '#020210');
+        g.fillStyle = '#2b3cff';
+        for (var x = 2; x < 64; x += 12){ g.fillRect(x, 6, 1, 14); g.fillRect(x, 28, 1, 14); }
+        g.fillRect(2, 4, 61, 1); g.fillRect(2, 43, 61, 1); g.fillRect(2, 24, 20, 1); g.fillRect(42, 24, 21, 1);
+        var p = (t*18) % 112, px, py;
+        if (p < 56){ px = 4 + p; py = 23; } else { px = 60 - (p - 56); py = 23; }
+        g.fillStyle = '#ffe1a8'; for (var d = 6; d < 60; d += 4) if ((p < 56 && d > px) || (p >= 56 && d < px)) g.fillRect(d, 24, 1, 1);
+        var open = Math.floor(t*8) % 2;
+        g.fillStyle = NEON.gold; g.fillRect(px - 2, py - 2, 5, 5); if (open){ g.fillStyle = '#020210'; g.fillRect(p < 56 ? px + 1 : px - 2, py, 2, 1); }
+        var gx = p < 56 ? px - 12 : px + 12;
+        g.fillStyle = NEON.pink; g.fillRect(gx - 2, py - 2, 5, 4); g.fillRect(gx - 2, py + 2, 1, 1); g.fillRect(gx + 2, py + 2, 1, 1); g.fillRect(gx, py + 2, 1, 1);
+        g.fillStyle = '#fff'; g.fillRect(gx - 1, py - 1, 1, 1); g.fillRect(gx + 1, py - 1, 1, 1);
+      }),
+      racer: screen(function(g, t){
+        for (var y = 0; y < 22; y++){ g.fillStyle = y < 8 ? '#2a0f4a' : (y < 15 ? '#6a1f6a' : '#d24a5a'); g.fillRect(0, y, 64, 1); }
+        g.fillStyle = NEON.gold; g.fillRect(26, 10, 12, 6); g.fillStyle = '#d24a5a'; g.fillRect(26, 12, 12, 1); g.fillRect(26, 14, 12, 1);
+        g.fillStyle = '#1b1430'; g.fillRect(0, 22, 64, 26);
+        for (var y2 = 22; y2 < 48; y2++){
+          var k = (y2 - 22)/26, half = 4 + k*30;
+          g.fillStyle = '#3a3550'; g.fillRect(32 - half, y2, half*2, 1);
+          var ph = Math.floor((1/(k + .08)) + t*14) % 2;
+          g.fillStyle = ph ? '#ff4fb8' : '#fff'; g.fillRect(32 - half - 2, y2, 2, 1); g.fillRect(32 + half, y2, 2, 1);
+          if (ph && k > .1){ g.fillStyle = '#e8e2ff'; g.fillRect(31, y2, 1, 1); }
+        }
+        var cx = 32 + Math.round(Math.sin(t*1.7)*8);
+        g.fillStyle = NEON.red; g.fillRect(cx - 5, 38, 11, 5); g.fillStyle = '#ffd0d0'; g.fillRect(cx - 3, 36, 7, 2);
+        g.fillStyle = '#000'; g.fillRect(cx - 6, 42, 3, 2); g.fillRect(cx + 4, 42, 3, 2);
+      }),
+      bricks: screen(function(g, t){
+        clr(g, '#04050e');
+        var cols = [NEON.red, NEON.orange, NEON.gold, NEON.green, NEON.cyan];
+        for (var r = 0; r < 5; r++) for (var c = 0; c < 8; c++) if (!((r*3 + c*5 + Math.floor(t/3)) % 7 === 0)){ g.fillStyle = cols[r]; g.fillRect(2 + c*8, 5 + r*3, 7, 2); }
+        var bx = Math.abs(((t*30) % 116) - 58) + 3, by = Math.abs(((t*23) % 52) - 26) + 18;
+        g.fillStyle = '#fff'; g.fillRect(Math.floor(bx), Math.floor(by), 2, 2);
+        g.fillStyle = NEON.cyan; g.fillRect(Math.floor(bx) - 6, 44, 13, 2);
+      }),
+      fight: screen(function(g, t){
+        for (var y = 0; y < 48; y++){ g.fillStyle = y < 30 ? '#1a0d33' : '#3a1d2a'; g.fillRect(0, y, 64, 1); }
+        g.fillStyle = '#3a2f6a'; g.fillRect(0, 22, 64, 8);
+        g.fillStyle = NEON.gold; g.fillRect(3, 3, 24, 2); g.fillStyle = NEON.red; g.fillRect(37, 3, 18 - Math.floor(t*2) % 10, 2);
+        var a = Math.floor(t*4) % 2, x1 = 20 + (a ? 2 : 0), x2 = 40 - (a ? 0 : 2);
+        g.fillStyle = NEON.cyan; g.fillRect(x1, 26, 4, 10); g.fillRect(x1 - 1, 22, 5, 4); g.fillRect(x1 + 4, 28, a ? 6 : 3, 2); g.fillRect(x1, 36, 1, 6); g.fillRect(x1 + 3, 36, 1, 6);
+        g.fillStyle = NEON.pink; g.fillRect(x2, 26, 4, 10); g.fillRect(x2, 22, 5, 4); g.fillRect(x2 - (a ? 3 : 6), 28, a ? 3 : 6, 2); g.fillRect(x2, 36, 1, 6); g.fillRect(x2 + 3, 36, 1, 6);
+        if (Math.floor(t*2) % 2) ctext(g, 'FIGHT!', 32, 12, 1, '#fff', '#a0306a');
+      }),
+      title: screen(function(g, t){
+        clr(g, '#07051a');
+        for (var i = 0; i < 6; i++){ g.fillStyle = ['#3a1a6a','#5a2080','#8a2a8a','#c03a7a','#ff6a5a','#ffb04a'][i]; g.fillRect(0, 30 + i*3, 64, 3); }
+        ctext(g, 'STAR RAID', 32, 8, 1, NEON.cyan, '#1a2a6a');
+        if (Math.floor(t*2) % 2) ctext(g, 'INSERT COIN', 32, 20, 1, NEON.gold);
+        g.fillStyle = '#fff'; g.fillRect(10 + Math.floor((t*10) % 44), 4, 1, 1);
+      }),
+      ledger: screen(function(g, t){
+        clr(g, '#140c06');
+        ctext(g, 'LEDGER', 32, 3, 1, NEON.gold);
+        for (var r = 0; r < 5; r++){
+          g.fillStyle = '#5a3a1a'; g.fillRect(6, 12 + r*6, 52, 1);
+          g.fillStyle = '#e8c890'; g.fillRect(6, 10 + r*6, 6 + ((r*17) % 14), 1);
+          var w = 6 + Math.floor((Math.sin(t*1.5 + r)*.5 + .5)*12); g.fillStyle = r % 2 ? NEON.green : NEON.gold; g.fillRect(58 - w, 10 + r*6, w, 1);
+        }
+        var s = Math.abs(Math.sin(t*3)); g.fillStyle = NEON.gold; g.fillRect(30 - Math.round(s*3), 42, 1 + Math.round(s*6), 4);
+      }),
+      aion: screen(function(g, t){
+        clr(g, '#040a1a');
+        ctext(g, 'AION 2', 32, 3, 1, '#8fd8ff');
+        for (var r = 0; r < 4; r++){
+          g.fillStyle = '#1a2a4a'; g.fillRect(8, 13 + r*8, 48, 3);
+          var f = ((t*.15 + r*.27) % 1); g.fillStyle = r === 0 ? NEON.cyan : (r === 1 ? NEON.purple : (r === 2 ? NEON.gold : NEON.green)); g.fillRect(8, 13 + r*8, Math.floor(48*f), 3);
+        }
+      }),
+      club: screen(function(g, t){
+        clr(g, '#0a3a1a');
+        g.fillStyle = '#156a2a'; for (var x = 0; x < 64; x += 8) g.fillRect(x, 0, 4, 48);
+        g.fillStyle = '#d8ffd8'; g.fillRect(2, 2, 60, 1); g.fillRect(2, 45, 60, 1); g.fillRect(2, 2, 1, 44); g.fillRect(61, 2, 1, 44); g.fillRect(32, 2, 1, 44);
+        g.fillRect(2, 16, 6, 1); g.fillRect(2, 32, 6, 1); g.fillRect(8, 16, 1, 17); g.fillRect(56, 16, 6, 1); g.fillRect(56, 32, 6, 1); g.fillRect(56, 16, 1, 17);
+        var bx = 32 + Math.sin(t*1.1)*22, by = 24 + Math.sin(t*1.9)*14;
+        g.fillStyle = '#fff'; g.fillRect(Math.floor(bx), Math.floor(by), 2, 2);
+        ctext(g, 'CLUBBIE', 32, 5, 1, '#fff', '#0a3a1a');
+      }),
+      target: screen(function(g, t){
+        clr(g, '#05040f');
+        for (var i = 0; i < 48; i += 2){ g.fillStyle = 'rgba(80,40,140,' + (.08 + .06*Math.sin(t*2 + i*.3)) + ')'; g.fillRect(0, i, 64, 1); }
+        ctext(g, "JORDI'S", 32, 7, 1, NEON.pink, '#401030');
+        ctext(g, 'ARCADE', 32, 15, 1, NEON.cyan, '#103040');
+        if (Math.floor(t*1.6) % 2) ctext(g, 'INSERT COIN', 32, 30, 1, NEON.gold);
+        var s = Math.abs(Math.sin(t*2.5)); g.fillStyle = NEON.gold; g.fillRect(31 - Math.round(s*2), 39, 1 + Math.round(s*4), 4);
+      })
+    };
+    var attract = [S.shooter, S.maze, S.racer, S.bricks, S.fight, S.title];
+
+    // ---------- marquees and posters (static canvases) ----------
+    function marquee(name, col, style){
+      var c = canvas(128, 24), g = c.getContext('2d');
+      g.fillStyle = '#120a20'; g.fillRect(0, 0, 128, 24);
+      if (style === 'zig'){
+        for (var x = 0; x < 128; x++){ var y = Math.abs((x % 12) - 6); g.fillStyle = '#ff6a1a'; g.fillRect(x, 4 + y, 1, 2); g.fillStyle = '#ffb04a'; g.fillRect(x, 13 - y, 1, 2); g.fillStyle = '#a03010'; g.fillRect(x, 18 + (y >> 1), 1, 1); }
+      } else {
+        g.fillStyle = col; g.globalAlpha = .35; g.fillRect(0, 0, 128, 3); g.fillRect(0, 21, 128, 3); g.globalAlpha = .18;
+        for (var x2 = 0; x2 < 128; x2 += 8) g.fillRect(x2, 3, 4, 18); g.globalAlpha = 1;
+      }
+      var k = textW(name, 2) <= 122 ? 2 : 1;
+      ctext(g, name, 64, k === 2 ? 7 : 9, k, '#fff', style === 'zig' ? '#5a1a00' : col);
+      var key = 'mq_' + name + '_' + col;
+      if (!mats[key]){ mats[key] = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats[key].userData.glow = true; }
+      return key;
+    }
+    function poster(kind){
+      var key = 'poster_' + kind;
+      if (mats[key]) return key;
+      var c = canvas(32, 44), g = c.getContext('2d');
+      if (kind === 'peaks'){
+        for (var y = 0; y < 44; y++){ g.fillStyle = y < 14 ? '#1a1048' : (y < 24 ? '#5a2a7a' : '#d2556a'); g.fillRect(0, y, 32, 1); }
+        g.fillStyle = NEON.gold; g.fillRect(12, 16, 8, 6);
+        g.fillStyle = '#20103a'; for (var x = 0; x < 32; x++){ var h = 30 - Math.abs((x % 16) - 8)*1.6; g.fillRect(x, h, 1, 44 - h); }
+        g.fillStyle = '#0c0820'; for (var x3 = 0; x3 < 32; x3++){ var h2 = 36 - Math.abs(((x3 + 6) % 12) - 6)*1.4; g.fillRect(x3, h2, 1, 44 - h2); }
+      } else if (kind === 'hero'){
+        g.fillStyle = '#0f1640'; g.fillRect(0, 0, 32, 44);
+        g.fillStyle = '#2a3a8a'; g.fillRect(0, 30, 32, 14);
+        g.fillStyle = NEON.cyan; g.fillRect(14, 10, 4, 4); g.fillRect(13, 14, 6, 10); g.fillRect(12, 24, 3, 8); g.fillRect(17, 24, 3, 8); g.fillRect(19, 12, 2, 12);
+        g.fillStyle = '#fff'; g.fillRect(20, 4, 1, 9);
+        ctext(g, 'QUEST', 16, 36, 1, NEON.gold);
+      } else if (kind === 'ship'){
+        g.fillStyle = '#05061a'; g.fillRect(0, 0, 32, 44);
+        g.fillStyle = '#6a74c8'; for (var i = 0; i < 18; i++) g.fillRect(Math.floor(rnd()*32), Math.floor(rnd()*44), 1, 1);
+        g.fillStyle = NEON.pink; g.fillRect(14, 12, 4, 14); g.fillRect(10, 22, 12, 4); g.fillStyle = NEON.gold; g.fillRect(15, 26, 2, 4);
+        ctext(g, 'SKY ACE', 16, 34, 1, NEON.cyan);
+      } else {
+        g.fillStyle = '#1a0828'; g.fillRect(0, 0, 32, 44);
+        ctext(g, 'GAME', 16, 10, 1, NEON.pink); ctext(g, 'ON', 16, 18, 2, NEON.gold);
+        g.fillStyle = NEON.cyan; g.fillRect(4, 34, 24, 1); g.fillRect(4, 38, 24, 1);
+      }
+      g.strokeStyle = '#000'; g.strokeRect(.5, .5, 31, 43);
+      mats[key] = new T3.MeshBasicMaterial({ map: ctex(c), fog: true, color: 0xbfbfd8 }); mats[key].userData.glow = true;
+      return key;
+    }
+    function scoreboard(){
+      var c = canvas(80, 44), g = c.getContext('2d');
+      g.fillStyle = '#05040f'; g.fillRect(0, 0, 80, 44);
+      ctext(g, 'HIGH SCORES', 40, 3, 1, NEON.pink);
+      var rows = [['1', 'JORDI', '999990'], ['2', 'LEDGER', '812300'], ['3', 'CLUBBIE', '640180'], ['4', 'AION 2', '525060']];
+      rows.forEach(function(r, i){ text(g, r[0], 5, 13 + i*7, 1, NEON.gold); text(g, r[1], 13, 13 + i*7, 1, '#e8e2ff'); text(g, r[2], 51, 13 + i*7, 1, NEON.cyan); });
+      mats.score = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats.score.userData.glow = true;
+      return 'score';
+    }
+
+    // ---------- props ----------
+    var BTN = ['btn_r', 'btn_b', 'btn_y', 'btn_g'];
+    function cabinet(x, z, ry, o){
+      var f = frameAt(x, 0, z, ry), trim = 'n_' + o.trim;
+      part(f, G.box(.86, .95, .7), 'body', 0, .475, -.05);
+      part(f, G.box(.86, .9, .62), 'body', 0, 1.42, -.12);
+      part(f, G.box(.84, .66, .02), 'black', 0, 1.42, .2, -.1);
+      part(f, G.plane(.66, .5), o.screen, 0, 1.43, .214, -.1);
+      part(f, G.box(.86, .26, .5), 'body', 0, 2.02, -.03);
+      part(f, G.plane(.8, .2), o.marquee, 0, 2.02, .224);
+      part(f, G.box(.92, .05, .78), 'dark', 0, 2.17, -.03);
+      var cp = sub(f, 0, 1.0, .28, -.32);
+      part(cp, G.box(.86, .1, .4), 'panel', 0, 0, 0);
+      part(cp, G.cyl(.011, .011, .1), 'metal', -.22, .09, .02);
+      part(cp, G.sph(.036), 'ball', -.22, .15, .02);
+      for (var b = 0; b < 6; b++) part(cp, G.cyl(.026, .026, .025, 10), BTN[(b + (o.seed || 0)) % 4], .02 + (b % 3)*.1, .055, (b < 3 ? -.06 : .06));
+      part(f, G.box(.24, .2, .02), 'dark', 0, .58, .31);
+      part(f, G.box(.04, .07, .021), 'coin', -.05, .6, .315); part(f, G.box(.04, .07, .021), 'coin', .05, .6, .315);
+      part(f, G.box(.04, 2.2, .84), sideKey(o.trim), -.45, 1.1, -.03); part(f, G.box(.04, 2.2, .84), sideKey(o.trim), .45, 1.1, -.03);
+      part(f, G.box(.03, 2.18, .03), trim, -.47, 1.1, .4); part(f, G.box(.03, 2.18, .03), trim, .47, 1.1, .4);
+      part(f, G.box(.97, .03, .03), trim, 0, 2.19, .4); part(f, G.box(.9, .02, .02), trim, 0, 1.87, .23);
+      glowPool(f, o.trim, 0, .75, 1.3, 1.1);
+    }
+    function stool(x, z){
+      var f = frameAt(x, 0, z, 0);
+      part(f, G.cyl(.18, .18, .07, 12), 'stoolSeat', 0, .72, 0); part(f, G.cyl(.025, .025, .7), 'metal', 0, .36, 0);
+      part(f, G.cyl(.16, .2, .03, 12), 'metal', 0, .015, 0); part(f, G.cyl(.16, .16, .015, 12), 'metal', 0, .3, 0);
+    }
+    function plant(x, z){
+      var f = frameAt(x, 0, z, 0);
+      part(f, G.cyl(.22, .16, .42, 10), 'pot', 0, .21, 0);
+      for (var i = 0; i < 9; i++){ var a = i*.7, r = .12 + (i % 3)*.06; part(f, G.box(.06, .5 + (i % 3)*.15, .2), i % 2 ? 'leaf' : 'leaf2', Math.cos(a)*r, .7 + (i % 3)*.12, Math.sin(a)*r, .5*Math.sin(a), a, .5*Math.cos(a)); }
+    }
+    function claw(x, z, ry){
+      var f = frameAt(x, 0, z, ry);
+      part(f, G.box(1.1, .8, 1.0), 'body', 0, .4, 0);
+      part(f, G.box(1.1, .25, 1.0), 'body', 0, 2.05, 0);
+      [[-.53, -.48], [.53, -.48], [-.53, .48], [.53, .48]].forEach(function(p){ part(f, G.box(.05, 1.0, .05), 'n_pink', p[0], 1.3, p[1]); });
+      part(f, G.box(1.12, .04, 1.02), 'n_pink', 0, 1.82, 0); part(f, G.box(1.12, .04, 1.02), 'n_pink', 0, .8, 0);
+      part(f, G.plane(.9, .2), marquee('PRIZES', NEON.pink), 0, 2.05, .505);
+      for (var i = 0; i < 14; i++) part(f, G.sph(.09), ['n_gold', 'n_cyan', 'n_pink', 'n_green', 'n_purple'][i % 5], -.38 + (i % 5)*.19, .9 + Math.floor(i/5)*.12, -.3 + (i % 3)*.3);
+      part(f, G.box(.04, .3, .04), 'metal', .1, 1.66, 0); part(f, G.box(.16, .05, .16), 'metal', .1, 1.5, 0);
+      glowPool(f, 'pink', 0, 0, 1.8, 1.8);
+    }
+    function pinball(x, z, ry){
+      var f = frameAt(x, 0, z, ry);
+      [[-.3, -.6], [.3, -.6], [-.3, .6], [.3, .6]].forEach(function(p){ part(f, G.box(.05, .8, .05), 'metal', p[0], .4, p[1]); });
+      var top = sub(f, 0, .92, 0, .08);
+      part(top, G.box(.66, .16, 1.36), 'body', 0, 0, 0);
+      part(top, G.plane(.6, 1.28), pinField(), 0, .085, 0, -Math.PI/2);
+      part(top, G.box(.68, .03, .03), 'n_purple', 0, .09, .68); part(top, G.box(.68, .03, .03), 'n_purple', 0, .09, -.68);
+      part(top, G.box(.03, .03, 1.38), 'n_purple', .34, .09, 0); part(top, G.box(.03, .03, 1.38), 'n_purple', -.34, .09, 0);
+      part(f, G.box(.66, .6, .14), 'body', 0, 1.35, -.68);
+      part(f, G.plane(.6, .5), S.title, 0, 1.36, -.605);
+      glowPool(f, 'purple', 0, 0, 1.2, 1.8);
+    }
+    var pinKey = null;
+    function pinField(){
+      if (pinKey) return pinKey;
+      var c = canvas(24, 48), g = c.getContext('2d');
+      g.fillStyle = '#1a0f4a'; g.fillRect(0, 0, 24, 48);
+      g.fillStyle = '#3a2a8a'; for (var i = 0; i < 48; i += 4) g.fillRect(0, i, 24, 1);
+      [[6, 10, NEON.pink], [17, 12, NEON.cyan], [12, 18, NEON.gold], [8, 26, NEON.green], [16, 28, NEON.orange]].forEach(function(b){ g.fillStyle = b[2]; g.fillRect(b[0] - 2, b[1] - 2, 4, 4); });
+      g.fillStyle = NEON.gold; g.fillRect(4, 42, 6, 1); g.fillRect(14, 42, 6, 1);
+      ctext(g, 'STAR', 12, 33, 1, '#fff');
+      pinKey = 'pinfield'; mats.pinfield = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats.pinfield.userData.glow = true;
+      return pinKey;
+    }
+    function hockey(x, z, ry){
+      var f = frameAt(x, 0, z, ry);
+      part(f, G.box(1.0, .7, 1.7), 'body', 0, .35, 0);
+      part(f, G.box(1.04, .06, 1.74), 'n_cyan', 0, .73, 0);
+      part(f, G.box(.92, .02, 1.6), 'panel', 0, .74, 0);
+      part(f, G.box(.92, .021, .02), 'n_pink', 0, .745, 0);
+      part(f, G.cyl(.07, .07, .03, 12), 'n_red', 0, .76, .5); part(f, G.cyl(.07, .07, .03, 12), 'n_blue', .1, .76, -.55);
+      glowPool(f, 'cyan', 0, 0, 1.6, 2.2);
+    }
+    function bin(x, z){ var f = frameAt(x, 0, z, 0); part(f, G.cyl(.2, .18, .7, 10), 'bin', 0, .35, 0); part(f, G.cyl(.21, .21, .04, 10), 'metal', 0, .72, 0); }
+
+    // light pools on the floor under the neon (additive, soft)
+    var poolTex = (function(){
+      var c = canvas(32, 32), g = c.getContext('2d'), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+      gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.5, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 32, 32);
+      var t = new T3.CanvasTexture(c); return t;
+    })();
+    function glowPool(frame, n, x, z, w, d){
+      var key = 'pool_' + n;
+      if (!mats[key]) mats[key] = new T3.MeshBasicMaterial({ map: poolTex, color: NEON[n], transparent: true, opacity: .32, blending: T3.AdditiveBlending, depthWrite: false, fog: true });
+      part(frame, G.plane(w, d), key, x, .012, z, -Math.PI/2);
+    }
+
+    // ---------- the room ----------
+    var HALF = 4.7, ZN = 14, ZF = -13.6, H = 4.0;
+    (function(){
+      var c = canvas(16, 16), g = c.getContext('2d');
+      g.fillStyle = '#0d1030'; g.fillRect(0, 0, 16, 16);
+      g.fillStyle = '#141a48'; g.fillRect(1, 1, 14, 14);
+      g.fillStyle = '#1b2360'; g.fillRect(2, 2, 6, 1);
+      g.fillStyle = '#070818'; g.fillRect(0, 15, 16, 1); g.fillRect(15, 0, 1, 16);
+      var floor = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ map: ctex(c, [HALF*2/1.1, (ZN - ZF)/1.1]), transparent: true, opacity: .8 }));
+      floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, (ZN + ZF)/2); floor.renderOrder = 1;
+      scene.add(floor);
+
+      var w = canvas(16, 16), wg = w.getContext('2d');
+      wg.fillStyle = '#100c26'; wg.fillRect(0, 0, 16, 16); wg.fillStyle = '#16113a'; wg.fillRect(0, 0, 8, 16); wg.fillStyle = '#0a0818'; wg.fillRect(0, 0, 1, 16);
+      var wallMat = new T3.MeshLambertMaterial({ map: ctex(w, [12, 3]) });
+      var wl = new T3.Mesh(new T3.PlaneGeometry(ZN - ZF, H), wallMat); wl.rotation.y = Math.PI/2; wl.position.set(-HALF, H/2, (ZN + ZF)/2); scene.add(wl);
+      var wr = new T3.Mesh(new T3.PlaneGeometry(ZN - ZF, H), wallMat); wr.rotation.y = -Math.PI/2; wr.position.set(HALF, H/2, (ZN + ZF)/2); scene.add(wr);
+      var we = new T3.Mesh(new T3.PlaneGeometry(HALF*2, H), new T3.MeshLambertMaterial({ map: ctex(w, [4, 3]) })); we.position.set(0, H/2, ZF); scene.add(we);
+      var ceil = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ color: 0x07061a })); ceil.rotation.x = Math.PI/2; ceil.position.set(0, H, (ZN + ZF)/2); scene.add(ceil);
+
+      var root = frameAt(0, 0, 0, 0);
+      // ceiling light panels and wall neon
+      for (var z = 10; z > ZF + 1; z -= 3.2){
+        part(root, G.box(1.3, .04, .5), (Math.round(z) % 3) ? 'ceil' : 'ceilDim', -1.6, H - .03, z);
+        part(root, G.box(1.3, .04, .5), 'ceil', 1.6, H - .03, z - 1.6);
+      }
+      part(root, G.box(.04, .05, ZN - ZF), 'n_pink', -HALF + .03, 2.75, (ZN + ZF)/2);
+      part(root, G.box(.04, .03, ZN - ZF), 'n_purple', -HALF + .03, 3.25, (ZN + ZF)/2);
+      part(root, G.box(.04, .05, ZN - ZF), 'n_cyan', HALF - .03, 2.75, (ZN + ZF)/2);
+      part(root, G.box(.04, .03, ZN - ZF), 'n_purple', HALF - .03, 3.25, (ZN + ZF)/2);
+      part(root, G.box(HALF*2, .05, .04), 'n_purple', 0, 2.75, ZF + .03);
+      part(root, G.box(HALF*2, .03, .04), 'n_pink', 0, 3.6, ZF + .03);
+      // posters on the side walls, above the cabinets
+      var kinds = ['peaks', 'hero', 'ship', 'gameon'];
+      for (var i = 0; i < 7; i++){
+        var pz = 9 - i*3.3;
+        part(root, G.plane(.75, 1.0), poster(kinds[i % 4]), -HALF + .02, 3.0 - (i % 2)*.05, pz, 0, Math.PI/2);
+        part(root, G.plane(.75, 1.0), poster(kinds[(i + 2) % 4]), HALF - .02, 3.0, pz - 1.4, 0, -Math.PI/2);
+      }
+      part(root, G.plane(1.6, .88), scoreboard(), 0, 3.05, ZF + .07);
+      part(root, G.plane(1.0, 1.3), poster('peaks'), -2.9, 2.9, ZF + .02);
+      part(root, G.plane(1.0, 1.3), poster('hero'), 2.9, 2.9, ZF + .02);
+    })();
+
+    // ---------- the machines ----------
+    var trims = ['orange', 'cyan', 'pink', 'purple', 'gold', 'green'];
+    var names = ['STAR RAID', 'MAZE MUNCH', 'TURBO RUN', 'BRICK BUST', 'PIXEL FIGHT', 'SKY ACE', 'GHOST HUNT', 'NEON DRIFT', 'GALAXY', 'ROBO RUMBLE'];
+    var special = { '1:12': ['RETAINERS LEDGER', S.ledger, 'gold'], '1:14': ['AION 2', S.aion, 'cyan'], '-1:13': ['CLUBBIE', S.club, 'green'] };
+    var n = 0;
+    for (var side = -1; side <= 1; side += 2){
+      for (var k = 0; k < 17; k++){
+        var z = 9.6 - k*1.18;
+        if (z < -11.4) break;
+        var x = side*(HALF - .48), ry = side < 0 ? Math.PI/2 : -Math.PI/2;
+        if (side < 0 && k === 5){ claw(x + .08, z - .55, ry); k++; continue; }
+        if (side > 0 && k === 8){ claw(x - .08, z - .55, ry); k++; continue; }
+        if ((side < 0 && k === 10) || (side > 0 && k === 3)){ plant(x - .15*side, z); continue; }
+        var spec = special[side + ':' + k] || null;
+        var tr = spec ? spec[2] : trims[(n*5 + 1) % trims.length];
+        cabinet(x, z, ry, { trim: tr, screen: spec ? spec[1] : attract[n % attract.length], marquee: spec ? marquee(spec[0], NEON[tr]) : marquee(names[n % names.length], NEON[tr]), seed: n });
+        if (k % 3 === 1) stool(x - side*.95, z + .1);
+        n++;
+      }
+    }
+    // the end wall: our machine in the middle, two neighbours
+    cabinet(0, ZF + .5, 0, { trim: 'orange', screen: S.target, marquee: marquee("JORDI'S ARCADE", NEON.orange, 'zig'), seed: 1 });
+    cabinet(-1.25, ZF + .5, 0, { trim: 'pink', screen: S.fight, marquee: marquee('PIXEL FIGHT', NEON.pink), seed: 2 });
+    cabinet(1.25, ZF + .5, 0, { trim: 'cyan', screen: S.racer, marquee: marquee('TURBO RUN', NEON.cyan), seed: 3 });
+    pinball(-1.75, -3.6, .25); pinball(-1.75, -6.2, .25);
+    hockey(1.9, 1.8, 0);
+    plant(-HALF + .45, ZF + .5); plant(HALF - .45, ZF + .5); bin(2.6, -10.8); bin(-2.7, 6.5);
+
+    // ---------- bake ----------
+    var mirror = new T3.Group(); mirror.scale.set(1, -1, 1); scene.add(mirror);
+    Object.keys(batches).forEach(function(key){
+      var g = merge(batches[key]), m = mats[key];
+      var mesh = new T3.Mesh(g, m); mesh.matrixAutoUpdate = false; mesh.updateMatrix();
+      if (m.transparent) mesh.renderOrder = 2;
+      scene.add(mesh);
+      if (m.userData.glow){ var r = new T3.Mesh(g, m); r.matrixAutoUpdate = false; r.updateMatrix(); mirror.add(r); }
+    });
+
+    // ---------- lights ----------
+    scene.add(new T3.AmbientLight(0x3a3070, .9));
+    scene.add(new T3.HemisphereLight(0x5a60c0, 0x120a28, .5));
+    [[-2.6, 3.2, 7, 0xff4fb8], [2.6, 3.2, 2, 0x4fe6ff], [-2.6, 3.2, -3, 0xa85cff], [2.6, 3.2, -7.5, 0xff4fb8], [0, 2.4, -11.2, 0xff8a2a]].forEach(function(l){
+      var p = new T3.PointLight(l[3], 1.2, 9, 1.6); p.position.set(l[0], l[1], l[2]); scene.add(p);
+    });
+
+    // ---------- size, camera, loop ----------
+    var W = 0, Hh = 0;
+    function size(){
+      var vw = innerWidth, vh = innerHeight, k = Math.max(2, Math.round(Math.max(vw, vh)/460));
+      W = Math.max(1, Math.round(vw/k)); Hh = Math.max(1, Math.round(vh/k));
+      renderer.setSize(W, Hh, false);
+      bloom.width = Math.max(1, W >> 1); bloom.height = Math.max(1, Hh >> 1);
+      camera.aspect = vw/vh; camera.fov = vw < vh ? 66 : 58; camera.updateProjectionMatrix();
+    }
+    size(); addEventListener('resize', size);
+
+    var Z0 = 12.2, Z1 = ZF + 2.75, TGT = END - 1.3, pose = { cam: 0, bob: 0 };
+    function sm(x){ x = Math.max(0, Math.min(1, x)); return x*x*(3 - 2*x); }
+    function place(t){
+      var p = Math.max(0, Math.min(1, pose.cam/TGT)), moving = pose.bob !== 0 ? 1 : 0;
+      var z = Z0 + (Z1 - Z0)*p;
+      var x = Math.sin(pose.cam*4.2)*.03*moving + Math.sin(t*.37)*.02*(1 - p);
+      var y = 1.62 - .08*sm(p) + pose.bob*.011 + Math.sin(t*1.1)*.006;
+      var glance = Math.sin(p*Math.PI*2.6)*.9*(1 - sm(p)) + Math.sin(t*.25)*.25*(1 - p);
+      camera.position.set(x, y, z);
+      camera.lookAt(x*.3 + glance, 1.62 - .3*sm(p), ZF + .7);
+      camera.rotateZ(pose.bob*.0016);
+    }
+    var last = 0, t0 = performance.now();
+    function frame(now){
+      requestAnimationFrame(frame);
+      if (document.hidden) return;
+      var b = document.body, gap = b.classList.contains('walking') ? 0 : (b.classList.contains('arrived') ? 150 : 33);
+      if (now - last < gap) return;
+      last = now;
+      var t = (now - t0)/1000;
+      screens.forEach(function(s){ s.draw(s.g, t); s.t.needsUpdate = true; });
+      mats.ceilDim.color.setHex((Math.floor(t*7) % 23) === 0 ? 0x16303a : 0x5aa8c0);
+      place(t);
+      renderer.render(scene, camera);
+      bctx.clearRect(0, 0, bloom.width, bloom.height);
+      bctx.drawImage(cv, 0, 0, bloom.width, bloom.height);
+    }
+    requestAnimationFrame(frame);
+
+    return {
+      END: END,
+      draw: function(cam, f, bob){ pose.cam = cam; pose.bob = bob || 0; }
+    };
+  }
+
+  // Pick the hall: the 3D one when WebGL and Three.js are there, else the three pictures.
+  var Hall = (function(){
+    var bg = document.getElementById('bg');
+    try{
+      var h3 = makeHall3D(bg, 12);
+      if (h3){ document.body.classList.add('three'); return h3; }
+    }catch(e){
+      bg.querySelectorAll('canvas').forEach(function(c){ c.remove(); });
+      try{ console.warn('3D hall unavailable, using the pictures', e); }catch(x){}
+    }
+    return make2DHall();
   })();
 
   // Walking, arriving, choosing.
