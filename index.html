@@ -39,8 +39,8 @@
   .cab{--c1:#7c3bff;--c2:#ff4fb8;--glow:var(--neon-pink);
     position:relative;display:block;width:270px;text-decoration:none;color:inherit;
     transition:transform .2s ease, filter .2s ease; cursor:pointer;outline:none}
-  .cab{zoom:.72}
-  .cab.broken{zoom:.4;align-self:flex-start;margin-top:150px}
+  .cab{zoom:var(--z,.72)}
+  .cab.broken{zoom:calc(var(--z,.72)*.55);align-self:flex-start;margin-top:calc(150px*var(--z,.72)/.72)}
   .cab:hover,.cab:focus-visible{transform:translateY(-8px);filter:drop-shadow(0 0 22px var(--glow))}
   .cab.ffxiv{--c1:#d99a2b;--c2:#8c3a2b;--glow:var(--neon-gold)}
   .cab.aion{--c1:#3b55c9;--c2:#8e5bff;--glow:var(--neon-cyan)}
@@ -82,7 +82,9 @@
   .coinbox{position:relative;margin:0 10px;padding:12px 10px 14px;background:#0f0b1c;border-top:2px solid rgba(255,255,255,.08);text-align:center;font-size:11px;letter-spacing:.22em;color:var(--neon-gold);clip-path:polygon(0 0,100% 0,98% 100%,2% 100%)}
   .slot{display:inline-block;width:46px;height:9px;margin:0 8px;background:#000;border:1px solid #444;vertical-align:middle;position:relative}
   .slot::after{content:"";position:absolute;inset:-1px;box-shadow:0 0 8px var(--neon-gold);opacity:.7;animation:press 1.4s steps(1) infinite}
-  .legs{height:26px;background:linear-gradient(90deg,var(--c2),var(--c1) 25%,var(--c1) 75%,var(--c2));clip-path:polygon(0 0,100% 0,96% 100%,4% 100%);opacity:.9}
+  .legs{position:relative;height:150px;background:linear-gradient(90deg,var(--c2),var(--c1) 12%,#1a1230 12%,#150f26 88%,var(--c1) 88%,var(--c2));clip-path:polygon(0 0,100% 0,96% 100%,4% 100%)}
+  .legs::before{content:"";position:absolute;left:28%;right:28%;top:26px;height:62px;border:3px solid var(--glow);background:#0a0714;box-shadow:0 0 12px var(--glow) inset,0 0 10px var(--glow);opacity:.85}
+  .legs::after{content:"";position:absolute;left:44%;right:44%;top:46px;height:22px;background:#000;border:2px solid #444}
   .shadow{height:14px;margin:0 -10px;background:radial-gradient(ellipse at center,rgba(0,0,0,.65),transparent 70%)}
   .tag{position:absolute;top:-14px;right:-10px;z-index:3;background:var(--neon-gold);color:#1a1000;font-size:11px;font-weight:800;letter-spacing:.12em;padding:4px 10px;transform:rotate(6deg);box-shadow:0 3px 0 rgba(0,0,0,.4)}
   .tag.hid{display:none}
@@ -294,6 +296,19 @@
     var f = 0; draw(0);
     var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!still) setInterval(function(){ f++; draw(f); }, 450);
+  })();
+
+  // Scale the cabinets together with the background so they stay in proportion at any window size.
+  (function(){
+    function fit(){
+      var vw = innerWidth, vh = innerHeight;
+      var bg = Math.max(vw/240, vh/135);               // px per background pixel
+      var z = 0.72 * bg / 6.04;                        // 0.72 was tuned at the reference size
+      z = Math.min(z, (vw - 40) / (2*270 + 70));       // both cabinets must fit the width
+      z = Math.max(0.35, Math.min(1.5, z));
+      document.documentElement.style.setProperty('--z', z.toFixed(3));
+    }
+    fit(); addEventListener('resize', fit);
   })();
 
   // Back cabinet: coming soon screen.
