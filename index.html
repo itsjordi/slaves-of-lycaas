@@ -309,6 +309,7 @@
     }
     function walkBack(){
       if (state !== 'arrived') return;
+      try{ sessionStorage.removeItem('arcade_at'); }catch(x){}
       state = 'walking'; body.classList.remove('arrived'); body.classList.add('walking');
       document.getElementById('m').classList.remove('go');
       walk(0, 5000, function(){ state = 'hall'; body.classList.remove('walking'); paint(0); });
@@ -368,7 +369,7 @@
       var o = opts[sel];
       if (o.dataset.soon){ document.getElementById('soon').classList.add('on'); return; }
       try{ localStorage.setItem('lycaas_lastgame', o.dataset.game); }catch(x){}
-      try{ sessionStorage.setItem('arcade_in', '1'); }catch(x){}
+      try{ sessionStorage.setItem('arcade_in', '1'); sessionStorage.setItem('arcade_at', '1'); }catch(x){}
       body.classList.add('leaving'); mEl.classList.add('go');
       setTimeout(function(){ location.href = o.href; }, 1500);
     }
@@ -390,6 +391,25 @@
       else if (e.key === 'ArrowDown'){ e.preventDefault(); select(sel + 1); tilt(1); }
       else if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
       else if (e.key === 'Escape'){ walkBack(); }
+    });
+
+    // Coming back from a game or the portfolio: stand at the machine again with the menu on, no walk and no coin.
+    function restoreAtMachine(){
+      cancelAnimationFrame(raf);
+      cam = TARGET; state = 'arrived'; fit();
+      body.classList.remove('walking', 'leaving', 'tossing'); body.classList.add('arrived');
+      paint(0); resetMachine();
+      document.querySelectorAll('.opt .last').forEach(function(n){ n.remove(); }); lastTagged = false;
+      scr.classList.add('on'); coinBtn.classList.remove('ready'); coinBtn.classList.add('used');
+      powered = true; select(startIndex());
+    }
+    var returning = false;
+    try{ returning = sessionStorage.getItem('arcade_at') === '1'; }catch(x){}
+    if (returning) restoreAtMachine();
+    addEventListener('pageshow', function(e){
+      var again = false;
+      try{ again = sessionStorage.getItem('arcade_at') === '1'; }catch(x){}
+      if (e.persisted && again) restoreAtMachine();
     });
   })();
 </script>
