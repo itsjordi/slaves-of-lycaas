@@ -8,7 +8,7 @@ Live site: https://jordimutsaers.nl/
 |---|---|---|
 | Game arcade | `index.html` | Landing page styled as an arcade shop. Each tool is a cabinet, click it to insert a coin and play. |
 | FFXIV | `ffxiv.html` | Retainer's Ledger: crafting costs, market profit, watchlist, gil per hour and more. Pinned to the Light data center. |
-| Portfolio | `portfolio.html`, `portfolio.css`, `portfolio.js` | About me, a project list and a career quest log in a minimal editorial style with three-colour pixel art. The CSS and JS are shared with the case studies, so upload all three. |
+| Portfolio | `portfolio.html`, `about.html`, `path.html`, `portfolio.css`, `portfolio.js` | Home with the projects, an About page and a career path page, in a minimal editorial style with three-colour pixel art. The CSS and JS are shared with the case studies, so upload all of them. |
 | Case studies | `case-clubbie.html`, `case-ffxiv.html`, `case-aion2.html` | One page per project, in English and Dutch. Screenshots go in `images/`: Clubbie in `images/clubbie/`, the others directly in `images/` as `ffxiv-<name>.jpg` and `aion2-<name>.jpg`. |
 | Aion 2 | `aion2.html` | Daily and weekly board for your main and alts, timers, and a to-do list. Set up for Global Europe (Yustiel). |
 
