@@ -112,8 +112,9 @@
   #soon p{margin:26px 0 0;color:var(--neon-gold);letter-spacing:.3em;font-size:13px;animation:press 1s steps(1) infinite}
   @keyframes crton{0%{transform:scaleY(.02);opacity:0}60%{transform:scaleY(1);opacity:.6}100%{opacity:1}}
 
-  #skipArcade{position:fixed;right:14px;top:14px;z-index:60;font:inherit;font-size:12px;letter-spacing:.2em;color:#cfd6ee;text-decoration:none;background:rgba(8,5,18,.7);border:2px solid #4a4478;padding:8px 12px}
-  #skipArcade:hover,#skipArcade:focus-visible{border-color:var(--neon-cyan);color:#fff;outline:none}
+  #skipArcade{position:fixed;left:0;right:0;bottom:6vh;width:max-content;margin:0 auto;z-index:4;font:inherit;font-size:12px;letter-spacing:.2em;color:#a99ac9;text-decoration:none;padding:6px 10px;transition:opacity .5s}
+  #skipArcade:hover,#skipArcade:focus-visible{color:#fff;text-decoration:underline;outline:none}
+  body.walking #skipArcade,body.arrived #skipArcade{opacity:0;pointer-events:none}
   body.leaving #skipArcade{display:none}
   /* phones and small windows: the machine screen takes over the whole display, with a menu you can scroll and tap */
   body.compact .sign{margin-top:22px;padding:0 14px}
@@ -150,8 +151,7 @@
     </div>
   </div>
   <button id="walkBtn" type="button">WALK IN</button>
-  <div id="walkHint">or press Enter</div>
-  <div id="walkCaption">WALKING TO A MACHINE...</div>
+    <div id="walkCaption">WALKING TO A MACHINE...</div>
 
   <a id="skipArcade" href="portfolio.html" data-file="portfolio.html">SKIP TO PORTFOLIO &rsaquo;</a>
 
