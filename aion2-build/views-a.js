@@ -341,7 +341,7 @@
     Object.keys(groups).forEach(function (g) {
       h += '<div class="card" style="margin-bottom:12px"><h2>' + groups[g] + '</h2><div class="eq">' + BA.SLOTS.filter(function (s) { return s.group === g; }).map(function (s) {
         var it = d.equipment[s.id];
-        return '<button class="slot" data-act="item-open" data-slot="' + e(s.id) + '"><div class="sn">' + e(s.name) + '</div><div class="in">' + (it ? e(it.name) + ' <span class="en">+' + e(it.enh) + '</span>' : '<span class="muted">Empty</span>') + '</div><div class="small muted">' + (it ? (it.rolls.length + it.soulBinding.length + it.manastones.length) + ' stat lines &middot; ' : '') + '</div>' + (it ? APP.pill(it.m) : '') + '</button>';
+        return '<button class="slot" data-act="item-open" data-slot="' + e(s.id) + '"><div class="sn">' + e(s.name) + '</div><div class="in">' + (it ? e(it.name) + ' <span class="en">+' + e(it.enh) + '</span>' : '<span class="muted">Empty</span>') + '</div><div class="small muted">' + (it ? ((it.rolls.length + it.soulBinding.length + it.manastones.length) ? (it.rolls.length + it.soulBinding.length + it.manastones.length) + ' stat lines' : 'Stats not recorded') : '') + '</div>' + (it ? APP.pill(it.m) : '') + '</button>';
       }).join('') + '</div></div>';
     });
     h += '<div class="card"><h2>Arcana</h2>' + (d.arcana.items.length ? d.arcana.items.map(function (a) { return '<span class="chip">' + e(a.name) + ' +' + e(a.enh) + '</span>'; }).join('') : '<span class="bad">None equipped</span>') + ' <a href="#/character/arcana" class="small">Manage</a></div>';
