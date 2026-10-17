@@ -193,7 +193,7 @@
   });
 
   function numTable(defs, map, unit, extra) {
-    return '<table><tbody>' + defs.map(function (x) { var v = map[x.id] || {}; return '<tr><td>' + e(x.name) + (x.effects ? '<div class="small muted">' + e(x.effects.join(', ')) + '</div>' : '') + '</td><td class="right">' + f(BA.num(v)) + (unit || '') + '</td><td>' + APP.pill(v.m) + '</td>' + (extra ? '<td>' + extra(x, v) + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table>';
+    return '<table><tbody>' + defs.map(function (x) { var v = map[x.id] || {}; return '<tr><td style="min-width:170px">' + e(x.name) + (x.effects ? '<div class="small muted">' + e(x.effects.join(', ')) + '</div>' : '') + '</td><td class="right">' + f(BA.num(v)) + (unit || '') + '</td><td>' + APP.pill(v.m) + '</td>' + (extra ? '<td>' + extra(x, v) + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table>';
   }
   function cCore(ch, d) {
     return '<div class="grid g2"><div class="card"><h2>Core stats</h2>' + numTable(BA.CORE_STATS, d.coreStats) + '<div class="row" style="margin-top:10px"><button data-act="edit-map" data-key="coreStats">Edit</button></div></div>' +

@@ -48,7 +48,8 @@
   APP.pill = function (m) {
     if (!m) return '<span class="pill unknown">Unknown</span>';
     var st = BA.STATUS[m.status] || BA.STATUS.unknown, tip = [st.label, m.source ? 'Source: ' + m.source : '', m.observedAt ? 'Observed: ' + m.observedAt : '', m.note || ''].filter(Boolean).join('\n');
-    return '<span class="pill ' + e(m.status) + '" title="' + e(tip) + '">' + e(st.label) + '</span>';
+    var short = { verified: 'Verified', confirmed: 'Confirmed', imported: 'Imported', estimated: 'Estimated', outdated: 'Outdated', unknown: 'Unknown' }[m.status] || st.label;
+    return '<span class="pill ' + e(m.status) + '" title="' + e(tip) + '">' + e(short) + '</span>';
   };
   APP.tier = function (t) { return t ? '<span class="pill t-' + e(t.replace('+', 'p')) + '">' + e(t) + '</span>' : '<span class="pill">-</span>'; };
   APP.lvl = function (l) { return '<span class="lvl-' + e(l) + '">' + e(l) + '</span>'; };
