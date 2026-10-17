@@ -144,6 +144,47 @@
   });
   APP.act('dps-del', function (el) { var id = el.getAttribute('data-id'); APP.state.dps = APP.state.dps.filter(function (r) { return r.id !== id; }); APP.save(); APP.render(); });
 
+  /* ------------------------------------------------------------------ tier lists and guides */
+  var DISTINCT = [
+    ['Back Attack vs Back Attack Damage Boost', 'Back Attack is a flat value, the Damage Boost is a percentage. They are separate stats; how they combine is not verified.'],
+    ['Attack vs Attack Increase', 'Flat Attack and Attack Increase (%) are different stats. Attack Bonus is shown apart from base Attack and is not assumed to equal it.'],
+    ['Critical Hit', 'Critical Hit is a rating, not necessarily the final critical chance you see.'],
+    ['Combat Power vs DPS', 'Higher Combat Power does not prove higher boss DPS. Compare DPS-meter runs on the same boss.'],
+    ['Completion vs value', 'A higher Daevanion or Pantheon completion % is not automatically more damage.']
+  ];
+  APP.view('tiers', { title: 'Tier lists', icon: 'res', group: 'Knowledge', render: function (arg) {
+    var mode = APP.state.selected.mode, tiers = BA.tiersFor(mode, APP.state.customTiers), custom = !!APP.state.customTiers[mode];
+    var d = APP.pd(), b = APP.bench(), bd = APP.bd(), tab = arg || 'stats';
+    var h = '<div class="head"><div><h1>Tier lists</h1><div class="muted">The best current information for an Assassin in PvE, in one place. Every list here is provisional: it comes from earlier discussion, not from a verified damage formula.</div></div><span class="sp"></span><div><label>Mode</label><select data-chg="mode">' + Object.keys(BA.MODES).map(function (m) { return '<option value="' + m + '"' + (m === mode ? ' selected' : '') + '>' + e(BA.MODES[m].label) + '</option>'; }).join('') + '</select></div></div>';
+    h += '<div class="tabs">' + [['stats', 'Combat stats'], ['divine', 'Divine Stats'], ['core', 'Core stats'], ['rules', 'Good to know'], ['edit', 'Edit ranking']].map(function (t) { return '<button data-act="go" data-to="#/tiers/' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    if (tab === 'stats') {
+      h += '<div class="note info">' + e(BA.MODES[mode].note) + (custom ? ' You edited this ranking.' : '') + '</div>';
+      h += '<div class="card">' + tiers.map(function (t, i) {
+        var cls = i < 2 ? '' : i < 4 ? ' t2' : ' t3';
+        return '<div class="tier' + cls + '"><div class="tl">' + e(t.tier) + '</div><div><div class="small" style="margin-bottom:8px">' + e(t.why) + '</div>' + t.stats.map(function (id) {
+          var st = BA.STAT_BY_ID[id]; if (!st) return '';
+          var mine = d.combatStats[id], theirs = bd && bd.combatStats[id];
+          return '<div class="scard" title="' + e(st.description) + '"><b>' + e(st.name) + '</b><span>' + e(st.unit === '%' ? 'percentage' : st.unit) + ' &middot; ' + e(BA.CATEGORIES[st.category]) + '</span><span>You: ' + (mine ? f(mine.v, mine.unit || st.unit) : 'not recorded') + (b ? ' &middot; ' + e(b.name) + ': ' + (theirs ? f(theirs.v, theirs.unit || st.unit) : '?') : '') + '</span></div>';
+        }).join('') + '</div></div>';
+      }).join('') + '</div>';
+      if (!Object.keys(d.combatStats).length) h += '<div class="note" style="margin-top:12px">Your stat values are not recorded yet, so this list cannot say which of these you already have enough of. <a href="#/import/combatStats">Import a Combat Stats screenshot</a>.</div>';
+      h += '<div class="small muted" style="margin-top:8px">The ranking can change with your current stats, the encounter, gear you can get, how often you hit from behind, stat caps, skill synergy, buffs, testing and patches.</div>';
+    } else if (tab === 'divine') {
+      var needs = BA.divineNeeds(d);
+      h += '<div class="note info">Collection-targeting hypothesis for Assassin PvE. Re-check it against your stats: if Critical Hit is already high, Death matters less than Time or Destruction.</div><div class="card"><div class="tbl"><table><thead><tr><th>#</th><th>Divine Stat</th><th>What it gives</th><th class="right">You</th>' + (b ? '<th class="right">' + e(b.name) + '</th><th class="right">Gap</th>' : '') + '</tr></thead><tbody>' +
+        needs.map(function (x, i) { var df = BA.DIVINE.filter(function (y) { return y.id === x.id; })[0], their = bd ? BA.num(bd.divine[x.id]) : null; return '<tr><td>' + (i + 1) + '</td><td><b>' + e(x.name) + '</b></td><td class="small">' + e(df.effects.join(', ')) + '</td><td class="right">' + f(x.level) + '</td>' + (b ? '<td class="right">' + f(their) + '</td><td class="right">' + (their != null && x.level != null ? APP.signed(x.level - their) : '-') + '</td>' : '') + '</tr>'; }).join('') +
+        '<tr><td></td><td colspan="2"><b>Sum of displayed levels</b> <span class="small muted">(analytic total, not an official stat)</span></td><td class="right"><b>' + f(BA.divineTotal(d)) + '</b></td>' + (b ? '<td class="right"><b>' + f(BA.divineTotal(bd)) + '</b></td><td></td>' : '') + '</tr></tbody></table></div><div class="small muted" style="margin-top:6px">Pantheon is the main way to raise these. <a href="#/pantheon">Open Pantheon</a>.</div></div>';
+    } else if (tab === 'core') {
+      h += '<div class="note info">For Assassin PvE, Precision and Might are the first offensive candidates to look at. Exact allocations are not recommended without your point total, caps and reset rules.</div><div class="card"><table><thead><tr><th>Core stat</th><th>Effects (AionFlex tooltip)</th><th class="right">You</th><th>Role for boss DPS</th></tr></thead><tbody>' +
+        BA.CORE_STATS.map(function (x) { var role = { might: 'Offensive: Attack Increase', precision: 'Offensive: Accuracy and Critical Hit', dexterity: 'Defensive', constitution: 'Defensive', willpower: 'Defensive (status resist)', intelligence: 'Utility (status chance)' }[x.id]; return '<tr><td><b>' + e(x.name) + '</b></td><td class="small">' + e(x.effects.join(', ')) + '</td><td class="right">' + f(BA.num(d.coreStats[x.id])) + '</td><td class="small">' + e(role) + '</td></tr>'; }).join('') + '</tbody></table><div class="row" style="margin-top:10px"><a href="#/character/core">Try a what-if redistribution</a></div></div>';
+    } else if (tab === 'rules') {
+      h += '<div class="card"><ul class="list">' + DISTINCT.map(function (x) { return '<li><b>' + e(x[0]) + '</b><div class="small">' + e(x[1]) + '</div></li>'; }).join('') + '</ul></div><div class="card" style="margin-top:12px"><h2>Not verified yet</h2><div class="small">Stat caps, Combat Speed scaling, Smite and Double Chance mechanics, enhancement costs and success rates, Global Arcana sources, Pantheon drop rates, and per-item CP contributions. Add what you find, with the source, in <a href="#/research">Research</a>.</div></div>';
+    } else {
+      h += '<div class="card"><h2>Edit ranking for ' + e(BA.MODES[mode].label) + '</h2>' + tierEditor() + '</div>';
+    }
+    return h;
+  } });
+
   /* ------------------------------------------------------------------ research */
   var FRESH = ['Current', 'Needs verification', 'Potentially outdated', 'Superseded'];
   APP.view('research', { title: 'Research', icon: 'res', group: 'Knowledge', render: function () {
@@ -154,7 +195,7 @@
       return '<li><div class="row"><b>' + e(r.topic) + '</b><span class="pill ' + (r.freshness === 'Current' ? 'verified' : r.freshness === 'Needs verification' ? 'estimated' : 'outdated') + '">' + e(r.freshness) + '</span><span class="pill">' + e(r.kind) + '</span><span class="pill">Confidence ' + e(r.confidence) + '</span><span style="flex:1"></span><button class="sm" data-act="res-review" data-id="' + e(r.id) + '">Mark reviewed</button><button class="sm" data-act="res-edit" data-id="' + e(r.id) + '">Edit</button></div>' +
         '<div class="small" style="margin-top:4px">' + e(r.summary) + '</div><div class="small muted">Source: ' + (r.url ? '<a href="' + e(r.url) + '" target="_blank" rel="noopener">' + e(r.source) + '</a>' : e(r.source)) + (r.published ? ' &middot; published ' + e(r.published) : '') + ' &middot; region ' + e(r.region) + (r.reviewedAt ? ' &middot; reviewed ' + e(r.reviewedAt) : '') + '</div></li>';
     }).join('') + '</ul></div>';
-    h += '<div class="card" style="margin-top:14px"><h2>Stat priority (editable)</h2><div class="row" style="margin-bottom:8px"><label>Mode</label><select data-chg="mode">' + Object.keys(BA.MODES).map(function (m) { return '<option value="' + m + '"' + (m === APP.state.selected.mode ? ' selected' : '') + '>' + e(BA.MODES[m].label) + '</option>'; }).join('') + '</select><span class="small muted">' + e(BA.MODES[APP.state.selected.mode].note) + '</span></div>' + tierEditor() + '</div>';
+    h += '<div class="note info" style="margin-top:14px">Stat tier lists, the Divine Stat priority and the Core Stat guide are on the <a href="#/tiers">Tier lists</a> page.</div>';
     return h;
   } });
   function tierEditor() {

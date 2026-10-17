@@ -35,7 +35,20 @@ button.pri{background:var(--gold);color:var(--on);border-color:var(--gold);font-
 button.ghost{background:transparent}
 button.sm{padding:3px 8px;font-size:12px}
 button:disabled{opacity:.45;cursor:not-allowed}
-input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0;max-width:100%}
+input:not([type=checkbox]):not([type=radio]):not([type=file]){width:100%}
+td input:not([type=checkbox]){min-width:60px}
+.row>input,.row>select,.row>textarea{width:auto;flex:1 1 140px}
+.top .pick select{width:auto;max-width:170px}
+input[type=file]{max-width:100%}
+.tier{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.tier:last-child{border-bottom:0}
+.tier .tl{font-size:22px;font-weight:700;color:var(--gold);text-align:center;border:1px solid var(--line2);border-radius:8px;display:flex;align-items:center;justify-content:center;min-height:48px}
+.tier.t2 .tl{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,transparent)}
+.tier.t3 .tl{color:var(--muted);border-color:var(--line)}
+.scard{display:inline-flex;flex-direction:column;gap:2px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:0 6px 6px 0;min-width:150px;vertical-align:top}
+.scard b{font-size:13px}
+.scard span{font-size:12px;color:var(--muted)}
 input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
 textarea{width:100%;min-height:80px;resize:vertical}
 label{display:block;font-size:12px;color:var(--muted);margin:0 0 3px}

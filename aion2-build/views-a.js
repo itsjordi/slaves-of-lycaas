@@ -88,7 +88,7 @@
     var any = Object.keys(d.combatStats || {}).length;
     var h = any ? '' : '<div class="note info small">No combat stats recorded yet. <a href="#/import">Import a Combat Stats screenshot</a> or <a href="#/character/stats">enter them</a>.</div>';
     h += '<table><tbody>' + tiers.map(function (t) { return t.stats.map(function (id) { var st = BA.STAT_BY_ID[id], v = d.combatStats[id]; return '<tr><td>' + APP.tier(t.tier) + ' ' + e(st.name) + '</td><td class="right">' + (v ? f(v.v, v.unit || st.unit) + ' ' + APP.pill(v.m) : '<span class="muted small">Not recorded</span>') + '</td></tr>'; }).join(''); }).join('') + '</tbody></table>';
-    return h + '<div class="small muted" style="margin-top:6px">Tier list is provisional and editable in <a href="#/research">Research</a>.</div>';
+    return h + '<div class="small muted" style="margin-top:6px">Tier list is provisional. See all tiers on <a href="#/tiers">Tier lists</a>.</div>';
   }
   function recent(ch) {
     var done = (APP.state.tasks || []).filter(function (t) { return t.status === 'done' && t.character === ch.id; }).sort(function (a, b) { return a.completedAt < b.completedAt ? 1 : -1; }).slice(0, 5);
