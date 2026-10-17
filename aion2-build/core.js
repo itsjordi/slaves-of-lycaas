@@ -113,8 +113,12 @@
     solo: { label: 'Solo PvE', tiers: null, note: 'No ranking defined yet. Starts as a copy of Boss PvE.' },
     pvp: { label: 'PvP (future)', tiers: null, note: 'Not supported yet.' }
   };
-  function tiersFor(mode, custom) {
-    if (custom && custom[mode]) return custom[mode];
+  // default ranking exists for Assassin only; other classes start empty until the player builds one
+  function tierKey(mode, cls) { return !cls || cls === 'Assassin' ? mode : cls + ':' + mode; }
+  function tiersFor(mode, custom, cls) {
+    var k = tierKey(mode, cls);
+    if (custom && custom[k]) return custom[k];
+    if (cls && cls !== 'Assassin') return TIER_ORDER.map(function (t) { return { tier: t, stats: [], why: '' }; });
     return MODES[mode] && MODES[mode].tiers ? MODES[mode].tiers : STAT_TIERS_BOSS;
   }
   function tierOf(statId, tiers) {
@@ -272,11 +276,17 @@
     return {
       app: APP_ID, version: SCHEMA_VERSION, createdAt: now,
       characters: [lyca, novin],
-      selected: { player: 'lycaa', benchmark: 'novin', mode: 'boss', rankMode: 'value' },
+      selected: { player: 'lycaa', benchmark: '', mode: 'boss', rankMode: 'value' }, selfFocus: 1,
       tasks: [], resources: [], dps: [], research: seedResearch(D), proposals: [], conflicts: [],
       customTiers: {}, uploads: [],
-      settings: { model: 'claude-sonnet-5-5', apiKey: '', aiEnabled: false, theme: 'dark' }
+      settings: { provider: 'anthropic', model: 'claude-sonnet-5-5', apiKey: '', openaiModel: 'gpt-5', openaiKey: '', aiEnabled: false }
     };
+  }
+  // what a new visitor starts with: no characters, research notes and settings only
+  function emptyState(now) {
+    var s = seedState(now);
+    s.characters = []; s.selected = { player: '', benchmark: '', mode: 'boss', rankMode: 'value' }; s.selfFocus = 1;
+    return s;
   }
   function seedResearch(D) {
     function R(topic, summary, kind, conf) {
@@ -352,6 +362,90 @@
     return out;
   }
   function itemLine(name) { return String(name || '').split(' ')[0]; }
+
+  /* ------------------------------------------------------------------ classes, servers, blank characters */
+  var CLASSES = ['Assassin', 'Gladiator', 'Templar', 'Ranger', 'Sorcerer', 'Spiritmaster', 'Elementalist', 'Cleric', 'Chanter', 'Brawler'];
+  // Global Europe server names as shown on AionFlex; free text is allowed for anything else
+  var SERVERS = ['Siel (EU)', 'Nezekan (EU)', 'Vaizel (EU)', 'Kaisinel (EU)', 'Yustiel (EU)', 'Ariel (EU)', 'Fregion (EU)', 'Meslamtaeda (EU)', 'Hithanya (EU)', 'Nania (EU)', 'Tahavatha (EU)', 'Luteros (EU)', 'Phernos (EU)', 'Daminu (EU)', 'Kasaka (EU)', 'Bakarma (EU)', 'Tsenka (EU)', 'Kochi (EU)', 'Ishtar (EU)', 'Tiamat (EU)', 'Gauss (EU)', 'Lamuatan (EU)', 'Nathara (EU)',
+    'Israphel (EU)', 'Zikel (EU)', 'Triniel (EU)', 'Lumiel (EU)', 'Marchutan (EU)', 'Azphel (EU)', 'Ereshkigal (EU)', 'Beritra (EU)', 'Nemon (EU)', 'Hadala (EU)', 'Ludra (EU)', 'Ulgorn (EU)', 'Munin (EU)', 'Odar (EU)', 'Zemurru (EU)', 'Kromede (EU)', 'Quai (EU)', 'Baba (EU)', 'Fafnir (EU)', 'Indnath (EU)', 'Agnita (EU)', 'Atiel (EU)', 'Tassin (EU)',
+    'Siel (NAE)', 'Nezekan (NAE)', 'Vaizel (NAE)', 'Kaisinel (NAE)', 'Yustiel (NAE)', 'Ariel (NAE)', 'Fregion (NAE)', 'Meslamtaeda (NAE)', 'Hithanya (NAE)', 'Israphel (NAE)', 'Zikel (NAE)', 'Triniel (NAE)', 'Lumiel (NAE)', 'Marchutan (NAE)', 'Azphel (NAE)', 'Ereshkigal (NAE)', 'Beritra (NAE)', 'Nemon (NAE)',
+    'Siel (NAW)', 'Nezekan (NAW)', 'Vaizel (NAW)', 'Kaisinel (NAW)', 'Yustiel (NAW)', 'Israphel (NAW)', 'Zikel (NAW)', 'Triniel (NAW)', 'Lumiel (NAW)', 'Marchutan (NAW)'];
+  function skillsFor(cls, m) {
+    if (cls !== 'Assassin') return [];
+    var list = [];
+    ['active', 'passive', 'stigma'].forEach(function (t) { SKILLS[t].forEach(function (n) { list.push({ id: slug(n), name: n, type: t, level: null, unlocked: null, m: m }); }); });
+    return list;
+  }
+  function blankData(cls) {
+    var none = meta('unknown', 'none', null);
+    function map(defs) { var o = {}; defs.forEach(function (d) { o[d.id] = { v: null, m: none }; }); return o; }
+    return {
+      level: { v: null, m: none }, cp: { v: null, m: none }, itemLevel: { v: null, m: none }, dps: { v: null, m: none },
+      equipment: {}, arcana: { state: 'unknown', items: [], m: none }, combatStats: {},
+      coreStats: map(CORE_STATS), divine: map(DIVINE), daevanion: map(DAEVANION),
+      pantheon: { collected: null, total: null, slots: null, effects: {}, collectibles: [], m: none },
+      skills: { needsRefresh: true, list: skillsFor(cls, none), rotations: { boss: '', aoe: '', burst: '' } },
+      titles: { unlocked: null, total: null, selected: null, bonuses: '', m: none },
+      pet: { name: null, level: null, rarity: null, effects: '', m: none }, wings: { name: null, rarity: null, stats: '', m: none },
+      collections: { notes: '', m: none }
+    };
+  }
+  function newCharacter(o) {
+    var cls = CLASSES.indexOf(o.cls) >= 0 ? o.cls : (o.cls || 'Assassin');
+    var d = blankData(cls), m = meta('confirmed', o.source || 'Setup', o.observedAt || null);
+    if (o.level != null) d.level = { v: o.level, m: m };
+    if (o.cp != null) d.cp = { v: o.cp, m: m };
+    if (o.itemLevel != null) d.itemLevel = { v: o.itemLevel, m: m };
+    return { id: slug(o.name || 'character') + '_' + Date.now().toString(36), role: o.role || 'player', name: String(o.name || '').slice(0, 40), cls: cls, race: o.race || '', region: o.region || 'Global', server: o.server || '', guild: o.guild || '', url: o.url || '',
+      snapshots: [snapshot('Created', o.observedAt || new Date().toISOString().slice(0, 10), d)] };
+  }
+  // read name, region and server id from an AionFlex profile URL (query or path form)
+  function parseProfileUrl(u) {
+    var out = { name: null, region: null, serverId: null, ok: false };
+    try {
+      var url = new URL(String(u).trim());
+      if (!/(^|\.)aionflex\.gg$/i.test(url.hostname)) return out;
+      var q = url.searchParams;
+      if (q.get('name')) { out.name = q.get('name'); out.region = q.get('region'); out.serverId = q.get('server'); }
+      var m = url.pathname.match(/^\/character\/([^/]+)\/(\d+)\/([^/]+)/);
+      if (m) { out.region = decodeURIComponent(m[1]); out.serverId = m[2]; out.name = decodeURIComponent(m[3]); }
+      if (out.region) out.region = out.region.charAt(0).toUpperCase() + out.region.slice(1).toLowerCase();
+      out.ok = !!out.name;
+    } catch (e) { }
+    return out;
+  }
+
+  /* ------------------------------------------------------------------ self check: what you are not using or not recording */
+  function selfCheck(d) {
+    var missing = [], unknowns = [];
+    if (arcanaState(d) === 'none') missing.push({ system: 'arcana', text: 'Arcana: none equipped.' });
+    if (arcanaState(d) === 'unknown') unknowns.push({ system: 'arcana', text: 'Arcana not recorded.' });
+    var pp = pantheonPct(d);
+    if (pp != null && pp < 25) missing.push({ system: 'pantheon', text: 'Pantheon: ' + d.pantheon.collected + '/' + d.pantheon.total + ' collected (' + pp + '%).' });
+    if (pp == null) unknowns.push({ system: 'pantheon', text: 'Pantheon progress not recorded.' });
+    DAEVANION.forEach(function (b) { var v = num(d.daevanion && d.daevanion[b.id]); if (v != null && v < 10) missing.push({ system: 'daevanion', text: 'Daevanion ' + b.name + ': ' + v + '%, barely started.' }); });
+    var empty = SLOTS.filter(function (s) { return !(d.equipment && d.equipment[s.id]); });
+    if (empty.length && empty.length < SLOTS.length) missing.push({ system: 'equipment', text: 'Empty slots: ' + empty.map(function (s) { return s.name; }).join(', ') + '.' });
+    if (empty.length === SLOTS.length) unknowns.push({ system: 'equipment', text: 'No equipment recorded yet.' });
+    if (!Object.keys(d.combatStats || {}).length) unknowns.push({ system: 'stats', text: 'Combat stats not recorded.' });
+    if (d.skills && d.skills.needsRefresh) unknowns.push({ system: 'skills', text: 'Skill levels missing or outdated.' });
+    var noRolls = SLOTS.every(function (s) { var it = d.equipment && d.equipment[s.id]; return !it || !(it.rolls.length + it.base.length); });
+    if (!empty.length || empty.length < SLOTS.length) if (noRolls) unknowns.push({ system: 'equipment', text: 'Item stat lines (rolls, Soul Binding, Manastones) not recorded.' });
+    if (d.titles && d.titles.unlocked == null) unknowns.push({ system: 'titles', text: 'Title count not recorded.' });
+    if (num(d.cp) == null) unknowns.push({ system: 'cp', text: 'Combat Power not recorded.' });
+    return { missing: missing, unknowns: unknowns };
+  }
+  // slots clearly below the rest of your own gear in the same group
+  function weakSlots(d) {
+    var out = [];
+    ['weapon', 'armor', 'accessory', 'rune'].forEach(function (g) {
+      var rows = SLOTS.filter(function (s) { return s.group === g && d.equipment && d.equipment[s.id] && typeof d.equipment[s.id].enh === 'number'; }).map(function (s) { return { slot: s, enh: d.equipment[s.id].enh }; });
+      if (rows.length < 2) return;
+      var sorted = rows.map(function (r) { return r.enh; }).sort(function (a, b) { return a - b; }), med = sorted[Math.floor(sorted.length / 2)];
+      rows.forEach(function (r) { if (r.enh <= med - 2) out.push({ slot: r.slot.id, slotName: r.slot.name, group: g, enh: r.enh, typical: med, name: d.equipment[r.slot.id].name }); });
+    });
+    return out.sort(function (a, b) { return (a.enh - a.typical) - (b.enh - b.typical); });
+  }
 
   /* ------------------------------------------------------------------ comparison engine */
   function compare(a, b, opts) {
@@ -473,13 +567,22 @@
       var runeBehind = c.slots.filter(function (r) { return r.group === 'rune' && r.verdict === 'behind'; });
       runeBehind.forEach(function (r) { out.push(rec({ id: 'enh_' + r.slot, title: 'Enhance ' + r.slotName + ' (' + r.a.name + ') to +' + r.b.enh, system: 'runes', description: '+' + r.a.enh + ' -> +' + r.b.enh + '.', current: '+' + r.a.enh, proposed: '+' + r.b.enh, dps: 'Low', cp: 'Low', cost: 'Unknown', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Unknown', confidence: 'Medium', longterm: 'Medium', why: 'Small, same-item enhancement.' })); });
     }
+    var haveEnh = {}; out.forEach(function (r) { haveEnh[r.id] = 1; });
+    weakSlots(player).forEach(function (w) {
+      if (haveEnh['enh_' + w.slot]) return;
+      out.push(rec({ id: 'weak_' + w.slot, title: 'Raise ' + w.slotName + ' (+' + w.enh + ')', system: w.group === 'rune' ? 'runes' : 'equipment', description: w.name + ' is at +' + w.enh + ' while your other ' + (w.group === 'accessory' ? 'accessories' : w.group === 'armor' ? 'armor pieces' : w.group + 's') + ' are around +' + w.typical + '.', current: '+' + w.enh, proposed: 'Towards +' + w.typical, dps: w.group === 'weapon' ? 'Medium' : 'Low', cp: 'Medium', cost: 'Unknown', time: 'Medium', availability: 'Now', difficulty: 'Medium', risk: 'Unknown', confidence: 'Medium', longterm: 'Medium', source: 'Your own gear', why: 'Your weakest piece in this group compared with the rest of your own gear. Costs and success rates are not recorded; treat enhancing as probabilistic.' }));
+    });
+    if (!bench) {
+      var low = DAEVANION.map(function (b2) { return { name: b2.name, v: num(player.daevanion && player.daevanion[b2.id]) }; }).filter(function (x) { return x.v != null; }).sort(function (a2, b2) { return a2.v - b2.v; });
+      if (low.length && low[0].v < 50) out.push(rec({ id: 'daevanion_low', title: 'Daevanion: work on ' + low[0].name + ' (' + low[0].v + '%)', system: 'daevanion', description: 'Your least developed board' + (low[1] && low[1].v < 50 ? 's: ' + low.filter(function (x) { return x.v < 50; }).map(function (x) { return x.name + ' ' + x.v + '%'; }).join(', ') : '') + '. Prefer nodes with offensive bonuses.', current: low[0].v + '%', proposed: 'Offensive nodes first', dps: 'Unknown', cp: 'Medium', cost: 'Unknown', time: 'Medium', availability: 'Now', difficulty: 'Medium', risk: 'Low', confidence: 'Low', longterm: 'High', source: 'Your own boards', why: 'Node bonuses are not recorded yet, so this only points at the board.' }));
+    }
     var core = player.coreStats || {};
     if (num(core.precision) === 0) out.push(rec({ id: 'core_review', title: 'Review Core Stat allocation (Precision, Might)', system: 'core', description: 'Precision is 0 and Dexterity (defensive) is 68. Precision maps to Accuracy and Critical Hit, Might to Attack Increase. Check point totals and reset rules first; this is a what-if, not an instruction.', current: 'Might ' + num(core.might) + ', Dex ' + num(core.dexterity) + ', Precision 0', proposed: 'Simulate a redistribution', dps: 'Medium', cp: 'Unknown', cost: 'Unknown', time: 'Low', availability: 'Not verified', difficulty: 'Low', risk: 'Low', confidence: 'Low', longterm: 'Medium', source: 'Core Stat tooltip mapping + provisional priority', why: 'Points in defensive Dexterity may be worth more in offensive stats for boss DPS, if resets are possible.' }));
     if (c) {
       var behindB = c.daevanion.filter(function (x) { return x.diff != null && x.diff < 0; });
       if (behindB.length) out.push(rec({ id: 'daevanion', title: 'Daevanion: ' + behindB.map(function (x) { return x.name; }).join(', '), system: 'daevanion', description: 'Behind the benchmark on these boards. Prefer nodes with offensive bonuses; completion % alone says little about damage.', current: behindB.map(function (x) { return x.name + ' ' + x.a + '%'; }).join(', '), proposed: 'Offensive nodes first', dps: 'Unknown', cp: 'Medium', cost: 'Unknown', time: 'Medium', availability: 'Now', difficulty: 'Medium', risk: 'Low', confidence: 'Low', longterm: 'High', why: 'Node bonuses are not recorded yet, so the route cannot be optimised beyond the board level.' }));
     }
-    if (player.titles && player.titles.unlocked == null) out.push(rec({ id: 'data_titles', title: 'Record your title collection', system: 'titles', description: 'The benchmark has ' + (bench && bench.titles && bench.titles.unlocked != null ? bench.titles.unlocked + '/' + bench.titles.total : 'an unknown number of') + ' titles.', current: 'Unknown', proposed: 'Recorded', dps: 'Unknown', cp: 'Unknown', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'Medium', source: 'Data quality', why: 'Titles may explain part of the CP gap; we cannot tell without the count.' }));
+    if (player.titles && player.titles.unlocked == null) out.push(rec({ id: 'data_titles', title: 'Record your title collection', system: 'titles', description: 'Titles can carry stat bonuses and count towards Combat Power. ' + (bench && bench.titles && bench.titles.unlocked != null ? 'The character you compare with has ' + bench.titles.unlocked + '/' + bench.titles.total + '.' : ''), current: 'Unknown', proposed: 'Recorded', dps: 'Unknown', cp: 'Unknown', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'Medium', source: 'Data quality', why: 'Cheap to record and needed before titles can be part of the advice.' }));
     // the bench name used in a string above
     return out;
   }
@@ -748,7 +851,7 @@
   /* ------------------------------------------------------------------ import / export */
   function exportState(state, opts) {
     var s = clone(state);
-    if (!(opts && opts.includeKey)) s.settings.apiKey = '';
+    if (!(opts && opts.includeKey)) { s.settings.apiKey = ''; s.settings.openaiKey = ''; }
     s.uploads = (s.uploads || []).map(function (u) { var c = {}; for (var k in u) if (k !== 'data') c[k] = u[k]; return c; });
     return { app: APP_ID, version: SCHEMA_VERSION, exportedAt: new Date().toISOString(), state: s };
   }
@@ -770,8 +873,10 @@
     if (!state.version) state.version = SCHEMA_VERSION;
     ['tasks', 'resources', 'dps', 'research', 'proposals', 'conflicts', 'uploads'].forEach(function (k) { if (!Array.isArray(state[k])) state[k] = []; });
     state.customTiers = state.customTiers || {};
+    if (state.selfFocus !== 1) { state.selfFocus = 1; if (state.selected) state.selected.benchmark = ''; }
     state.settings = state.settings || { model: 'claude-sonnet-5-5', apiKey: '', aiEnabled: false };
-    state.selected = state.selected || { player: state.characters[0] && state.characters[0].id, benchmark: state.characters[1] && state.characters[1].id, mode: 'boss', rankMode: 'value' };
+    var st = state.settings; if (!st.provider) st.provider = 'anthropic'; if (st.openaiKey == null) st.openaiKey = ''; if (!st.openaiModel) st.openaiModel = 'gpt-5';
+    state.selected = state.selected || { player: state.characters[0] && state.characters[0].id, benchmark: '', mode: 'boss', rankMode: 'value' };
     return state;
   }
   function csvEscape(v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
@@ -808,7 +913,7 @@
     TIER_ORDER: TIER_ORDER, STAT_TIERS_BOSS: STAT_TIERS_BOSS, MODES: MODES, CORE_STATS: CORE_STATS, DIVINE: DIVINE, DIVINE_PRIORITY: DIVINE_PRIORITY,
     DAEVANION: DAEVANION, SLOTS: SLOTS, SLOT_BY_ID: SLOT_BY_ID, SKILLS: SKILLS, CATEGORY: CATEGORY, RANK_MODES: RANK_MODES,
     meta: meta, fv: fv, val: val, num: num, uid: uid, clone: clone, freeze: freeze, slug: slug, fmt: fmt,
-    seedState: seedState, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
+    seedState: seedState, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
     statIdFor: statIdFor, slotIdFor: slotIdFor, tiersFor: tiersFor, tierOf: tierOf, itemLine: itemLine,
     cpGap: cpGap, divineTotal: divineTotal, pct: pct, pantheonPct: pantheonPct, daevanionAvg: daevanionAvg, arcanaState: arcanaState, enhTotal: enhTotal,
     snapshotSummary: snapshotSummary, snapshotDiff: snapshotDiff, compare: compare, recommendations: recommendations, divineNeeds: divineNeeds,

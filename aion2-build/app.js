@@ -13,7 +13,7 @@
       var raw = localStorage.getItem(KEY);
       if (raw) { var s = JSON.parse(raw); if (s && s.app === BA.APP_ID && Array.isArray(s.characters)) return BA.migrate(s); }
     } catch (e) { console.warn('Could not read saved data', e); }
-    return BA.seedState();
+    return BA.emptyState();
   }
   APP.state = load();
   APP.save = function () {
@@ -22,19 +22,22 @@
   };
   APP.save();
   APP.reset = function () { APP.state = BA.seedState(); APP.save(); };
-  APP.player = function () { return BA.getChar(APP.state, APP.state.selected.player) || APP.state.characters[0]; };
-  APP.bench = function () { var b = BA.getChar(APP.state, APP.state.selected.benchmark); return b && b !== APP.player() ? b : null; };
-  APP.pd = function () { return BA.cur(APP.player()); };
+  APP.player = function () { return BA.getChar(APP.state, APP.state.selected.player) || APP.state.characters.filter(function (c) { return c.role !== 'benchmark'; })[0] || APP.state.characters[0] || null; };
+  // comparing is opt-in on the Compare page only; everywhere else the tool looks at you alone
+  APP.bench = function () { return null; };
+  APP.tiers = function (mode) { var p = APP.player(); return BA.tiersFor(mode || APP.state.selected.mode, APP.state.customTiers, p ? p.cls : null); };
+  APP.pd = function () { var p = APP.player(); return p ? BA.cur(p) : null; };
   APP.bd = function () { var b = APP.bench(); return b ? BA.cur(b) : null; };
   APP.commit = function (ch, mutate, label, observedAt) { var s = BA.commit(ch, mutate, label, observedAt); APP.save(); return s; };
   APP.recs = function () {
     var p = APP.player(), b = APP.bench();
-    return BA.recommendations(BA.cur(p), b ? BA.cur(b) : null, { mode: APP.state.selected.mode, customTiers: APP.state.customTiers, benchName: b ? b.name : null });
+    if (!p) return [];
+    return BA.recommendations(BA.cur(p), b ? BA.cur(b) : null, { mode: APP.state.selected.mode, customTiers: APP.state.customTiers, cls: p.cls, benchName: b ? b.name : null });
   };
   APP.doneMap = function () {
     var m = {}; (APP.state.tasks || []).forEach(function (t) { if (t.status === 'done' && t.recId) m[t.recId] = true; });
     var d = APP.pd();
-    if (d && !d.skills.needsRefresh) m.data_skills = true;
+    if (d && d.skills && !d.skills.needsRefresh) m.data_skills = true;
     if (d && Object.keys(d.combatStats || {}).length) m.data_stats = true;
     if (d && d.titles && d.titles.unlocked != null) m.data_titles = true;
     return m;
@@ -179,6 +182,8 @@
   function route() { var h = (location.hash || '#/dashboard').replace(/^#\/?/, '').split('/'); return { name: h[0] || 'dashboard', arg: h.slice(1).join('/') }; }
   APP.render = function () {
     var r = route(), v = APP.views[r.name] || APP.views.dashboard;
+    // nobody set up yet: everything except settings and the characters page leads to the setup screen
+    if (!APP.state.characters.length && ['settings', 'characters', 'setup'].indexOf(r.name) < 0 && APP.views.setup) v = APP.views.setup;
     renderSide(r.name);
     renderPick();
     var el = document.getElementById('view');
@@ -196,22 +201,26 @@
     document.getElementById('side').innerHTML = html;
   }
   function renderPick() {
-    var s = APP.state, opts = function (sel, includeNone) {
-      return (includeNone ? '<option value="">(none)</option>' : '') + s.characters.map(function (c) { return '<option value="' + e(c.id) + '"' + (c.id === sel ? ' selected' : '') + '>' + e(c.name) + (c.role === 'benchmark' ? ' (benchmark)' : '') + '</option>'; }).join('');
-    };
-    document.getElementById('pickPlayer').innerHTML = opts(s.selected.player);
-    document.getElementById('pickBench').innerHTML = opts(s.selected.benchmark, true);
+    var s = APP.state, mine = s.characters.filter(function (c) { return c.role !== 'benchmark'; }), p = APP.player();
+    var sel = document.getElementById('pickPlayer');
+    sel.innerHTML = mine.length ? mine.map(function (c) { return '<option value="' + e(c.id) + '"' + (p && c.id === p.id ? ' selected' : '') + '>' + e(c.name) + '</option>'; }).join('') + '<option value="__manage">Manage characters...</option>' : '<option value="">No character yet</option><option value="__manage">Set up a character...</option>';
   }
-  document.getElementById('pickPlayer').addEventListener('change', function (ev) { APP.state.selected.player = ev.target.value; APP.save(); APP.render(); });
-  document.getElementById('pickBench').addEventListener('change', function (ev) { APP.state.selected.benchmark = ev.target.value; APP.save(); APP.render(); });
-  var themeBtn = document.getElementById('themeBtn');
-  function themeLabel() { themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? 'Dark' : 'Light'; }
-  themeLabel();
-  themeBtn.addEventListener('click', function () {
-    var t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('aion2_build_theme', t); } catch (x) {}
-    themeLabel();
+  document.getElementById('pickPlayer').addEventListener('change', function (ev) {
+    if (ev.target.value === '__manage') { location.hash = '#/characters'; return; }
+    APP.state.selected.player = ev.target.value; APP.save(); APP.render();
   });
+  /* themes: the same six as the Daily Board; follows the board's theme until you pick one here */
+  APP.THEMES = [['aion', 'Aion'], ['paper', 'Paper'], ['lamp', 'Lamp'], ['slate', 'Slate'], ['mist', 'Mist'], ['pixel', 'Pixel']];
+  APP.setTheme = function (t) {
+    if (!APP.THEMES.some(function (x) { return x[0] === t; })) t = 'aion';
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('aion2_build_theme', t); } catch (x) {}
+    var tp = document.getElementById('themePick'); if (tp) tp.value = t;
+  };
+  var tp = document.getElementById('themePick');
+  tp.innerHTML = APP.THEMES.map(function (x) { return '<option value="' + x[0] + '">' + x[1] + '</option>'; }).join('');
+  tp.value = document.documentElement.getAttribute('data-theme') || 'aion';
+  tp.addEventListener('change', function () { APP.setTheme(tp.value); });
   addEventListener('hashchange', function () { APP.render(); document.getElementById('view').focus({ preventScroll: true }); window.scrollTo(0, 0); });
 
   /* ------------------------------------------------------------------ screenshots in IndexedDB */
@@ -238,28 +247,69 @@
       .catch(function () { return null; });
   };
 
-  /* ------------------------------------------------------------------ Claude client (optional, your own key) */
+  /* ------------------------------------------------------------------ AI client: Claude or ChatGPT, your own key */
+  // Internally everything uses the Anthropic message shape (content blocks, tool_use, tool_result).
+  // For OpenAI the request is translated to Chat Completions and the answer is translated back.
   var calls = [];
-  APP.aiReady = function () { var s = APP.state.settings; return !!(s.aiEnabled && s.apiKey && s.model); };
-  APP.claude = function (body) {
-    var s = APP.state.settings;
-    if (!APP.aiReady()) return Promise.reject(new Error('AI is not configured. Add your Anthropic API key and model in Settings, or use manual entry.'));
+  APP.PROVIDERS = { anthropic: 'Claude (Anthropic)', openai: 'ChatGPT (OpenAI)' };
+  function aiConf() {
+    var s = APP.state.settings, p = s.provider === 'openai' ? 'openai' : 'anthropic';
+    return { provider: p, key: p === 'openai' ? s.openaiKey : s.apiKey, model: p === 'openai' ? s.openaiModel : s.model, name: APP.PROVIDERS[p] };
+  }
+  APP.aiConf = aiConf;
+  APP.aiReady = function () { var c = aiConf(); return !!(APP.state.settings.aiEnabled && c.key && c.model); };
+  function toOpenAI(body) {
+    var msgs = [];
+    if (body.system) msgs.push({ role: 'system', content: body.system });
+    (body.messages || []).forEach(function (m) {
+      if (typeof m.content === 'string') { msgs.push({ role: m.role, content: m.content }); return; }
+      var blocks = m.content || [];
+      if (m.role === 'assistant') {
+        var text = blocks.filter(function (b) { return b.type === 'text'; }).map(function (b) { return b.text; }).join('\n');
+        var uses = blocks.filter(function (b) { return b.type === 'tool_use'; });
+        var o = { role: 'assistant', content: text || null };
+        if (uses.length) o.tool_calls = uses.map(function (u) { return { id: u.id, type: 'function', function: { name: u.name, arguments: JSON.stringify(u.input || {}) } }; });
+        msgs.push(o); return;
+      }
+      var results = blocks.filter(function (b) { return b.type === 'tool_result'; });
+      results.forEach(function (r) { msgs.push({ role: 'tool', tool_call_id: r.tool_use_id, content: typeof r.content === 'string' ? r.content : JSON.stringify(r.content) }); });
+      var parts = blocks.filter(function (b) { return b.type === 'text' || b.type === 'image'; }).map(function (b) {
+        return b.type === 'text' ? { type: 'text', text: b.text } : { type: 'image_url', image_url: { url: 'data:' + b.source.media_type + ';base64,' + b.source.data } };
+      });
+      if (parts.length) msgs.push({ role: 'user', content: parts });
+    });
+    var out = { messages: msgs, max_completion_tokens: body.max_tokens || 1500 };
+    if (body.tools) out.tools = body.tools.map(function (t) { return { type: 'function', function: { name: t.name, description: t.description, parameters: t.input_schema } }; });
+    return out;
+  }
+  function fromOpenAI(j) {
+    var ch = (j.choices || [])[0] || {}, m = ch.message || {}, content = [];
+    if (m.content) content.push({ type: 'text', text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) });
+    (m.tool_calls || []).forEach(function (t) { var input = {}; try { input = JSON.parse(t.function.arguments || '{}'); } catch (x) { input = {}; } content.push({ type: 'tool_use', id: t.id, name: t.function.name, input: input }); });
+    return { content: content, stop_reason: (m.tool_calls && m.tool_calls.length) ? 'tool_use' : 'end_turn' };
+  }
+  APP.toOpenAI = toOpenAI; APP.fromOpenAI = fromOpenAI;
+  APP.claude = APP.ai = function (body) {
+    var c = aiConf();
+    if (!APP.aiReady()) return Promise.reject(new Error('AI is not configured. Choose Claude or ChatGPT in Settings and add your own key, or use manual entry.'));
     var now = Date.now();
     calls = calls.filter(function (t) { return now - t < 10 * 60 * 1000; });
     if (calls.length >= 30) return Promise.reject(new Error('Rate limit: max 30 AI requests per 10 minutes.'));
     if (calls.length && now - calls[calls.length - 1] < 1500) return Promise.reject(new Error('Slow down a little: one request per 1.5 seconds.'));
     calls.push(now);
-    var ctl = new AbortController(), to = setTimeout(function () { ctl.abort(); }, 90000);
-    body.model = s.model;
-    return fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', signal: ctl.signal,
-      headers: { 'content-type': 'application/json', 'x-api-key': s.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify(body)
-    }).then(function (r) {
+    var ctl = new AbortController(), to = setTimeout(function () { ctl.abort(); }, 90000), req;
+    if (c.provider === 'openai') {
+      var ob = toOpenAI(body); ob.model = c.model;
+      req = fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + c.key }, body: JSON.stringify(ob) });
+    } else {
+      body.model = c.model;
+      req = fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', 'x-api-key': c.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(body) });
+    }
+    return req.then(function (r) {
       clearTimeout(to);
       return r.json().catch(function () { return {}; }).then(function (j) {
-        if (!r.ok) throw new Error('AI request failed (' + r.status + '): ' + ((j.error && j.error.message) || 'unknown error'));
-        return j;
+        if (!r.ok) throw new Error(c.name + ' request failed (' + r.status + '): ' + ((j.error && j.error.message) || 'unknown error'));
+        return c.provider === 'openai' ? fromOpenAI(j) : j;
       });
     }, function (err) { clearTimeout(to); throw new Error(err.name === 'AbortError' ? 'AI request timed out.' : 'Network error: ' + err.message); });
   };

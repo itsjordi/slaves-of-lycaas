@@ -16,7 +16,10 @@
 - Export: JSON, snapshots, plan, CSV; backup and restore.
 - Tier lists page (cards or sortable table, per mode), sortable and filterable tables everywhere.
 - Tutorial: Start here checklist, guided tour, per-page help, glossary, FAQ, first-visit welcome.
-- Tests: 25 unit tests, 12 end-to-end checks.
+- Self-focused: no default benchmark, self-based recommendations (weak slots, low boards, unused systems), Compare only when you want it.
+- Multi-user: empty start, setup wizard with AionFlex link parsing, characters list with search, any class, example character.
+- Themes from the Daily Board; Claude or ChatGPT; send tasks to the Daily Board to-do; Help menu and Ari the helper.
+- Tests: 33 unit tests, 19 end-to-end checks.
 
 ## Next
 

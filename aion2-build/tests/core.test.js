@@ -255,3 +255,71 @@ test('csv exports escape values', () => {
   assert.ok(csv.includes('Spiritforged Dagger'));
   assert.ok(BA.snapshotsCsv(L).includes('72815'));
 });
+
+test('self-based recommendations work without anyone to compare with', () => {
+  const { L } = seed();
+  const recs = BA.recommendations(BA.cur(L), null, {});
+  const ids = recs.map(r => r.id);
+  ['arcana_start', 'divine_collect', 'weak_belt', 'weak_amulet', 'daevanion_low', 'data_stats'].forEach(id => assert.ok(ids.includes(id), id));
+  assert.ok(!recs.some(r => /Novin|benchmark/.test(r.description)), 'no comparison wording');
+  assert.equal(BA.bestNext(recs, 'value', {}).rec.kind, 'upgrade');
+});
+
+test('weak slots are judged against your own gear', () => {
+  const { L } = seed();
+  const w = BA.weakSlots(BA.cur(L)).map(x => x.slot);
+  assert.ok(w.includes('belt') && w.includes('amulet') && w.includes('off_hand'));
+  assert.ok(!w.includes('helmet'));
+});
+
+test('self check lists unused systems and missing data', () => {
+  const { L } = seed();
+  const c = BA.selfCheck(BA.cur(L));
+  assert.ok(c.missing.some(x => x.system === 'arcana'));
+  assert.ok(c.missing.some(x => x.system === 'pantheon'));
+  assert.ok(c.unknowns.some(x => x.system === 'stats'));
+  const blank = BA.selfCheck(BA.blankData('Cleric'));
+  assert.ok(blank.unknowns.some(x => x.system === 'cp'));
+});
+
+test('new visitors start empty; new characters work for any class', () => {
+  const s = BA.emptyState();
+  assert.equal(s.characters.length, 0);
+  assert.equal(s.selected.benchmark, '');
+  const c = BA.newCharacter({ name: 'Test', cls: 'Cleric', server: 'Siel (EU)', cp: 50000 });
+  assert.equal(c.cls, 'Cleric');
+  assert.equal(BA.cur(c).skills.list.length, 0, 'no Assassin skills for a Cleric');
+  assert.equal(BA.num(BA.cur(c).cp), 50000);
+  const a = BA.newCharacter({ name: 'Ass', cls: 'Assassin' });
+  assert.equal(BA.cur(a).skills.list.length, 32);
+});
+
+test('tier lists are per class; only Assassin has a default', () => {
+  assert.ok(BA.tiersFor('boss', {}, 'Assassin')[0].stats.length > 0);
+  assert.ok(BA.tiersFor('boss', {}, 'Cleric').every(t => t.stats.length === 0));
+  const custom = { [BA.tierKey('boss', 'Cleric')]: [{ tier: 'S+', stats: ['attack'], why: '' }] };
+  assert.deepEqual(BA.tiersFor('boss', custom, 'Cleric')[0].stats, ['attack']);
+  assert.equal(BA.tierKey('boss', 'Assassin'), 'boss');
+});
+
+test('AionFlex profile links are parsed, other sites are not', () => {
+  const a = BA.parseProfileUrl('https://aionflex.gg/character?id=x&server=1305&region=GLOBAL&name=lycaa');
+  assert.deepEqual([a.ok, a.name, a.serverId, a.region], [true, 'lycaa', '1305', 'Global']);
+  const b = BA.parseProfileUrl('https://aionflex.gg/character/Global/2313/Leecher');
+  assert.deepEqual([b.ok, b.name, b.serverId], [true, 'Leecher', '2313']);
+  assert.equal(BA.parseProfileUrl('https://evil.example/character?name=x').ok, false);
+  assert.equal(BA.parseProfileUrl('not a url').ok, false);
+});
+
+test('migration turns off the always-on comparison', () => {
+  const s = BA.seedState(); s.selected.benchmark = 'novin'; delete s.selfFocus;
+  BA.migrate(s);
+  assert.equal(s.selected.benchmark, '');
+  assert.equal(s.settings.provider, 'anthropic');
+});
+
+test('exports never contain either AI key', () => {
+  const s = BA.seedState(); s.settings.apiKey = 'a'; s.settings.openaiKey = 'b';
+  const ex = BA.exportState(s);
+  assert.equal(ex.state.settings.apiKey, ''); assert.equal(ex.state.settings.openaiKey, '');
+});

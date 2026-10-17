@@ -508,6 +508,8 @@ function load(){
 }
 let S = load();
 function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }
+// the Build Architect can add to-dos from another tab: pick them up when storage changes
+window.addEventListener('storage', ev=>{ if (ev.key !== LS_KEY) return; S = load(); try{ applyResets(); renderAll(); }catch(e){} });
 
 /* ---------- reset logic ---------- */
 function dayKey(now){ return Math.floor((now - S.settings.resetHourUTC*3600e3) / 864e5); }

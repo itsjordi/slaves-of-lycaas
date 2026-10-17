@@ -15,16 +15,16 @@
   APP.provFields = provFields; APP.prov = prov; APP.numOrNull = numOrNull;
   function warnBlock(d, ch) {
     var w = [];
-    if (d.skills && d.skills.needsRefresh) w.push('Skill levels need a fresh in-game screenshot. The AionFlex levels were outdated, so skills are not used for advice yet. <a href="#/import">Import a Skills screenshot</a>.');
-    var hist = ch.snapshots.length === 1 && ch.snapshots[0].observedAt;
-    if (hist) w.push('Showing the historical snapshot from ' + e(ch.snapshots[0].observedAt) + '. Fields marked "Imported" come from AionFlex and may be stale.');
+    if (d.skills && d.skills.needsRefresh && d.skills.list.length) w.push('Skill levels are missing or outdated, so skills are not used for advice yet. <a href="#/import/skills">Import a Skills screenshot</a>.');
+    var imported = ['cp', 'itemLevel'].some(function (k) { return d[k] && d[k].m && d[k].m.status === 'imported'; });
+    if (imported) w.push('Some values were imported from an external profile on ' + e(d.itemLevel.m.observedAt || '?') + ' and may be stale. Hover the status labels to check.');
     return w.map(function (x) { return '<div class="note">' + x + '</div>'; }).join('');
   }
   function recRow(r, rowOpts) {
     rowOpts = rowOpts || {};
     var inPlan = (APP.state.tasks || []).some(function (t) { return t.recId === r.id; });
     return '<li class="rec"><div class="row"><span class="t">' + e(r.title) + '</span><span class="pill">' + e(r.system) + '</span>' + (rowOpts.blocked ? '<span class="pill warn">waits on a step</span>' : '') +
-      '<span style="flex:1"></span>' + (inPlan ? '<span class="pill confirmed">In plan</span>' : '<button class="sm" data-act="rec-add" data-id="' + e(r.id) + '">Add to plan</button>') + '</div>' +
+      '<span style="flex:1"></span>' + (inPlan ? '<span class="pill confirmed">In plan</span>' : '<button class="sm" data-act="rec-add" data-id="' + e(r.id) + '">Add to plan</button>') + '<button class="sm ghost" data-act="board-send" data-text="' + e(r.title) + '" title="Add to the to-do list on the Daily Board">To Daily board</button></div>' +
       '<div class="small muted">' + e(r.description) + '</div>' +
       '<div class="m"><span>DPS ' + APP.lvl(r.dps) + '</span><span>CP ' + APP.lvl(r.cp) + '</span><span>Confidence ' + APP.lvl(r.confidence) + '</span><span>Cost ' + e(r.cost) + '</span><span>Time ' + e(r.time) + '</span><span>Availability ' + e(r.availability) + '</span></div>' +
       (rowOpts.why ? '<div class="small" style="margin-top:4px">' + e(r.why) + '</div>' : '') + '</li>';
@@ -45,46 +45,48 @@
 
   /* ------------------------------------------------------------------ dashboard */
   APP.view('dashboard', { title: 'Dashboard', icon: 'dash', group: 'Overview', render: function () {
-    var ch = APP.player(), d = APP.pd(), b = APP.bench(), bd = APP.bd();
-    var sum = BA.snapshotSummary(d), bsum = bd ? BA.snapshotSummary(bd) : null, gap = bd ? BA.cpGap(d, bd) : null;
+    var ch = APP.player(), d = APP.pd();
+    var sum = BA.snapshotSummary(d), chk = BA.selfCheck(d);
     var dps = (APP.state.dps || []).filter(function (x) { return x.character === ch.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; })[0];
     var recs = APP.recs(), done = APP.doneMap(), best = BA.bestNext(recs, APP.state.selected.rankMode, done), ranked = BA.rank(recs, APP.state.selected.rankMode, done);
-    var c = bd ? BA.compare(d, bd, { mode: APP.state.selected.mode, customTiers: APP.state.customTiers }) : null;
-    var h = '<div class="head"><div><h1>' + e(ch.name) + '</h1><div class="muted">' + [ch.cls, 'Level ' + (BA.num(d.level) == null ? '?' : BA.num(d.level)), ch.race, ch.server, ch.region, ch.guild ? '<' + ch.guild + '>' : ''].filter(Boolean).map(e).join(' &middot; ') + (ch.url ? ' &middot; <a href="' + e(ch.url) + '" target="_blank" rel="noopener">AionFlex</a>' : '') + '</div></div><span class="sp"></span><button data-act="go" data-to="#/import">Import screenshot</button></div>';
+    var rec9 = [['Combat Power', sum.cp != null], ['Item Level', sum.itemLevel != null], ['Combat stats', Object.keys(d.combatStats || {}).length > 0], ['Skills', !d.skills.needsRefresh || !d.skills.list.length], ['Equipment', Object.keys(d.equipment || {}).length > 0], ['Item stat lines', BA.SLOTS.some(function (s) { var it = d.equipment[s.id]; return it && (it.rolls.length + it.base.length); })], ['Divine stats', BA.divineTotal(d) != null], ['Pantheon', d.pantheon.collected != null], ['Titles', d.titles.unlocked != null]];
+    var have = rec9.filter(function (x) { return x[1]; }).length;
+    var h = '<div class="head"><div><h1>' + e(ch.name) + '</h1><div class="muted">' + [ch.cls, 'Level ' + (BA.num(d.level) == null ? '?' : BA.num(d.level)), ch.race, ch.server, ch.region, ch.guild ? '<' + ch.guild + '>' : ''].filter(Boolean).map(e).join(' &middot; ') + (ch.url ? ' &middot; <a href="' + e(ch.url) + '" target="_blank" rel="noopener">Profile</a>' : '') + '</div></div><span class="sp"></span><button data-act="go" data-to="#/import">Import screenshot</button></div>';
     h += warnBlock(d, ch);
     h += '<div class="grid g4">' +
       kpi('Combat Power', f(sum.cp), APP.pill(d.cp.m)) +
-      kpi('Item Level', f(sum.itemLevel), APP.pill(d.itemLevel.m) + (bsum && bsum.itemLevel != null ? ' <span class="small muted">' + e(b.name) + ': ' + f(bsum.itemLevel) + '</span>' : '')) +
+      kpi('Item Level', f(sum.itemLevel), APP.pill(d.itemLevel.m)) +
       kpi('DPS', dps ? f(dps.avgDps) : '<span class="muted small">Not measured</span>', dps ? e(dps.boss + ', ' + dps.date) : '<a href="#/dps">Log a DPS run</a>') +
-      kpi(b ? 'CP gap to ' + e(b.name) : 'CP gap', gap == null ? '<span class="muted small">No benchmark</span>' : f(gap), b ? 'Benchmark: ' + f(bsum.cp) + ' (historical)' : '') + '</div>';
+      kpi('Data recorded', have + '/' + rec9.length, APP.bar(have/rec9.length*100) + '<div class="small" style="margin-top:4px">' + (have < rec9.length ? 'Missing: ' + rec9.filter(function (x) { return !x[1]; }).map(function (x) { return e(x[0]); }).join(', ') : 'Everything key is recorded') + '</div>') + '</div>';
     h += '<div class="grid g2" style="margin-top:14px">';
-    h += '<div class="card hl"><h2>Best next upgrade</h2>' + (best ? '<div class="rec"><div class="t" style="font-size:16px">' + e(best.rec.title) + '</div><div class="small muted" style="margin:4px 0">' + e(best.rec.description) + '</div><div class="small">' + e(best.why) + '</div><div class="row" style="margin-top:10px"><button class="pri sm" data-act="rec-add" data-id="' + e(best.rec.id) + '">Add to plan</button><a href="#/planner" class="small">All recommendations</a></div></div>' : '<div class="muted">Nothing left to recommend with the current data.</div>') + '</div>';
+    h += '<div class="card hl"><h2>Best next upgrade</h2>' + (best ? '<div class="rec"><div class="t" style="font-size:16px">' + e(best.rec.title) + '</div><div class="small muted" style="margin:4px 0">' + e(best.rec.description) + '</div><div class="small">' + e(best.why) + '</div><div class="row" style="margin-top:10px"><button class="pri sm" data-act="rec-add" data-id="' + e(best.rec.id) + '">Add to plan</button><button class="sm ghost" data-act="board-send" data-text="' + e(best.rec.title) + '">To Daily board</button><a href="#/planner" class="small">All recommendations</a></div></div>' : '<div class="muted">Nothing to recommend yet. Record some data first.</div>') + '</div>';
     var dataRecs = recs.filter(function (r) { return r.kind === 'data' && !done[r.id]; });
     h += '<div class="card"><h2>Collect this data first</h2>' + (dataRecs.length ? '<ul class="list">' + dataRecs.map(function (r) { return '<li><div class="t">' + e(r.title) + '</div><div class="small muted">' + e(r.why) + '</div></li>'; }).join('') + '</ul>' : '<div class="muted">All key data is recorded.</div>') + '</div>';
     h += '</div>';
-    h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>Top recommendations</h2><ul class="list">' + ranked.filter(function (r) { return r.rec.kind !== 'data' && !done[r.rec.id]; }).slice(0, 5).map(function (r) { return recRow(r.rec, { blocked: r.blocked }); }).join('') + '</ul></div>';
-    h += '<div class="card"><h2>Progression</h2>' + progressRows(d, bd, b) + '</div></div>';
+    h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>What to improve</h2><ul class="list">' + ranked.filter(function (r) { return r.rec.kind !== 'data' && !done[r.rec.id]; }).slice(0, 6).map(function (r) { return recRow(r.rec, { blocked: r.blocked }); }).join('') + '</ul><a href="#/planner" class="small">See all in the planner</a></div>';
+    h += '<div class="card"><h2>Progression</h2>' + progressRows(d) + '</div></div>';
     h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>Equipment</h2><div class="eq">' + BA.SLOTS.map(function (s) { var it = d.equipment[s.id]; return '<a class="slot" href="#/equipment"><div class="sn">' + e(s.name) + '</div><div class="in">' + (it ? e(it.name) + ' <span class="en">+' + e(it.enh) + '</span>' : '<span class="muted">Empty</span>') + '</div></a>'; }).join('') + '</div></div>';
-    h += '<div class="card"><h2>Offensive stats (boss PvE)</h2>' + offensiveSummary(d) + '</div></div>';
-    if (c) h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>Missing systems</h2>' + listOf(c.missingSystems, 'No unused systems found.') + '</div><div class="card"><h2>Unknowns</h2>' + listOf(c.unknowns, 'Nothing missing.') + '</div></div>';
+    h += '<div class="card"><h2>Offensive stats</h2>' + offensiveSummary(d) + '</div></div>';
+    h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>Systems you are not using yet</h2>' + listOf(chk.missing, 'None found.') + '</div><div class="card"><h2>Not recorded yet</h2>' + listOf(chk.unknowns, 'Nothing missing.') + '</div></div>';
     h += '<div class="card" style="margin-top:14px"><h2>Recent upgrades</h2>' + recent(ch) + '</div>';
+    h += '<div class="small muted" style="margin-top:14px">Want to see how you stack up against someone? That is on the <a href="#/compare">Compare</a> page, only when you want it.</div>';
     return h;
   } });
   function kpi(l, v, d) { return '<div class="card kpi"><div class="l">' + l + '</div><div class="v">' + v + '</div><div class="d">' + (d || '') + '</div></div>'; }
   function listOf(arr, empty) { return arr.length ? '<ul class="list">' + arr.map(function (x) { return '<li class="small">' + e(x.text) + '</li>'; }).join('') + '</ul>' : '<div class="muted small">' + e(empty) + '</div>'; }
-  function progressRows(d, bd, b) {
-    var p = d.pantheon, dt = BA.divineTotal(d), bdt = bd ? BA.divineTotal(bd) : null;
-    var h = '<table><tbody>';
+  function progressRows(d) {
+    var p = d.pantheon, dt = BA.divineTotal(d);
+    var h = '<table data-nosort><tbody>';
     h += '<tr><td>Pantheon</td><td style="width:45%">' + APP.bar(BA.pantheonPct(d)) + '</td><td class="right nowrap">' + (p.collected == null ? '?' : p.collected) + '/' + (p.total || '?') + '</td></tr>';
-    h += '<tr><td>Divine Stat total<div class="small muted">sum of displayed levels</div></td><td>' + APP.bar(bdt ? dt/bdt*100 : null, 'blue') + '</td><td class="right nowrap">' + f(dt) + (bdt != null ? ' <span class="muted">/ ' + f(bdt) + '</span>' : '') + '</td></tr>';
+    h += '<tr><td>Divine Stat total<div class="small muted">sum of displayed levels</div></td><td></td><td class="right nowrap">' + f(dt) + '</td></tr>';
     BA.DAEVANION.forEach(function (x) { var v = BA.num(d.daevanion[x.id]); h += '<tr><td>Daevanion ' + e(x.name) + '</td><td>' + APP.bar(v) + '</td><td class="right">' + f(v) + '%</td></tr>'; });
     var ar = BA.arcanaState(d);
-    h += '<tr><td>Arcana</td><td colspan="2">' + (ar === 'none' ? '<span class="bad">Not started</span>' + (bd && BA.arcanaState(bd) === 'equipped' ? ' <span class="muted small">(' + e(b.name) + ': ' + bd.arcana.items.length + ' equipped)</span>' : '') : ar === 'equipped' ? d.arcana.items.length + ' equipped' : '<span class="muted">Unknown</span>') + '</td></tr>';
-    h += '<tr><td>Titles</td><td colspan="2">' + (d.titles.unlocked == null ? '<span class="muted">Not recorded</span>' : d.titles.unlocked + '/' + d.titles.total) + '</td></tr>';
+    h += '<tr><td>Arcana</td><td colspan="2">' + (ar === 'none' ? '<span class="bad">Not started</span>' : ar === 'equipped' ? d.arcana.items.length + ' equipped' : '<span class="muted">Not recorded</span>') + '</td></tr>';
+    h += '<tr><td>Titles</td><td colspan="2">' + (d.titles.unlocked == null ? '<span class="muted">Not recorded</span>' : d.titles.unlocked + '/' + (d.titles.total || '?')) + '</td></tr>';
     return h + '</tbody></table>';
   }
   function offensiveSummary(d) {
-    var tiers = BA.tiersFor(APP.state.selected.mode, APP.state.customTiers).filter(function (t) { return t.tier === 'S+' || t.tier === 'S'; });
+    var tiers = APP.tiers().filter(function (t) { return t.tier === 'S+' || t.tier === 'S'; });
     var any = Object.keys(d.combatStats || {}).length;
     var h = any ? '' : '<div class="note info small">No combat stats recorded yet. <a href="#/import">Import a Combat Stats screenshot</a> or <a href="#/character/stats">enter them</a>.</div>';
     h += '<table><tbody>' + tiers.map(function (t) { return t.stats.map(function (id) { var st = BA.STAT_BY_ID[id], v = d.combatStats[id]; return '<tr><td>' + APP.tier(t.tier) + ' ' + e(st.name) + '</td><td class="right">' + (v ? f(v.v, v.unit || st.unit) + ' ' + APP.pill(v.m) : '<span class="muted small">Not recorded</span>') + '</td></tr>'; }).join(''); }).join('') + '</tbody></table>';
@@ -165,7 +167,7 @@
   });
 
   function cStats(ch, d) {
-    var tiers = BA.tiersFor(APP.state.selected.mode, APP.state.customTiers);
+    var tiers = APP.tiers();
     var h = '<div class="row" style="margin-bottom:10px"><button data-act="edit-stats">Edit combat stats</button><a href="#/import">Import from screenshot</a></div>';
     Object.keys(BA.CATEGORIES).forEach(function (cat) {
       h += '<div class="card" style="margin-bottom:12px"><h2>' + e(BA.CATEGORIES[cat]) + '</h2><div class="tbl"><table><thead><tr><th>Stat</th><th>Tier</th><th class="right">Value</th><th>Status</th><th>About</th></tr></thead><tbody>' +
@@ -212,8 +214,8 @@
       (gain.length ? '<div class="small" style="margin-top:4px">More in ' + e(gain.join(' and ')) + ', which map to offensive effects. The size of the gain is not verified.</div>' : '');
   });
   function cDivine(ch, d) {
-    var needs = BA.divineNeeds(d), bd = APP.bd(), total = BA.divineTotal(d);
-    return '<div class="grid g2"><div class="card"><h2>Divine stats</h2>' + numTable(BA.DIVINE, d.divine, '', bd ? function (x) { var b = BA.num(bd.divine[x.id]); return b == null ? '' : '<span class="small muted">' + e(APP.bench().name) + ' ' + b + '</span>'; } : null) +
+    var needs = BA.divineNeeds(d), total = BA.divineTotal(d);
+    return '<div class="grid g2"><div class="card"><h2>Divine stats</h2>' + numTable(BA.DIVINE, d.divine, '') +
       '<div class="small" style="margin-top:8px">Sum of displayed levels: <b>' + f(total) + '</b> <span class="muted">(our own analytic total, not an official stat)</span></div><div class="row" style="margin-top:10px"><button data-act="edit-map" data-key="divine">Edit</button></div></div>' +
       '<div class="card"><h2>Collection priority (Assassin PvE)</h2><div class="small muted" style="margin-bottom:8px">Provisional collection-targeting hypothesis. Re-check it once your Combat Stats are recorded: if Critical Hit is already high, Death matters less than Time or Destruction.</div><ol>' +
       needs.map(function (x) { return '<li>' + e(x.name) + ' <span class="muted small">(' + (x.level == null ? '?' : x.level) + ') ' + e((BA.DIVINE.filter(function (y) { return y.id === x.id; })[0].effects).join(', ')) + '</span></li>'; }).join('') + '</ol><div class="small muted">Pantheon display effects are tracked separately in <a href="#/pantheon">Pantheon</a>.</div></div></div>';
@@ -268,13 +270,27 @@
 
   function cSkills(ch, d) {
     var h = d.skills.needsRefresh ? '<div class="note">Skill data needs a refresh. The AionFlex levels were outdated and are not shown as current. <a href="#/import">Import a Skills screenshot</a> or enter the levels below.</div>' : '';
-    h += '<div class="card"><div class="row"><h2 style="margin:0;flex:1">Skills</h2><button class="pri sm" data-act="save-skills">Save levels as new snapshot</button></div><div class="tbl" id="skillForm"><table><thead><tr><th>Skill</th><th>Type</th><th>Level</th><th>Status</th><th>Notes</th></tr></thead><tbody>' +
+    if (!d.skills.list.length) h += '<div class="note info">No skill list for ' + e(ch.cls) + ' yet. Add your skills one by one, or import a Skills screenshot.</div>';
+    h += '<div class="card"><div class="row"><h2 style="margin:0;flex:1">Skills</h2><button class="sm" data-act="skill-add">Add skill</button><button class="pri sm" data-act="save-skills">Save levels as new snapshot</button></div><div class="tbl" id="skillForm"><table><thead><tr><th>Skill</th><th>Type</th><th>Level</th><th>Status</th><th>Notes</th></tr></thead><tbody>' +
       d.skills.list.map(function (s) { return '<tr><td>' + e(s.name) + '</td><td class="small muted">' + e(s.type) + '</td><td><input name="lv_' + e(s.id) + '" value="' + e(s.level == null ? '' : s.level) + '" style="width:70px"></td><td>' + APP.pill(s.m) + '</td><td><input name="nt_' + e(s.id) + '" value="' + e(s.note || '') + '" placeholder="role, breakpoints"></td></tr>'; }).join('') + '</tbody></table></div></div>';
     var rot = d.skills.rotations || {};
     h += '<div class="card" style="margin-top:14px" id="rotForm"><h2>Rotation notes</h2><div class="small muted" style="margin-bottom:8px">Write down what you actually do. No skill timings or coefficients are assumed here; compare with DPS logs.</div><div class="grid g3">' +
       [['boss', 'Single-target boss'], ['aoe', 'AoE dungeon'], ['burst', 'Burst windows']].map(function (r) { return '<div><label>' + e(r[1]) + '</label><textarea name="rot_' + r[0] + '">' + e(rot[r[0]] || '') + '</textarea></div>'; }).join('') + '</div><div class="row" style="margin-top:8px"><button data-act="save-rot">Save notes</button></div></div>';
     return h;
   }
+  APP.act('skill-add', function () {
+    APP.dialog('Add skill', '<div class="form">' + inp('name', 'Skill name', '') + '<div><label>Type</label><select name="type"><option value="active">Active</option><option value="passive">Passive</option><option value="stigma">Stigma</option></select></div>' + inp('level', 'Level', '') + '</div>', [{ label: 'Save as new snapshot', cls: 'pri', act: 'skill-save' }]);
+  });
+  APP.act('skill-save', function () {
+    var o = APP.form(); if (!o.name.trim()) return APP.toast('Name required.');
+    var lv = numOrNull(o.level); if (lv != null && (lv < 0 || lv > 99 || Math.round(lv) !== lv)) return APP.toast('Level must be 0-99.');
+    APP.commit(APP.player(), function (d) {
+      var id = BA.slug(o.name); if (d.skills.list.some(function (x) { return x.id === id; })) return;
+      d.skills.list.push({ id: id, name: o.name.slice(0, 40), type: o.type, level: lv, unlocked: null, custom: true, m: BA.meta(lv == null ? 'unknown' : 'confirmed', 'Manual entry', APP.today()) });
+      d.skills.needsRefresh = d.skills.list.some(function (x) { return x.level == null || x.m.status === 'outdated'; });
+    }, 'Skill added: ' + o.name);
+    APP.closeDialog(); APP.render();
+  });
   APP.act('save-skills', function () {
     var o = APP.form(document.getElementById('skillForm')), m = BA.meta('confirmed', 'Manual entry', APP.today()), bad = [], changed = 0;
     APP.commit(APP.player(), function (d) {
@@ -295,7 +311,7 @@
   });
   function cArcana(ch, d) {
     var bd = APP.bd(), st = BA.arcanaState(d);
-    var h = st === 'none' ? '<div class="note bad">Arcana progression not started: no Arcana equipped (confirmed by you on ' + e(d.arcana.m.observedAt || '?') + ').</div>' : '';
+    var h = st === 'none' ? '<div class="note bad">Arcana progression not started: no Arcana equipped.</div>' : st === 'unknown' ? '<div class="note">Arcana not recorded yet. Add what you have, or confirm you have none.</div><div class="row" style="margin-bottom:10px"><button class="sm" data-act="arc-none">I have no Arcana</button></div>' : '';
     h += '<div class="grid g2"><div class="card"><h2>Your Arcana</h2>' + (d.arcana.items.length ? '<table><thead><tr><th>Arcana</th><th>Enh.</th><th>Rarity</th><th>Stats</th><th></th></tr></thead><tbody>' + d.arcana.items.map(function (a, i) { return '<tr><td>' + e(a.name) + '</td><td>+' + e(a.enh) + '</td><td>' + e(a.rarity || '-') + '</td><td class="small">' + e((a.stats || []).join(', ') || 'not recorded') + '</td><td><button class="sm" data-act="arc-del" data-i="' + i + '">Remove</button></td></tr>'; }).join('') + '</tbody></table>' : '<div class="muted small">None equipped.</div>') +
       '<div class="row" style="margin-top:10px"><button data-act="arc-add">Add Arcana</button></div></div>';
     h += '<div class="card"><h2>Getting started</h2><div class="small">How Arcana are obtained on Global is <b>not verified</b> in this tool yet. Before spending resources:</div><ol class="small"><li>Check official patch notes and in-game tooltips for Global Arcana sources.</li><li>Record what you find in <a href="#/research">Research</a> with the source link.</li><li>Record each Arcana you get here, including its stats.</li></ol>' +
@@ -311,6 +327,7 @@
     APP.commit(APP.player(), function (d) { d.arcana.items.push({ name: o.name.slice(0, 60), enh: enh, rarity: o.rarity || null, slot: o.slot || null, stats: o.stats ? o.stats.split(',').map(function (s) { return s.trim(); }).filter(Boolean) : [], source: o.source, m: prov(o) }); d.arcana.state = 'equipped'; d.arcana.m = prov(o); }, 'Arcana added', o._obs);
     APP.closeDialog(); APP.render();
   });
+  APP.act('arc-none', function () { APP.commit(APP.player(), function (d) { d.arcana.state = 'none'; d.arcana.items = []; d.arcana.m = BA.meta('confirmed', 'Manual entry', APP.today()); }, 'Arcana: none'); APP.render(); });
   APP.act('arc-del', function (el) {
     var i = +el.getAttribute('data-i');
     APP.commit(APP.player(), function (d) { d.arcana.items.splice(i, 1); if (!d.arcana.items.length) d.arcana.state = 'none'; d.arcana.m = BA.meta('confirmed', 'Manual entry', APP.today()); }, 'Arcana removed');
@@ -364,7 +381,7 @@
   }
   APP.parseLines = parseLines;
   APP.act('cmp-run', function () {
-    var root = document.getElementById('cmpTool'), o = APP.form(root), A = parseLines(o.astats), B = parseLines(o.bstats), tiers = BA.tiersFor(APP.state.selected.mode, APP.state.customTiers);
+    var root = document.getElementById('cmpTool'), o = APP.form(root), A = parseLines(o.astats), B = parseLines(o.bstats), tiers = APP.tiers();
     var it = APP.pd().equipment[o.slot], ids = {};
     A.rows.concat(B.rows).forEach(function (r) { ids[r.stat] = 1; });
     var better = 0, worse = 0, lean = 0, rows = Object.keys(ids).map(function (id) {
@@ -402,10 +419,10 @@
 
   /* ------------------------------------------------------------------ compare */
   APP.view('compare', { title: 'Compare', icon: 'cmp', group: 'Analysis', render: function () {
-    var s = APP.state, sel = s.cmp || {}, A = BA.getChar(s, sel.a || s.selected.player) || APP.player(), B = BA.getChar(s, sel.b || s.selected.benchmark) || s.characters.filter(function (c) { return c !== A; })[0];
-    if (!B) return '<div class="note">Add a second character to compare.</div>';
+    var s = APP.state, sel = s.cmp || {}, A = BA.getChar(s, sel.a) || APP.player(), B = BA.getChar(s, sel.b) || s.characters.filter(function (c) { return c !== A && c.role === 'benchmark'; })[0] || s.characters.filter(function (c) { return c !== A; })[0];
+    if (!B || B === A) return '<div class="head"><div><h1>Compare</h1><div class="muted">Only when you want it: put yourself next to another player or next to an older version of yourself (see Progression).</div></div></div><div class="card hl"><h2>Add someone to compare with</h2><div class="small">Find the player on AionFlex, copy their profile link, and paste it here. Then import their profile text or a screenshot of their gear on the Import page.</div><div class="row" style="margin-top:10px"><a class="sm" href="https://aionflex.gg/search" target="_blank" rel="noopener">Search on AionFlex</a><button class="pri sm" data-act="char-new" data-role="benchmark">Add a player to compare</button></div></div>';
     var sa = A.snapshots.filter(function (x) { return x.id === sel.sa; })[0] || BA.latest(A), sb = B.snapshots.filter(function (x) { return x.id === sel.sb; })[0] || BA.latest(B);
-    var c = BA.compare(sa.data, sb.data, { mode: s.selected.mode, customTiers: s.customTiers });
+    var c = BA.compare(sa.data, sb.data, { mode: s.selected.mode, customTiers: s.customTiers, cls: A.cls });
     function chSel(n, v) { return '<select data-chg="cmp-sel" name="' + n + '">' + s.characters.map(function (x) { return '<option value="' + e(x.id) + '"' + (x.id === v ? ' selected' : '') + '>' + e(x.name) + '</option>'; }).join('') + '</select>'; }
     function snSel(n, ch, v) { return '<select data-chg="cmp-sel" name="' + n + '">' + ch.snapshots.map(function (x) { return '<option value="' + e(x.id) + '"' + (x.id === v ? ' selected' : '') + '>' + e(x.observedAt + ' - ' + x.label) + '</option>'; }).join('') + '</select>'; }
     var h = '<div class="head"><div><h1>Compare</h1><div class="muted">' + e(A.name) + ' vs ' + e(B.name) + '. ' + (B.role === 'benchmark' ? 'Benchmark data is historical unless refreshed.' : '') + '</div></div></div>';
@@ -422,7 +439,7 @@
       '<div class="card"><h2>Daevanion</h2><table><thead><tr><th>Board</th><th class="right">A</th><th class="right">B</th><th>Diff</th></tr></thead><tbody>' + c.daevanion.map(function (r) { return '<tr><td>' + e(r.name) + '</td><td class="right">' + f(r.a) + '%</td><td class="right">' + f(r.b) + '%</td><td>' + signed(r.diff) + '</td></tr>'; }).join('') + '</tbody></table>' +
       '<h3>Other systems</h3><table><tbody><tr><td>Arcana</td><td>' + e(BA.arcanaState(sa.data)) + '</td><td>' + e(BA.arcanaState(sb.data)) + (sb.data.arcana.items.length ? ' (' + sb.data.arcana.items.map(function (x) { return e(x.name + ' +' + x.enh); }).join(', ') + ')' : '') + '</td></tr><tr><td>Titles</td><td>' + (sa.data.titles.unlocked == null ? '?' : sa.data.titles.unlocked) + '</td><td>' + (sb.data.titles.unlocked == null ? '?' : sb.data.titles.unlocked + '/' + sb.data.titles.total) + '</td></tr><tr><td>Pantheon</td><td>' + (sa.data.pantheon.collected == null ? '?' : sa.data.pantheon.collected + '/' + sa.data.pantheon.total) + '</td><td>' + (sb.data.pantheon.collected == null ? '?' : sb.data.pantheon.collected + '/' + sb.data.pantheon.total) + '</td></tr><tr><td>Pet</td><td>' + e(sa.data.pet.name || '?') + '</td><td>' + e(sb.data.pet.name || '?') + '</td></tr><tr><td>Wings</td><td>' + e(sa.data.wings.name || '?') + '</td><td>' + e(sb.data.wings.name || '?') + '</td></tr></tbody></table></div></div>';
     h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>Unknowns</h2>' + listOf(c.unknowns, 'Nothing missing.') + '</div>';
-    var recs = BA.recommendations(sa.data, sb.data, { mode: s.selected.mode, customTiers: s.customTiers, benchName: B.name }), ranked = BA.rank(recs, s.selected.rankMode, APP.doneMap());
+    var recs = BA.recommendations(sa.data, sb.data, { mode: s.selected.mode, customTiers: s.customTiers, cls: A.cls, benchName: B.name }), ranked = BA.rank(recs, s.selected.rankMode, APP.doneMap());
     h += '<div class="card"><h2>Catch-up plan</h2><ol class="small">' + ranked.slice(0, 8).map(function (r) { return '<li>' + e(r.rec.title) + ' <span class="muted">(' + e(r.rec.kind === 'data' ? 'data first' : 'DPS ' + r.rec.dps + ', confidence ' + r.rec.confidence) + ')</span></li>'; }).join('') + '</ol><a href="#/planner" class="small">Open the planner</a></div></div>';
     return h;
   } });
@@ -451,7 +468,7 @@
   function taskRow(t, all) {
     var cc = BA.canComplete(t, all), rc = BA.resourceCheck(t, APP.state.resources);
     return '<li><div class="row"><b class="' + (t.status === 'done' ? 'good' : '') + '">' + (t.status === 'done' ? 'Done: ' : '') + e(t.title) + '</b><span class="pill">' + e(t.status) + '</span><span style="flex:1"></span>' +
-      '<button class="sm ghost" data-act="task-move" data-id="' + e(t.id) + '" data-dir="-1" aria-label="Move up">Up</button><button class="sm ghost" data-act="task-move" data-id="' + e(t.id) + '" data-dir="1" aria-label="Move down">Down</button><button class="sm" data-act="task-edit" data-id="' + e(t.id) + '">Edit</button>' +
+      '<button class="sm ghost" data-act="board-send" data-text="' + e(t.title) + '" data-task="' + e(t.id) + '" title="Add to the to-do list on the Daily Board">' + (t.onBoard ? 'On Daily board' : 'To Daily board') + '</button><button class="sm ghost" data-act="task-move" data-id="' + e(t.id) + '" data-dir="-1" aria-label="Move up">Up</button><button class="sm ghost" data-act="task-move" data-id="' + e(t.id) + '" data-dir="1" aria-label="Move down">Down</button><button class="sm" data-act="task-edit" data-id="' + e(t.id) + '">Edit</button>' +
       (t.status !== 'done' ? '<button class="sm pri" data-act="task-done" data-id="' + e(t.id) + '"' + (cc.ok ? '' : ' disabled title="Waits on: ' + e(cc.blockedBy.join(', ')) + '"') + '>Complete</button>' : '<button class="sm" data-act="task-reopen" data-id="' + e(t.id) + '">Reopen</button>') + '</div>' +
       (t.notes ? '<div class="small muted">' + e(t.notes) + '</div>' : '') + (!cc.ok ? '<div class="small warn">Waits on: ' + e(cc.blockedBy.join(', ')) + '</div>' : '') +
       (rc.length ? '<div class="small">' + rc.map(function (m) { return '<span class="chip">' + e(m.name) + ' ' + e(BA.fmt(m.need)) + (m.have == null ? ' (stock not tracked)' : m.short ? ' <span class="bad">short ' + e(BA.fmt(m.short)) + '</span>' : ' <span class="good">covered</span>') + (m.guaranteed ? '' : ' expected') + '</span>'; }).join('') + '</div>' : '') +
