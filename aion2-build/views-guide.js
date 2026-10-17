@@ -270,7 +270,7 @@
     res.innerHTML = (q && !list.length ? '<div class="small muted" style="margin-top:6px">I do not know that one yet. Try other words, or open <a href="#/guide">Start here</a>.</div>' : '') +
       list.map(function (t) { return '<button class="ari-item" data-act="sprite-go" data-i="' + TOPICS.indexOf(t) + '">' + e(t[0]) + '</button>'; }).join('');
   }
-  function openAri() { panel.hidden = false; bubble.hidden = true; greet(); setTimeout(function () { qi.focus(); }, 30); }
+  function openAri() { panel.hidden = false; bubble.hidden = true; greet(); [30, 150, 400].forEach(function (ms) { setTimeout(function () { if (!panel.hidden && document.activeElement !== qi) qi.focus(); }, ms); }); }
   function closeAri() { panel.hidden = true; }
   APP.act('sprite-toggle', function () { if (panel.hidden) openAri(); else closeAri(); });
   APP.act('sprite-open', function () { APP.closeDialog(); openAri(); });
