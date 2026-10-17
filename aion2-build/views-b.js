@@ -152,6 +152,7 @@
     ['Combat Power vs DPS', 'Higher Combat Power does not prove higher boss DPS. Compare DPS-meter runs on the same boss.'],
     ['Completion vs value', 'A higher Daevanion or Pantheon completion % is not automatically more damage.']
   ];
+  APP.onChange('tier-view', function (el) { APP.state.tierView = el.value; APP.save(); APP.render(); });
   APP.view('tiers', { title: 'Tier lists', icon: 'res', group: 'Knowledge', render: function (arg) {
     var mode = APP.state.selected.mode, tiers = BA.tiersFor(mode, APP.state.customTiers), custom = !!APP.state.customTiers[mode];
     var d = APP.pd(), b = APP.bench(), bd = APP.bd(), tab = arg || 'stats';
@@ -159,6 +160,17 @@
     h += '<div class="tabs">' + [['stats', 'Combat stats'], ['divine', 'Divine Stats'], ['core', 'Core stats'], ['rules', 'Good to know'], ['edit', 'Edit ranking']].map(function (t) { return '<button data-act="go" data-to="#/tiers/' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if (tab === 'stats') {
       h += '<div class="note info">' + e(BA.MODES[mode].note) + (custom ? ' You edited this ranking.' : '') + '</div>';
+      var tv = APP.state.tierView || 'cards';
+      h += '<div class="row" style="margin-bottom:10px"><label style="margin:0">View</label><select data-chg="tier-view"><option value="cards"' + (tv === 'cards' ? ' selected' : '') + '>Tier cards</option><option value="table"' + (tv === 'table' ? ' selected' : '') + '>Sortable table</option></select></div>';
+      if (tv === 'table') {
+        var rowsT = [];
+        tiers.forEach(function (t) { t.stats.forEach(function (id) { var st = BA.STAT_BY_ID[id]; if (st) rowsT.push({ t: t, st: st }); }); });
+        BA.STAT_CATALOG.forEach(function (st) { if (!BA.tierOf(st.id, tiers)) rowsT.push({ t: null, st: st }); });
+        h += '<div class="card"><div class="tbl"><table><thead><tr><th>Tier</th><th>Stat</th><th>Category</th><th>Unit</th><th class="right">You</th>' + (b ? '<th class="right">' + e(b.name) + '</th>' : '') + '<th>Why</th></tr></thead><tbody>' + rowsT.map(function (x) {
+          var mine = d.combatStats[x.st.id], theirs = bd && bd.combatStats[x.st.id];
+          return '<tr><td data-sort="' + e(x.t ? x.t.tier : '') + '">' + APP.tier(x.t && x.t.tier) + '</td><td><b>' + e(x.st.name) + '</b></td><td>' + e(BA.CATEGORIES[x.st.category]) + '</td><td>' + e(x.st.unit) + '</td><td class="right">' + (mine ? f(mine.v, mine.unit || x.st.unit) : 'not recorded') + '</td>' + (b ? '<td class="right">' + (theirs ? f(theirs.v, theirs.unit || x.st.unit) : '?') + '</td>' : '') + '<td class="small muted">' + e(x.t ? x.t.why : 'Not ranked for this mode.') + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>';
+      } else
       h += '<div class="card">' + tiers.map(function (t, i) {
         var cls = i < 2 ? '' : i < 4 ? ' t2' : ' t3';
         return '<div class="tier' + cls + '"><div class="tl">' + e(t.tier) + '</div><div><div class="small" style="margin-bottom:8px">' + e(t.why) + '</div>' + t.stats.map(function (id) {
@@ -173,7 +185,7 @@
       var needs = BA.divineNeeds(d);
       h += '<div class="note info">Collection-targeting hypothesis for Assassin PvE. Re-check it against your stats: if Critical Hit is already high, Death matters less than Time or Destruction.</div><div class="card"><div class="tbl"><table><thead><tr><th>#</th><th>Divine Stat</th><th>What it gives</th><th class="right">You</th>' + (b ? '<th class="right">' + e(b.name) + '</th><th class="right">Gap</th>' : '') + '</tr></thead><tbody>' +
         needs.map(function (x, i) { var df = BA.DIVINE.filter(function (y) { return y.id === x.id; })[0], their = bd ? BA.num(bd.divine[x.id]) : null; return '<tr><td>' + (i + 1) + '</td><td><b>' + e(x.name) + '</b></td><td class="small">' + e(df.effects.join(', ')) + '</td><td class="right">' + f(x.level) + '</td>' + (b ? '<td class="right">' + f(their) + '</td><td class="right">' + (their != null && x.level != null ? APP.signed(x.level - their) : '-') + '</td>' : '') + '</tr>'; }).join('') +
-        '<tr><td></td><td colspan="2"><b>Sum of displayed levels</b> <span class="small muted">(analytic total, not an official stat)</span></td><td class="right"><b>' + f(BA.divineTotal(d)) + '</b></td>' + (b ? '<td class="right"><b>' + f(BA.divineTotal(bd)) + '</b></td><td></td>' : '') + '</tr></tbody></table></div><div class="small muted" style="margin-top:6px">Pantheon is the main way to raise these. <a href="#/pantheon">Open Pantheon</a>.</div></div>';
+        '<tr class="fixed"><td></td><td colspan="2"><b>Sum of displayed levels</b> <span class="small muted">(analytic total, not an official stat)</span></td><td class="right"><b>' + f(BA.divineTotal(d)) + '</b></td>' + (b ? '<td class="right"><b>' + f(BA.divineTotal(bd)) + '</b></td><td></td>' : '') + '</tr></tbody></table></div><div class="small muted" style="margin-top:6px">Pantheon is the main way to raise these. <a href="#/pantheon">Open Pantheon</a>.</div></div>';
     } else if (tab === 'core') {
       h += '<div class="note info">For Assassin PvE, Precision and Might are the first offensive candidates to look at. Exact allocations are not recommended without your point total, caps and reset rules.</div><div class="card"><table><thead><tr><th>Core stat</th><th>Effects (AionFlex tooltip)</th><th class="right">You</th><th>Role for boss DPS</th></tr></thead><tbody>' +
         BA.CORE_STATS.map(function (x) { var role = { might: 'Offensive: Attack Increase', precision: 'Offensive: Accuracy and Critical Hit', dexterity: 'Defensive', constitution: 'Defensive', willpower: 'Defensive (status resist)', intelligence: 'Utility (status chance)' }[x.id]; return '<tr><td><b>' + e(x.name) + '</b></td><td class="small">' + e(x.effects.join(', ')) + '</td><td class="right">' + f(BA.num(d.coreStats[x.id])) + '</td><td class="small">' + e(role) + '</td></tr>'; }).join('') + '</tbody></table><div class="row" style="margin-top:10px"><a href="#/character/core">Try a what-if redistribution</a></div></div>';
@@ -539,5 +551,4 @@
   APP.act('reset-ask', function () { APP.dialog('Reset all data?', '<div class="note bad">This replaces everything with the original seed (lycaa and Novin). Export a backup first.</div>', [{ label: 'Reset', cls: 'pri', act: 'reset-do' }, { label: 'Download backup first', act: 'dl-json' }]); });
   APP.act('reset-do', function () { var k = APP.state.settings.apiKey; APP.reset(); APP.state.settings.apiKey = k; APP.save(); APP.closeDialog(); location.hash = '#/dashboard'; APP.render(); });
 
-  APP.start();
 })();

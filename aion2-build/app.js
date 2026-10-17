@@ -103,6 +103,77 @@
   APP.act('dlg-close', function () { APP.closeDialog(); });
   APP.act('go', function (el) { location.hash = el.getAttribute('data-to'); });
 
+  /* ------------------------------------------------------------------ sortable and filterable tables */
+  // Every table with a header row in the main view gets clickable headers and, with 4+ rows, a filter box.
+  // Tiers sort S+ > S > A+ > A > B > C; numbers sort numerically; unknown values ("?", "-") go last.
+  var TIER_RANK = { 'S+': 6, 'S': 5, 'A+': 4, 'A': 3, 'B': 2, 'C': 1 };
+  APP.sortState = {};
+  function cellKey(td) {
+    if (!td) return { t: 3, v: '' };
+    var raw = td.getAttribute('data-sort');
+    var txt = (raw != null ? raw : td.textContent).trim();
+    var tm = txt.match(/^(S\+|A\+|S|A|B|C)(?![\w+])/);
+    if (tm && raw == null && td.querySelector('.pill')) return { t: 0, v: TIER_RANK[tm[1]] };
+    if (raw != null && TIER_RANK[raw] != null) return { t: 0, v: TIER_RANK[raw] };
+    if (!txt || txt === '?' || txt === '-' || /^(not recorded|unknown)$/i.test(txt)) return { t: 3, v: '' };
+    var nm = txt.replace(/,/g, '').match(/^[+-]?\d+(\.\d+)?/);
+    if (nm) return { t: 1, v: parseFloat(nm[0]) };
+    return { t: 2, v: txt.toLowerCase() };
+  }
+  function cmp(a, b, dir) {
+    if (a.t === 3 && b.t !== 3) return 1; if (b.t === 3 && a.t !== 3) return -1;
+    if (a.t !== b.t) return a.t - b.t;
+    var r = a.v < b.v ? -1 : a.v > b.v ? 1 : 0;
+    return dir === 'asc' ? r : -r;
+  }
+  function sortTable(tb, col, dir) {
+    var body = tb.tBodies[0]; if (!body) return;
+    var rows = [].slice.call(body.rows), fixed = rows.filter(function (r) { return r.classList.contains('fixed'); }), movable = rows.filter(function (r) { return !r.classList.contains('fixed'); });
+    movable.sort(function (x, y) { return cmp(cellKey(x.cells[col]), cellKey(y.cells[col]), dir); });
+    movable.concat(fixed).forEach(function (r) { body.appendChild(r); });
+    [].slice.call(tb.tHead.rows[0].cells).forEach(function (th, i) { th.setAttribute('aria-sort', i === col ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'); th.querySelector('.sa') && (th.querySelector('.sa').textContent = i === col ? (dir === 'asc' ? ' ▲' : ' ▼') : ''); });
+  }
+  function filterTable(tb, q, tier, tierCol) {
+    q = (q || '').toLowerCase();
+    [].slice.call(tb.tBodies[0].rows).forEach(function (r) {
+      if (r.classList.contains('fixed')) return;
+      var ok = !q || r.textContent.toLowerCase().indexOf(q) >= 0;
+      if (ok && tier && tierCol >= 0) { var k = cellKey(r.cells[tierCol]); ok = k.t === 0 && k.v === TIER_RANK[tier]; }
+      r.style.display = ok ? '' : 'none';
+    });
+  }
+  APP.enhanceTables = function (root) {
+    root = root || document.getElementById('view');
+    var viewKey = location.hash || '#/dashboard';
+    [].slice.call(root.querySelectorAll('table')).forEach(function (tb, ti) {
+      if (!tb.tHead || !tb.tBodies[0] || tb.closest('#revForm') || tb.hasAttribute('data-nosort')) return;
+      var key = viewKey + ':' + ti, st = APP.sortState[key] || {};
+      var heads = [].slice.call(tb.tHead.rows[0].cells), tierCol = -1;
+      heads.forEach(function (th, i) {
+        if (/^tier$/i.test(th.textContent.trim())) tierCol = i;
+        if (!th.textContent.trim()) return;
+        th.style.cursor = 'pointer'; th.setAttribute('role', 'button'); th.tabIndex = 0; th.title = 'Sort';
+        var sa = document.createElement('span'); sa.className = 'sa'; th.appendChild(sa);
+        function go() { var dir = st.col === i && st.dir === 'desc' ? 'asc' : (st.col === i ? 'desc' : (cellKey(tb.tBodies[0].rows[0] && tb.tBodies[0].rows[0].cells[i]).t <= 1 ? 'desc' : 'asc')); st.col = i; st.dir = dir; APP.sortState[key] = st; sortTable(tb, i, dir); }
+        th.addEventListener('click', go); th.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } });
+      });
+      var n = tb.tBodies[0].rows.length;
+      if (n >= 4) {
+        var bar = document.createElement('div'); bar.className = 'row tfilter'; bar.style.margin = '0 0 8px';
+        bar.innerHTML = '<input type="search" placeholder="Filter ' + n + ' rows" aria-label="Filter table" style="max-width:260px">' + (tierCol >= 0 ? '<select aria-label="Filter by tier"><option value="">All tiers</option>' + Object.keys(TIER_RANK).map(function (t) { return '<option>' + t + '</option>'; }).join('') + '</select>' : '') + '<span class="small muted">Click a column header to sort.</span>';
+        var host = tb.parentNode.classList.contains('tbl') ? tb.parentNode : tb;
+        host.parentNode.insertBefore(bar, host);
+        var qi = bar.querySelector('input'), ts = bar.querySelector('select');
+        qi.value = st.q || ''; if (ts) ts.value = st.tier || '';
+        function apply() { st.q = qi.value; st.tier = ts ? ts.value : ''; APP.sortState[key] = st; filterTable(tb, st.q, st.tier, tierCol); }
+        qi.addEventListener('input', apply); if (ts) ts.addEventListener('change', apply);
+        if (st.q || st.tier) apply();
+      }
+      if (st.col != null) sortTable(tb, st.col, st.dir);
+      else if (tierCol >= 0) { st.col = tierCol; st.dir = 'desc'; APP.sortState[key] = st; sortTable(tb, tierCol, 'desc'); }
+    });
+  };
+
   /* ------------------------------------------------------------------ routing */
   APP.view = function (id, def) { APP.views[id] = def; if (!def.hidden) APP.order.push(id); };
   function route() { var h = (location.hash || '#/dashboard').replace(/^#\/?/, '').split('/'); return { name: h[0] || 'dashboard', arg: h.slice(1).join('/') }; }
@@ -111,7 +182,7 @@
     renderSide(r.name);
     renderPick();
     var el = document.getElementById('view');
-    try { el.innerHTML = v.render(r.arg) || ''; if (v.after) v.after(r.arg); }
+    try { el.innerHTML = v.render(r.arg) || ''; if (v.after) v.after(r.arg); APP.enhanceTables(el); }
     catch (err) { console.error(err); el.innerHTML = '<div class="note bad">This view failed to render: ' + e(err.message) + '</div>'; }
   };
   function renderSide(curName) {

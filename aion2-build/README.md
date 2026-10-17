@@ -24,10 +24,15 @@ aion2-build.html          page shell and styles
 aion2-build/core.js       data model, seed, catalogs, calculations, engines, validation (no DOM; also runs in Node)
 aion2-build/app.js        storage, routing, dialogs, events, Claude client
 aion2-build/views-a.js    dashboard, character, equipment, compare, upgrade planner
-aion2-build/views-b.js    pantheon, progression, DPS log, research, import, assistant, settings
+aion2-build/views-b.js    tier lists, pantheon, progression, DPS log, research, import, assistant, settings
+aion2-build/views-guide.js  Start here guide, setup checklist, guided tour, per-page help, glossary, FAQ (starts the app)
 aion2-build/tests/        unit and end-to-end tests
 aion2-build/docs/         architecture, game mechanics, imports, roadmap
 ```
+
+## Getting started
+
+Open the page and take the 1-minute guided tour, or go to **Start here**: a checklist that ticks itself off (import Combat Stats, import skills, record the weapon tooltip, read the tier lists, compare, plan an upgrade, log a DPS run, record titles, export a backup). Every page also has a "How this page works" box. All tables can be sorted by clicking a header (tiers sort S+ first) and filtered with the box above them.
 
 ## Running locally
 

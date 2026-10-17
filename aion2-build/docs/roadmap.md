@@ -14,6 +14,8 @@
 - Import: screenshots (AI or manual), pasted text, JSON, CSV; review, conflicts, duplicates.
 - AI assistant with read-only tools and approval for changes.
 - Export: JSON, snapshots, plan, CSV; backup and restore.
+- Tier lists page (cards or sortable table, per mode), sortable and filterable tables everywhere.
+- Tutorial: Start here checklist, guided tour, per-page help, glossary, FAQ, first-visit welcome.
 - Tests: 25 unit tests, 12 end-to-end checks.
 
 ## Next
