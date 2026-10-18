@@ -15,7 +15,7 @@
   APP.provFields = provFields; APP.prov = prov; APP.numOrNull = numOrNull;
   function warnBlock(d, ch) {
     var w = [];
-    if (d.skills && d.skills.needsRefresh && d.skills.list.length) w.push('Skill levels are missing or outdated, so skills are not used for advice yet. <a href="#/import/skills">Import a Skills screenshot</a>.');
+    if (d.skills && d.skills.needsRefresh && d.skills.list.length) w.push('Skill levels are missing or outdated, so skills are not used for advice yet. <a href="#/import">Update from AionFlex</a> or type them on Character &gt; Skills.');
     var imported = ['cp', 'itemLevel'].some(function (k) { return d[k] && d[k].m && d[k].m.status === 'imported'; });
     if (imported) w.push('Some values were imported from an external profile on ' + e(d.itemLevel.m.observedAt || '?') + ' and may be stale. Hover the status labels to check.');
     return w.map(function (x) { return '<div class="note">' + x + '</div>'; }).join('');
@@ -51,7 +51,7 @@
     var recs = APP.recs(), done = APP.doneMap(), best = BA.bestNext(recs, APP.state.selected.rankMode, done), ranked = BA.rank(recs, APP.state.selected.rankMode, done);
     var rec9 = [['Combat Power', sum.cp != null], ['Item Level', sum.itemLevel != null], ['Combat stats', Object.keys(d.combatStats || {}).length > 0], ['Skills', !d.skills.needsRefresh || !d.skills.list.length], ['Equipment', Object.keys(d.equipment || {}).length > 0], ['Item stat lines', BA.SLOTS.some(function (s) { var it = d.equipment[s.id]; return it && (it.rolls.length + it.base.length); })], ['Divine stats', BA.divineTotal(d) != null], ['Pantheon', d.pantheon.collected != null], ['Titles', d.titles.unlocked != null]];
     var have = rec9.filter(function (x) { return x[1]; }).length;
-    var h = '<div class="head"><div><h1>' + e(ch.name) + '</h1><div class="muted">' + [ch.cls, 'Level ' + (BA.num(d.level) == null ? '?' : BA.num(d.level)), ch.race, ch.server, ch.region, ch.guild ? '<' + ch.guild + '>' : ''].filter(Boolean).map(e).join(' &middot; ') + (ch.url ? ' &middot; <a href="' + e(ch.url) + '" target="_blank" rel="noopener">Profile</a>' : '') + '</div></div><span class="sp"></span><button data-act="go" data-to="#/import">Import screenshot</button></div>';
+    var h = '<div class="head"><div><h1>' + e(ch.name) + '</h1><div class="muted">' + [ch.cls, 'Level ' + (BA.num(d.level) == null ? '?' : BA.num(d.level)), ch.race, ch.server, ch.region, ch.guild ? '<' + ch.guild + '>' : ''].filter(Boolean).map(e).join(' &middot; ') + (ch.url ? ' &middot; <a href="' + e(ch.url) + '" target="_blank" rel="noopener">Profile</a>' : '') + '</div></div><span class="sp"></span><button data-act="go" data-to="#/import">Update from AionFlex</button></div>';
     h += warnBlock(d, ch);
     h += '<div class="grid g4">' +
       kpi('Combat Power', f(sum.cp), APP.pill(d.cp.m)) +
@@ -63,6 +63,10 @@
     var dataRecs = recs.filter(function (r) { return r.kind === 'data' && !done[r.id]; });
     h += '<div class="card"><h2>Collect this data first</h2>' + (dataRecs.length ? '<ul class="list">' + dataRecs.map(function (r) { return '<li><div class="t">' + e(r.title) + '</div><div class="small muted">' + e(r.why) + '</div></li>'; }).join('') + '</ul>' : '<div class="muted">All key data is recorded.</div>') + '</div>';
     h += '</div>';
+    var gains = BA.gainSources(d), ROOM = { High: 'bad', Medium: 'warn', Low: 'good', Unknown: 'muted' };
+    h += '<div class="card" style="margin-top:14px"><h2>Where you can still gain Combat Power and Gear Score</h2><div class="small muted" style="margin-bottom:8px">Based only on your own data. "Room" means how far this area is behind the rest of your character, not an exact CP number (the game does not publish the formula).</div><div class="tbl"><table><thead><tr><th>Area</th><th>Room</th><th>Your state</th><th>Next step</th></tr></thead><tbody>' + gains.map(function (g) {
+      return '<tr><td><a href="' + e(g.to) + '"><b>' + e(g.area) + '</b></a></td><td data-sort="' + ({ High: 3, Medium: 2, Low: 1, Unknown: 0 }[g.room]) + '"><span class="' + ROOM[g.room] + '">' + e(g.room === 'Unknown' ? 'Not recorded' : g.room) + '</span></td><td class="small">' + e(g.state) + '</td><td class="small muted">' + e(g.note || '') + '</td></tr>';
+    }).join('') + '</tbody></table></div><div class="row" style="margin-top:8px"><a class="small" href="#/import">Update from AionFlex</a></div></div>';
     h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>What to improve</h2><ul class="list">' + ranked.filter(function (r) { return r.rec.kind !== 'data' && !done[r.rec.id]; }).slice(0, 6).map(function (r) { return recRow(r.rec, { blocked: r.blocked }); }).join('') + '</ul><a href="#/planner" class="small">See all in the planner</a></div>';
     h += '<div class="card"><h2>Progression</h2>' + progressRows(d) + '</div></div>';
     h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>Equipment</h2><div class="eq">' + BA.SLOTS.map(function (s) { var it = d.equipment[s.id]; return '<a class="slot" href="#/equipment"><div class="sn">' + e(s.name) + '</div><div class="in">' + (it ? e(it.name) + ' <span class="en">+' + e(it.enh) + '</span>' : '<span class="muted">Empty</span>') + '</div></a>'; }).join('') + '</div></div>';
@@ -88,7 +92,7 @@
   function offensiveSummary(d) {
     var tiers = APP.tiers().filter(function (t) { return t.tier === 'S+' || t.tier === 'S'; });
     var any = Object.keys(d.combatStats || {}).length;
-    var h = any ? '' : '<div class="note info small">No combat stats recorded yet. <a href="#/import">Import a Combat Stats screenshot</a> or <a href="#/character/stats">enter them</a>.</div>';
+    var h = any ? '' : '<div class="note info small">No combat stats recorded yet. AionFlex does not show these: <a href="#/character/stats">type them in</a> from the Combat Stats window.</div>';
     h += '<table><tbody>' + tiers.map(function (t) { return t.stats.map(function (id) { var st = BA.STAT_BY_ID[id], v = d.combatStats[id]; return '<tr><td>' + APP.tier(t.tier) + ' ' + e(st.name) + '</td><td class="right">' + (v ? f(v.v, v.unit || st.unit) + ' ' + APP.pill(v.m) : '<span class="muted small">Not recorded</span>') + '</td></tr>'; }).join(''); }).join('') + '</tbody></table>';
     return h + '<div class="small muted" style="margin-top:6px">Tier list is provisional. See all tiers on <a href="#/tiers">Tier lists</a>.</div>';
   }
@@ -168,7 +172,7 @@
 
   function cStats(ch, d) {
     var tiers = APP.tiers();
-    var h = '<div class="row" style="margin-bottom:10px"><button data-act="edit-stats">Edit combat stats</button><a href="#/import">Import from screenshot</a></div>';
+    var h = '<div class="row" style="margin-bottom:10px"><button data-act="edit-stats">Edit combat stats</button><a href="#/import/combatStats">Type it in on Import</a></div>';
     Object.keys(BA.CATEGORIES).forEach(function (cat) {
       h += '<div class="card" style="margin-bottom:12px"><h2>' + e(BA.CATEGORIES[cat]) + '</h2><div class="tbl"><table><thead><tr><th>Stat</th><th>Tier</th><th class="right">Value</th><th>Status</th><th>About</th></tr></thead><tbody>' +
         BA.STAT_CATALOG.filter(function (s) { return s.category === cat; }).map(function (s) { var v = d.combatStats[s.id]; return '<tr><td>' + e(s.name) + '</td><td>' + APP.tier(BA.tierOf(s.id, tiers)) + '</td><td class="right">' + (v ? f(v.v, v.unit || s.unit) : '<span class="muted small">-</span>') + '</td><td>' + (v ? APP.pill(v.m) : '') + '</td><td class="small muted">' + e(s.description) + ' Unit: ' + e(s.unit) + '. Cap: ' + e(s.cap) + '.</td></tr>'; }).join('') + '</tbody></table></div></div>';
@@ -269,8 +273,8 @@
   });
 
   function cSkills(ch, d) {
-    var h = d.skills.needsRefresh ? '<div class="note">Skill data needs a refresh. The AionFlex levels were outdated and are not shown as current. <a href="#/import">Import a Skills screenshot</a> or enter the levels below.</div>' : '';
-    if (!d.skills.list.length) h += '<div class="note info">No skill list for ' + e(ch.cls) + ' yet. Add your skills one by one, or import a Skills screenshot.</div>';
+    var h = d.skills.needsRefresh ? '<div class="note">Skill data needs a refresh. The AionFlex levels were outdated and are not shown as current. <a href="#/import">Paste a fresh AionFlex page</a> or enter the levels below.</div>' : '';
+    if (!d.skills.list.length) h += '<div class="note info">No skill list for ' + e(ch.cls) + ' yet. Paste your AionFlex page on <a href="#/import">Import</a>, or add your skills one by one.</div>';
     h += '<div class="card"><div class="row"><h2 style="margin:0;flex:1">Skills</h2><button class="sm" data-act="skill-add">Add skill</button><button class="pri sm" data-act="save-skills">Save levels as new snapshot</button></div><div class="tbl" id="skillForm"><table><thead><tr><th>Skill</th><th>Type</th><th>Level</th><th>Status</th><th>Notes</th></tr></thead><tbody>' +
       d.skills.list.map(function (s) { return '<tr><td>' + e(s.name) + '</td><td class="small muted">' + e(s.type) + '</td><td><input name="lv_' + e(s.id) + '" value="' + e(s.level == null ? '' : s.level) + '" style="width:70px"></td><td>' + APP.pill(s.m) + '</td><td><input name="nt_' + e(s.id) + '" value="' + e(s.note || '') + '" placeholder="role, breakpoints"></td></tr>'; }).join('') + '</tbody></table></div></div>';
     var rot = d.skills.rotations || {};
@@ -338,8 +342,22 @@
     return '<div class="grid g2">' + blk('Titles', 'titles', [['Unlocked', d.titles.unlocked], ['Total', d.titles.total], ['Selected', d.titles.selected], ['Bonuses', d.titles.bonuses]]) +
       blk('Pet', 'pet', [['Name', d.pet.name], ['Level', d.pet.level], ['Rarity', d.pet.rarity], ['Combat effects', d.pet.effects]]) +
       blk('Wings', 'wings', [['Name', d.wings.name], ['Rarity', d.wings.rarity], ['Stat bonuses', d.wings.stats || 'Not recorded (cosmetic look is not a stat source unless verified)']]) +
-      blk('Collections', 'collections', [['Notes', d.collections.notes]]) + '</div>';
+      blk('Collections', 'collections', [['Notes', d.collections.notes]]) + genusBlock(d) + '</div>';
   }
+  function genusBlock(d) {
+    var g = d.genus || {};
+    return '<div class="card"><h2>Genus Insight</h2><table><tbody>' + BA.GENUS.map(function (x) { var lv = g[x.id] && typeof g[x.id].level === 'number' ? g[x.id].level : null; return '<tr><td class="muted">' + e(x.name) + ' <span class="small">(tier ' + e(x.tier) + ')</span></td><td>' + (lv == null ? '<span class="muted">-</span>' : 'Level ' + lv) + '</td></tr>'; }).join('') + '</tbody></table><div class="row" style="margin-top:8px">' + APP.pill(g.m) + '<span style="flex:1"></span><a class="small" href="#/tiers/pets">Pet tier list</a><button class="sm" data-act="genus-edit">Edit</button></div></div>';
+  }
+  APP.act('genus-edit', function () {
+    var g = APP.pd().genus || {};
+    APP.dialog('Genus Insight levels', '<div class="small muted" style="margin-bottom:8px">In game: Pets window, Genus Insight. Enter the level per genus (0 if none).</div><div class="form">' + BA.GENUS.map(function (x) { return inp('g_' + x.id, x.name + ' Insight level', g[x.id] ? g[x.id].level : null); }).join('') + '</div>' + provFields(), [{ label: 'Save as new snapshot', cls: 'pri', act: 'genus-save' }]);
+  });
+  APP.act('genus-save', function () {
+    var o = APP.form(), bad = BA.GENUS.filter(function (x) { var v = numOrNull(o['g_' + x.id]); return v != null && (v < 0 || v > 20 || Math.round(v) !== v); });
+    if (bad.length) return APP.toast('Insight levels are whole numbers from 0 to 20.');
+    APP.commit(APP.player(), function (d) { var m = prov(o); d.genus = d.genus || {}; BA.GENUS.forEach(function (x) { var v = numOrNull(o['g_' + x.id]); if (v != null) d.genus[x.id] = { level: v }; }); d.genus.m = m; }, 'Genus Insight edit', o._obs);
+    APP.closeDialog(); APP.render();
+  });
   var OBJF = { titles: [['unlocked', 'Unlocked', 1], ['total', 'Total', 1], ['selected', 'Selected title'], ['bonuses', 'Bonuses']], pet: [['name', 'Name'], ['level', 'Level', 1], ['rarity', 'Rarity'], ['effects', 'Combat effects']], wings: [['name', 'Name'], ['rarity', 'Rarity'], ['stats', 'Actual stat bonuses']], collections: [['notes', 'Completion and bonuses']] };
   APP.act('edit-obj', function (el) {
     var key = el.getAttribute('data-key'), d = APP.pd();

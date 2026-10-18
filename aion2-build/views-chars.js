@@ -9,7 +9,7 @@
   function charForm(def) {
     def = def || {};
     return '<div id="charForm"><div class="card" style="margin-bottom:12px;background:var(--panel2)"><label>AionFlex profile link (optional)</label><div class="row"><input name="url" value="' + e(def.url || '') + '" placeholder="https://aionflex.gg/character?...&name=..." style="flex:1 1 260px"><button class="sm" data-act="char-readurl" type="button">Read link</button><a class="sm" href="' + AF_SEARCH + '" target="_blank" rel="noopener">Search on AionFlex</a></div>' +
-      '<div class="small muted" style="margin-top:6px">Find the character on AionFlex, open its profile and copy the address bar here. The name, region and server are read from the link. Nothing is downloaded from AionFlex; add gear and stats by pasting the profile text or importing screenshots afterwards.</div><div id="urlMsg" class="small" style="margin-top:4px"></div></div>' +
+      '<div class="small muted" style="margin-top:6px">Find the character on AionFlex, open its profile and copy the address bar here. The name, region and server are read from the link. Nothing is downloaded from AionFlex; after creating, use Import > From AionFlex to fill in gear, skills and stats from the copied page.</div><div id="urlMsg" class="small" style="margin-top:4px"></div></div>' +
       '<div class="form">' + inp('name', 'Character name *', def.name) +
       '<div><label>Class</label><select name="cls">' + BA.CLASSES.map(function (c) { return '<option' + (c === (def.cls || 'Assassin') ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div>' +
       '<div><label>Race</label><select name="race"><option' + (def.race === 'Elyos' ? ' selected' : '') + '>Elyos</option><option' + (def.race === 'Asmodian' ? ' selected' : '') + '>Asmodian</option></select></div>' +
@@ -43,11 +43,18 @@
   /* ------------------------------------------------------------------ first-time setup */
   APP.view('setup', { title: 'Set up', icon: 'char', group: 'Overview', hidden: true, render: function () {
     return '<div class="head"><div><h1>Set up your character</h1><div class="muted">The Build Architect looks at one character at a time: yours. Comparing with someone else is optional and lives on the Compare page.</div></div></div>' +
-      '<div class="grid g2"><div class="card hl"><h2>Your character</h2>' + charForm({ role: 'player' }) + '<div class="row" style="margin-top:12px"><button class="pri" data-act="setup-create">Create and continue</button></div></div>' +
-      '<div class="card"><h2>What happens next</h2><ol class="small"><li>Your dashboard shows what you can improve, based on your own data.</li><li>Import screenshots of your Combat Stats, gear and skills (or type them in). Every save is kept as a snapshot.</li><li>Follow the <a href="#/guide">Start here</a> checklist. A guided tour is under Help at the top.</li></ol>' +
+      '<div class="card hl" style="margin-bottom:14px"><h2>Fastest: copy your AionFlex page</h2><ol class="small"><li><a href="' + AF_SEARCH + '" target="_blank" rel="noopener">Search your character on AionFlex</a> and open it.</li><li>When the page has loaded, press <span class="kbd">Ctrl+A</span> then <span class="kbd">Ctrl+C</span> (Mac: <span class="kbd">Cmd</span>).</li><li>Paste it here and press <b>Read</b>. You check the values before anything is saved. No AI, no API key.</li></ol>' +
+      '<textarea id="setupAf" placeholder="Paste the whole AionFlex page here" style="min-height:110px"></textarea><div class="form" style="margin-top:8px"><div><label>Profile link (optional)</label><input id="setupAfUrl" placeholder="https://aionflex.gg/character/..."></div></div><div class="row" style="margin-top:8px"><button class="pri" data-act="setup-af">Read</button></div></div>' +
+      '<div class="grid g2"><div class="card"><h2>Or type it in yourself</h2>' + charForm({ role: 'player' }) + '<div class="row" style="margin-top:12px"><button class="pri" data-act="setup-create">Create and continue</button></div></div>' +
+      '<div class="card"><h2>What happens next</h2><ol class="small"><li>Your dashboard shows what you can improve, based on your own data.</li><li>Update from AionFlex whenever you like, and type in what AionFlex does not show (Combat Stats window, item rolls). Screenshots with AI are optional. Every save is kept as a snapshot.</li><li>Follow the <a href="#/guide">Start here</a> checklist. A guided tour is under Help at the top.</li></ol>' +
       '<h3>Just looking around?</h3><div class="small">Load an example Assassin with real data to see how everything works. You can delete it later on the Characters page.</div><div class="row" style="margin-top:8px"><button class="sm" data-act="load-example">Load the example character</button></div>' +
       '<h3>Coming from another device?</h3><div class="small">Restore your export on <a href="#/import">Import</a> &gt; JSON.</div></div></div>';
   } });
+  APP.act('setup-af', function () {
+    var t = document.getElementById('setupAf').value, u = (document.getElementById('setupAfUrl').value || '').trim();
+    if (!t.trim()) return APP.toast('Paste the AionFlex page text first.');
+    APP.afStart(t, /^https:\/\/(www\.)?aionflex\.gg\//.test(u) ? u : '');
+  });
   APP.act('setup-create', function () { if (createFrom(document.getElementById('charForm'))) { APP.toast('Character created.'); location.hash = '#/dashboard'; APP.render(); } });
   APP.act('load-example', function () {
     var seed = BA.seedState(), ex = seed.characters[0];

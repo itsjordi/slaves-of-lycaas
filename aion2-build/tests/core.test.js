@@ -323,3 +323,94 @@ test('exports never contain either AI key', () => {
   const ex = BA.exportState(s);
   assert.equal(ex.state.settings.apiKey, ''); assert.equal(ex.state.settings.openaiKey, '');
 });
+
+const AF = require('fs').readFileSync(require('path').join(__dirname, 'aionflex-sample.txt'), 'utf8');
+test('AionFlex page text: everything readable is parsed', () => {
+  const p = BA.parseAionFlexText(AF);
+  assert.ok(p.ok);
+  assert.equal(p.profile.name, 'lycaa'); assert.equal(p.profile.cls, 'Assassin'); assert.equal(p.profile.server, 'Yustiel (EU)'); assert.equal(p.profile.guild, 'GOONER'); assert.equal(p.profile.level, 45);
+  assert.equal(p.cp, 78814); assert.equal(p.itemLevel, 1701);
+  assert.equal(p.equipment.length, 20);
+  assert.deepEqual(p.equipment.filter(x => x.slot === 'main_hand')[0], { slot: 'main_hand', name: 'Spiritforged Dagger', enh: 12 });
+  assert.ok(p.skills.some(s => s.name === 'Throw Shadowblade' && s.level === 15 && s.type === 'stigma'));
+  assert.ok(p.skills.some(s => s.name === 'Shadow Fall' && s.level === 3 && s.type === 'active'));
+  assert.equal(p.divine.justice, 41); assert.equal(p.core.might, 30); assert.equal(p.coreMax, 200);
+  assert.equal(p.daevanion.azphel, 5); assert.deepEqual(p.titles, { unlocked: 183, total: 297 });
+  assert.deepEqual(p.pet, { name: 'Kerubar', level: 3 }); assert.deepEqual(p.wings, { name: 'Ultimate Daeva Wings', rarity: 'Unique' });
+});
+test('AionFlex: random text is rejected', () => { assert.equal(BA.parseAionFlexText('hello world\n123').ok, false); });
+test('AionFlex fields apply to a blank character, new skills are added', () => {
+  const p = BA.parseAionFlexText(AF), d = BA.blankData('Assassin'), f = BA.aionflexFields(p, d);
+  assert.ok(f.some(x => x.path === 'skills.add.throw_shadowblade'));
+  BA.applyFields(d, f, BA.meta('imported', 'AionFlex', '2026-10-18'));
+  assert.equal(BA.num(d.cp), 78814); assert.equal(d.equipment.off_hand.enh, 10);
+  assert.ok(d.skills.list.some(s => s.name === 'Throw Shadowblade' && s.level === 15));
+  assert.equal(d.skills.needsRefresh, false);
+  assert.equal(d.pet.name, 'Kerubar');
+});
+test('weak skills and gain sources come from own data', () => {
+  const p = BA.parseAionFlexText(AF), d = BA.blankData('Assassin');
+  BA.applyFields(d, BA.aionflexFields(p, d), BA.meta('imported', 'AionFlex', '2026-10-18'));
+  const ws = BA.weakSkills(d).map(s => s.name);
+  assert.ok(ws.indexOf('Shadow Fall') >= 0); assert.ok(ws.indexOf('Quick Slice') < 0);
+  const g = BA.gainSources(d);
+  assert.equal(g.filter(r => r.area === 'Skill levels')[0].room, 'High');
+  assert.equal(g.filter(r => r.area === 'Pets and Genus Insight')[0].room, 'Unknown');
+  d.genus = { cogni: { level: 2 } };
+  assert.notEqual(BA.gainSources(d).filter(r => r.area === 'Pets and Genus Insight')[0].room, 'Unknown');
+  assert.ok(BA.recommendations(d, null, BA.tiersFor('boss')).some(r => r.id === 'pets_cogni'));
+});
+test('genus tier list is ordered S to C with sources', () => {
+  assert.deepEqual(BA.GENUS.map(g => g.tier), ['S', 'A', 'B', 'C', '-']);
+  assert.ok(BA.GENUS_SOURCES.every(s => /^https:\/\//.test(s.url)));
+});
+
+const SH = require('fs').readFileSync(require('path').join(__dirname, 'shugo-sample.txt'), 'utf8');
+const AT = require('fs').readFileSync(require('path').join(__dirname, 'atool-sample.txt'), 'utf8');
+test('source detection', () => {
+  assert.equal(BA.detectSource(SH, ''), 'shugo'); assert.equal(BA.detectSource(AT, ''), 'atool'); assert.equal(BA.detectSource(AF, ''), 'aionflex');
+  assert.equal(BA.detectSource('x', 'https://shugo.gg/character/x'), 'shugo'); assert.equal(BA.detectSource('hello', ''), null);
+});
+test('Shugo.GG page text', () => {
+  const p = BA.parseShugoText(SH);
+  assert.ok(p.ok); assert.equal(p.profile.name, 'lycaa'); assert.equal(p.profile.level, 45); assert.equal(p.profile.server, 'Yustiel (EU)');
+  assert.equal(p.gearScore, 1230); assert.equal(p.cp, 78814); assert.equal(p.equipment.length, 20);
+  assert.ok(p.skills.some(s => s.name === 'Illusive Clone' && s.type === 'stigma' && s.equipped));
+  assert.ok(!p.skills.some(s => s.name === 'Smoke Bomb'), 'not acquired stigmas are skipped');
+  assert.deepEqual(p.boards.nezekan, { done: 65, total: 88 }); assert.equal(p.daevanion.nezekan, 74);
+  assert.ok(p.daevEffects.indexOf('Combat Speed +3%') >= 0);
+  assert.deepEqual(p.pet, { name: 'Kerubar', level: 3 });
+});
+test('Atool page text, with item details', () => {
+  const p = BA.parseAtoolText(AT);
+  assert.ok(p.ok); assert.equal(p.profile.guild, 'GOONER'); assert.equal(p.gearScore, 1230); assert.equal(p.observedAt, '2026-10-19');
+  assert.equal(p.equipment.length, 20);
+  const mh = p.equipment[0]; assert.equal(mh.slot, 'main_hand'); assert.equal(mh.engraving[0].name, 'Might'); assert.equal(mh.engraving[0].grade, 'S'); assert.equal(mh.manastones.length, 4); assert.equal(mh.theostone, "Aulak's Roar");
+  const torso = p.equipment.filter(x => x.slot === 'torso')[0]; assert.equal(torso.engravingPct, 93.1); assert.equal(torso.subSkills.length, 3);
+  assert.equal(p.divine.death, 46); assert.equal(p.core.dexterity, 53); assert.deepEqual(p.titles, { unlocked: 183, total: 297 });
+  assert.equal(p.titleList[1].name, 'Failed Entrepreneur'); assert.deepEqual(p.titleList[1].effects, ['PvE Attack +25', 'Attack Bonus +20']);
+  assert.equal(p.ranks.server.pos, '32/68'); assert.equal(p.hexagon[4].value, '+9.2%');
+});
+test('three sources merge into one review, pair slots follow AionFlex', () => {
+  const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
+  const d = BA.blankData('Assassin'), f = BA.syncFields(ps, d);
+  assert.ok(!f.some(x => x.note), 'the samples agree');
+  assert.equal(f.filter(x => x.path === 'equipment.earring_2.name')[0].value, 'Pilgrim Earrings');
+  BA.applyFields(d, f, BA.meta('imported', 'sync', '2026-10-19'));
+  assert.equal(BA.num(d.gearScore), 1230); assert.equal(d.equipment.torso.engravingPct, 93.1);
+  assert.equal(d.equipment.main_hand.soulBinding[0].grade, 'S');
+  assert.ok(d.external.atool.hexagon.length === 6);
+  const again = BA.syncFields(ps, d);
+  assert.ok(again.every(x => x.kind === 'info' || x.path.indexOf('profile.') === 0 || x.path.indexOf('skills.add.') === 0 || BA.currentValueAt(d, x.path) === x.value), 'a second sync changes nothing');
+  assert.ok(BA.gainSources(d).some(r => r.area === 'Soul engraving' && r.room !== 'Unknown'));
+});
+test('disagreeing sources are flagged and the preferred one wins', () => {
+  const a = BA.parseSourceText(AT, ''), s = BA.parseSourceText(SH, '');
+  s.cp = 70000;
+  const f = BA.syncFields([s, a], BA.blankData('Assassin')).filter(x => x.path === 'cp')[0];
+  assert.equal(f.value, 78814); assert.match(f.note, /Shugo.GG 70000/);
+});
+test('profile links are built from name and server', () => {
+  const L = BA.sourceLinks({ name: 'lycaa', server: 'Yustiel (EU)' });
+  assert.equal(L.shugo, 'https://shugo.gg/character/global/eu-yustiel/lycaa'); assert.equal(L.atool, 'https://aion2tool.com/global/char/serverid=1305/lycaa');
+});

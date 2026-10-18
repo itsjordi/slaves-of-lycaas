@@ -159,7 +159,7 @@
     var d = APP.pd(), b = APP.bench(), bd = APP.bd(), tab = arg || 'stats';
     var emptyTiers = tiers.every(function (t) { return !t.stats.length; });
     var h = '<div class="head"><div><h1>Tier lists</h1><div class="muted">The best current information for ' + e(_cls) + ' PvE, in one place. Every list here is provisional: it comes from earlier discussion, not from a verified damage formula.</div></div><span class="sp"></span><div><label>Mode</label><select data-chg="mode">' + Object.keys(BA.MODES).map(function (m) { return '<option value="' + m + '"' + (m === mode ? ' selected' : '') + '>' + e(BA.MODES[m].label) + '</option>'; }).join('') + '</select></div></div>';
-    h += '<div class="tabs">' + [['stats', 'Combat stats'], ['divine', 'Divine Stats'], ['core', 'Core stats'], ['rules', 'Good to know'], ['edit', 'Edit ranking']].map(function (t) { return '<button data-act="go" data-to="#/tiers/' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    h += '<div class="tabs">' + [['stats', 'Combat stats'], ['divine', 'Divine Stats'], ['core', 'Core stats'], ['pets', 'Pets & Genus Insight'], ['rules', 'Good to know'], ['edit', 'Edit ranking']].map(function (t) { return '<button data-act="go" data-to="#/tiers/' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if (tab === 'stats' && emptyTiers) h += '<div class="note">There is no default tier list for ' + e(_cls) + ' yet (the built-in one is for Assassin). Build your own under <a href="#/tiers/edit">Edit ranking</a>; it is saved for ' + e(_cls) + ' only.</div>';
     if (tab === 'stats') {
       h += '<div class="note info">' + e(BA.MODES[mode].note) + (custom ? ' You edited this ranking.' : '') + '</div>';
@@ -182,7 +182,7 @@
           return '<div class="scard" title="' + e(st.description) + '"><b>' + e(st.name) + '</b><span>' + e(st.unit === '%' ? 'percentage' : st.unit) + ' &middot; ' + e(BA.CATEGORIES[st.category]) + '</span><span>You: ' + (mine ? f(mine.v, mine.unit || st.unit) : 'not recorded') + (b ? ' &middot; ' + e(b.name) + ': ' + (theirs ? f(theirs.v, theirs.unit || st.unit) : '?') : '') + '</span></div>';
         }).join('') + '</div></div>';
       }).join('') + '</div>';
-      if (!Object.keys(d.combatStats).length) h += '<div class="note" style="margin-top:12px">Your stat values are not recorded yet, so this list cannot say which of these you already have enough of. <a href="#/import/combatStats">Import a Combat Stats screenshot</a>.</div>';
+      if (!Object.keys(d.combatStats).length) h += '<div class="note" style="margin-top:12px">Your stat values are not recorded yet, so this list cannot say which of these you already have enough of. <a href="#/import/combatStats">Type in your Combat Stats</a>.</div>';
       h += '<div class="small muted" style="margin-top:8px">The ranking can change with your current stats, the encounter, gear you can get, how often you hit from behind, stat caps, skill synergy, buffs, testing and patches.</div>';
     } else if (tab === 'divine') {
       var needs = BA.divineNeeds(d);
@@ -192,6 +192,17 @@
     } else if (tab === 'core') {
       h += '<div class="note info">For Assassin PvE, Precision and Might are the first offensive candidates to look at. Exact allocations are not recommended without your point total, caps and reset rules.</div><div class="card"><table><thead><tr><th>Core stat</th><th>Effects (AionFlex tooltip)</th><th class="right">You</th><th>Role for boss DPS</th></tr></thead><tbody>' +
         BA.CORE_STATS.map(function (x) { var role = { might: 'Offensive: Attack Increase', precision: 'Offensive: Accuracy and Critical Hit', dexterity: 'Defensive', constitution: 'Defensive', willpower: 'Defensive (status resist)', intelligence: 'Utility (status chance)' }[x.id]; return '<tr><td><b>' + e(x.name) + '</b></td><td class="small">' + e(x.effects.join(', ')) + '</td><td class="right">' + f(BA.num(d.coreStats[x.id])) + '</td><td class="small">' + e(role) + '</td></tr>'; }).join('') + '</tbody></table><div class="row" style="margin-top:10px"><a href="#/character/core">Try a what-if redistribution</a></div></div>';
+    } else if (tab === 'pets') {
+      var gn = d.genus || {};
+      h += '<div class="note info">Pets are collected per genus. Each pet you own adds that genus\'s owned effect, and Genus Insight (levelled by collecting more pets of that genus) opens stat slots that apply against monsters of that genus. The ranking below is by how many level-45+ bosses and elites belong to each genus. Community data, October 2026: check it in-game before spending.</div>';
+      h += '<div class="card"><div class="tbl"><table><thead><tr><th>Tier</th><th>Genus</th><th class="right">Bosses 45+</th><th class="right">Elites 45+</th><th>Owned effect per pet</th><th class="right">Your Insight</th><th>Why</th></tr></thead><tbody>' + BA.GENUS.map(function (g) {
+        var lv = gn[g.id] && typeof gn[g.id].level === 'number' ? gn[g.id].level : null;
+        return '<tr><td data-sort="' + e(g.tier === '-' ? 'C' : g.tier) + '">' + (g.tier === '-' ? '<span class="muted">-</span>' : APP.tier(g.tier)) + '</td><td><b>' + e(g.name) + '</b></td><td class="right" data-sort="' + g.bosses + '">' + g.bosses + '%</td><td class="right" data-sort="' + g.elites + '">' + g.elites + '%</td><td class="small">' + e(g.owned) + '</td><td class="right">' + (lv == null ? '<span class="muted">-</span>' : lv) + '</td><td class="small muted">' + e(g.note) + '</td></tr>';
+      }).join('') + '</tbody></table></div><div class="row" style="margin-top:8px"><button class="sm" data-act="genus-edit">Record my Genus Insight levels</button></div></div>';
+      h += '<div class="grid g2" style="margin-top:14px"><div class="card"><h2>What to keep when you roll Insight slots</h2><table data-nosort><thead><tr><th>Role</th><th>Keep</th></tr></thead><tbody><tr><td>DPS (Assassin, Ranger, Sorcerer...)</td><td>Cogni: Attack, Critical Hit, Damage Boost lines</td></tr><tr><td>Tank</td><td>Cogni: Damage Tolerance, Defense, Block lines</td></tr><tr><td>Healer / support</td><td>Cogni first, then healing or survival lines</td></tr></tbody></table>' +
+        '<ul class="small" style="margin-top:8px"><li>Insight level 4 opens the slot that can roll damage lines: the first target for Cogni.</li><li>Rerolling costs 4 crystals and 1,000 Kinah per try.</li><li>Do not lock lines before Insight 10; locking makes later rerolls more expensive.</li></ul></div>' +
+        '<div class="card"><h2>How to raise it</h2><ul class="small"><li>Pet souls drop from monsters of that genus. About 5 souls unlock a pet, then roughly 25 and 75 more for the next levels.</li><li>Special pets have no genus line and do not drop as souls; their value is their own general-stat board.</li><li>Fera has the most pets but almost no endgame bosses: collect them for the owned effects, not for Insight.</li><li>Your summoned pet (for example its level) matters less for Combat Power than how many pets you own per genus.</li></ul>' +
+        '<div class="small muted" style="margin-top:8px">Sources: ' + BA.GENUS_SOURCES.map(function (s) { return '<a href="' + e(s.url) + '" target="_blank" rel="noopener">' + e(s.name) + '</a> (' + e(s.date) + ')'; }).join(', ') + '. Numbers come from these sites\' reading of the game client and may change with patches.</div></div></div>';
     } else if (tab === 'rules') {
       h += '<div class="card"><ul class="list">' + DISTINCT.map(function (x) { return '<li><b>' + e(x[0]) + '</b><div class="small">' + e(x[1]) + '</div></li>'; }).join('') + '</ul></div><div class="card" style="margin-top:12px"><h2>Not verified yet</h2><div class="small">Stat caps, Combat Speed scaling, Smite and Double Chance mechanics, enhancement costs and success rates, Global Arcana sources, Pantheon drop rates, and per-item CP contributions. Add what you find, with the source, in <a href="#/research">Research</a>.</div></div>';
     } else {
@@ -268,11 +279,30 @@
     dps: '{"boss":"","duration":0,"totalDamage":0,"avgDps":0,"burstDps":0}'
   };
   APP.view('import', { title: 'Import', icon: 'imp', group: 'Data', render: function (arg) {
-    var tab = APP.state.impTab || 'shot', pre = arg && BA.CATEGORY[arg] ? arg : '';
-    var h = '<div class="head"><div><h1>Import</h1><div class="muted">Everything goes through a review step. Nothing is saved until you confirm it, and each confirmation becomes a new snapshot.</div></div></div>';
-    h += '<div class="tabs">' + [['shot', 'Screenshot'], ['paste', 'Pasted text'], ['json', 'JSON'], ['csv', 'CSV']].map(function (t) { return '<button data-act="imp-tab" data-t="' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    if (arg && arg.indexOf('aionflex?') === 0 && !APP.review) { afFromHash(arg); }
+    var tab = APP.state.impTab || 'aionflex', pre = arg && BA.CATEGORY[arg] ? arg : '';
+    if (pre && tab === 'aionflex') tab = 'manual';
+    var h = '<div class="head"><div><h1>Import</h1><div class="muted">Everything goes through a review step. Nothing is saved until you confirm it, and each confirmation becomes a new snapshot. No AI or API key is needed.</div></div></div>';
+    h += '<div class="tabs">' + [['aionflex', 'From AionFlex'], ['manual', 'Type it in'], ['shot', 'Screenshot' + (APP.aiReady() ? '' : ' (optional)')], ['paste', 'Other text'], ['json', 'JSON'], ['csv', 'CSV']].map(function (t) { return '<button data-act="imp-tab" data-t="' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if (APP.review) return h + reviewHtml(APP.review);
-    if (tab === 'shot') {
+    if (tab === 'aionflex') {
+      var me = APP.player(), url = (me && me.url) || '';
+      h += '<div class="grid g2"><div class="card hl"><h2>Fill everything in from AionFlex</h2><ol class="small steps-ol">' +
+        '<li>Open your profile on AionFlex: ' + (url ? '<a href="' + e(url) + '" target="_blank" rel="noopener">open my profile</a>' : '<a href="https://aionflex.gg/search" target="_blank" rel="noopener">search your character</a> (type your name, pick your server, click your character)') + '.</li>' +
+        '<li>Wait until the page shows your Combat Power and gear, then press <span class="kbd">Ctrl+A</span> and <span class="kbd">Ctrl+C</span> (Mac: <span class="kbd">Cmd</span>) to copy the whole page.</li>' +
+        '<li>Paste it below and press <b>Read</b>. You get a list of everything that was found: check it, change what is wrong, untick what you do not want, and confirm.</li></ol>' +
+        '<textarea id="afTxt" placeholder="Paste the whole AionFlex page here" style="min-height:160px"></textarea>' +
+        '<div class="form" style="margin-top:8px"><div><label>Profile link (optional)</label><input id="afUrl" value="' + e(url) + '" placeholder="https://aionflex.gg/character/..."></div></div>' +
+        '<div class="row" style="margin-top:8px"><button class="pri" data-act="af-run">Read</button><span id="afMsg" class="small"></span></div></div>' +
+        '<div class="card"><h2>What is read</h2><div class="small">Name, class, server and guild; Combat Power and Item Level; every gear slot with its enhancement; skill levels (also new skills such as stigmas); Divine Stats; Core Stats; Daevanion board progress; titles; pet and wings.</div>' +
+        '<h3>Not on AionFlex</h3><div class="small">Item rolls, soul binding, manastones, the Combat Stats window (Attack, Critical Hit and so on), Arcana and Pantheon. Type those in on <a href="#/import" data-act="imp-tab" data-t="manual">Type it in</a> or on the Character page when you want advice on them.</div>' +
+        '<h3>Faster next time: the bookmark button</h3><div class="small">Drag this button to your bookmarks bar: <a class="btn sm" href="' + e(afBookmarklet()) + '" onclick="return false" title="Drag me to your bookmarks bar">Send to Build Architect</a>. On your AionFlex, Shugo.GG or Atool profile, click the bookmark and the page text comes straight here (on Shugo.GG it clicks through the Equipment, Skills and Daevanion tabs first). It only copies text the page shows you; it does not log in or download anything else. See <a href="#/profile">Profile</a> to sync from several sites at once.</div>' +
+        '<div class="small muted" style="margin-top:8px">Nothing is downloaded from AionFlex by this site; you copy the page yourself. AionFlex shows public data from the game, so check anything that looks off.</div></div></div>';
+    } else if (tab === 'manual') {
+      h += '<div class="card"><h2>Type it in</h2><div class="small muted" style="margin-bottom:8px">No screenshot or AI needed. Pick what you want to enter, open the game window next to it and type the numbers.</div><div class="form"><div><label>Character</label><select id="manChar">' + APP.state.characters.map(function (c) { return '<option value="' + e(c.id) + '"' + (c.id === APP.state.selected.player ? ' selected' : '') + '>' + e(c.name) + '</option>'; }).join('') + '</select></div>' +
+        '<div><label>What</label><select id="manCat">' + Object.keys(BA.CATEGORY).map(function (k) { return '<option value="' + k + '"' + (k === (pre || 'combatStats') ? ' selected' : '') + '>' + e(BA.CATEGORY[k]) + '</option>'; }).join('') + '</select></div>' +
+        '<div><label>Observed on</label><input type="date" id="manObs" value="' + APP.today() + '"></div></div><div class="row" style="margin-top:10px"><button class="pri" data-act="man-run">Open the form</button></div></div>';
+    } else if (tab === 'shot') {
       h += '<div class="card"><div class="form"><div><label>Character</label><select id="impChar">' + APP.state.characters.map(function (c) { return '<option value="' + e(c.id) + '"' + (c.id === APP.state.selected.player ? ' selected' : '') + '>' + e(c.name) + '</option>'; }).join('') + '</select></div>' +
         '<div><label>Screenshot type</label><select id="impCat"><option value="auto">' + (APP.aiReady() ? 'Detect automatically (AI)' : 'Choose a type') + '</option>' + Object.keys(BA.CATEGORY).map(function (k) { return '<option value="' + k + '"' + (k === pre ? ' selected' : '') + '>' + e(BA.CATEGORY[k]) + '</option>'; }).join('') + '</select></div>' +
         '<div><label>Observed on</label><input type="date" id="impObs" value="' + APP.today() + '"></div></div>' +
@@ -289,6 +319,97 @@
     }
     return h;
   } });
+  /* ---- Profile pages (AionFlex, Shugo.GG, Atool): no AI, no fetch. The user copies the page (or uses the bookmark button); we parse it and review. */
+  function afBookmarklet() {
+    var base = (location.origin + location.pathname).replace(/'/g, '');
+    // On Shugo.GG the profile is split over tabs: click through them first. Opening the window before waiting keeps popup blockers happy.
+    return "javascript:(function(){var w=window.open('','aion2_build');var h=location.hostname,T=document.body.innerText;function go(){var u='" + base + "#/profile/in?u='+encodeURIComponent(location.href)+'&d='+encodeURIComponent(T.slice(0,60000));if(w){w.location.href=u;w.focus();}else location.href=u;}" +
+      "if(!/shugo\\.gg$/.test(h)){go();return;}var tabs=['SKILLS','DAEVANION','EQUIPMENT'],i=0;function bt(t){return [].slice.call(document.querySelectorAll('button')).filter(function(b){return b.innerText.trim()===t;})[0];}" +
+      "(function next(){if(i>=tabs.length){go();return;}var b=bt(tabs[i]);var name=tabs[i++];if(!b){next();return;}b.click();setTimeout(function(){var t=document.body.innerText,k=t.indexOf('COSMETICS');T+='\\n=== '+name+' ===\\n'+(k>0?t.slice(k+9):t);next();},1500);})();})()";
+  }
+  APP.afBookmarklet = afBookmarklet;
+  function qs(arg) {
+    var q = arg.slice(arg.indexOf('?') + 1), o = {};
+    q.split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) { try { o[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); } catch (x) {} } });
+    return o;
+  }
+  function okUrl(u) { return /^https:\/\/(www\.)?(aionflex\.gg|shugo\.gg|aion2tool\.com)\//.test(u || '') ? String(u).slice(0, 400) : ''; }
+  // old AionFlex-only bookmark: review straight away
+  function afFromHash(arg) {
+    var o = qs(arg);
+    try { history.replaceState(null, '', '#/import'); } catch (x) {}
+    if (o.d) setTimeout(function () { APP.afStart(o.d, okUrl(o.u)); }, 0);
+  }
+  // bookmark button: park the page in the sync inbox, then show the Profile sync panel
+  APP.syncReceive = function (arg) {
+    var o = qs(arg);
+    try { history.replaceState(null, '', '#/profile'); } catch (x) {}
+    if (!o.d) return;
+    var u = okUrl(o.u), src = BA.detectSource(o.d, u);
+    if (!src) { APP.toast('That page is not an AionFlex, Shugo.GG or Atool character profile.', 6000); return; }
+    APP.inboxAdd(src, o.d, u);
+  };
+  APP.inboxAdd = function (src, text, url) {
+    var p = BA.parseSourceText(text, url);
+    if (!p.ok) { APP.toast('Could not find a character in the ' + BA.SOURCES[src].name + ' text. Wait until the page has loaded, then copy it again.', 6000); return false; }
+    APP.state.syncInbox = APP.state.syncInbox || {};
+    APP.state.syncInbox[src] = { text: String(text).slice(0, 80000), url: url || '', at: new Date().toISOString(), name: p.profile.name || '' };
+    APP.save(); APP.toast('Received ' + BA.SOURCES[src].name + ' page for ' + (p.profile.name || '?') + '. Add more sources or review now.', 5000);
+    if (location.hash.indexOf('#/profile') !== 0) location.hash = '#/profile'; else APP.render();
+    return true;
+  };
+  function afFields(parses, d, obs) {
+    var fields = BA.syncFields(parses, d);
+    fields.forEach(function (fl) {
+      fl.current = BA.currentValueAt(d, fl.path);
+      if (fl.path.indexOf('profile.') === 0 && d.__ch) fl.current = d.__ch[fl.path.slice(8)] || null;
+      var j = BA.judge(BA.metaAt(d, fl.path), { observedAt: obs });
+      fl.conflict = j.action === 'conflict' && fl.current != null && fl.value != null && fl.current !== fl.value ? j.reason : null;
+      fl.skip = fl.value == null || !!fl.conflict || fl.value === fl.current;
+    });
+    return fields;
+  }
+  function afTarget(p) {
+    var n = (p.profile.name || '').toLowerCase();
+    var hit = APP.state.characters.filter(function (c) { return c.name.toLowerCase() === n; })[0];
+    return hit ? hit.id : (n ? '__new' : (APP.state.selected.player || '__new'));
+  }
+  function afBuild(r) {
+    var d;
+    if (r.charId === '__new') d = BA.blankData(r.p.profile.cls || 'Assassin');
+    else { var ch = BA.getChar(APP.state, r.charId); d = BA.clone(BA.cur(ch)); d.__ch = ch; }
+    APP.review = { r: r, v: { fields: afFields(r.parses, d, r.obs), errors: [] } };
+  }
+  // items: [{text, url}] - one or more copied profile pages, merged into one review
+  APP.syncStart = function (items) {
+    var parses = [], bad = [];
+    items.forEach(function (x) { var p = BA.parseSourceText(x.text, x.url); if (p.ok) parses.push(p); else bad.push(p.source ? BA.SOURCES[p.source].name : 'unknown page'); });
+    if (!parses.length) { APP.toast('Could not find a character in that text. Copy the whole profile page (Ctrl+A, Ctrl+C) after it has finished loading.', 6000); return false; }
+    var mp = BA.mergedProfile(parses), first = parses[0];
+    parses.forEach(function (p) { if (p.cp != null && mp.cp == null) mp.cp = p.cp; if (p.itemLevel != null && mp.itemLevel == null) mp.itemLevel = p.itemLevel; if (p.gearScore != null && mp.gearScore == null) mp.gearScore = p.gearScore; });
+    var obs = parses.map(function (p) { return p.observedAt; }).filter(Boolean).sort().pop() || APP.today();
+    if (obs > APP.today()) obs = APP.today(); // Atool shows Korean time, which can be a day ahead
+    var names = parses.map(function (p) { return BA.SOURCES[p.source].name; });
+    var warn = [].concat.apply([], parses.map(function (p) { return p.warnings || []; }));
+    if (bad.length) warn.push('Not read: ' + bad.join(', ') + '.');
+    var r = { category: 'aionflex', parses: parses, p: mp, url: first.url || '', urls: parses.map(function (p) { return { src: p.source, url: p.url }; }), obs: obs, sourceNames: names, source: names.join(' + ') + (first.url ? ' ' + first.url.slice(0, 200) : ' page text'), aiNote: warn.join(' ') };
+    r.charId = afTarget(mp);
+    afBuild(r);
+    APP.state.impTab = 'aionflex';
+    if (location.hash.indexOf('#/import') !== 0) location.hash = '#/import';
+    APP.render();
+    return true;
+  };
+  APP.afStart = function (text, url) { return APP.syncStart([{ text: text, url: url }]); };
+  APP.act('af-run', function () {
+    var t = document.getElementById('afTxt').value, u = (document.getElementById('afUrl').value || '').trim();
+    if (!t.trim()) { document.getElementById('afMsg').textContent = 'Paste the page text first.'; return; }
+    APP.afStart(t, okUrl(u));
+  });
+  APP.onChange('rev-char', function (el) { var r = APP.review.r; r.charId = el.value; afBuild(r); APP.render(); });
+  APP.act('man-run', function () {
+    startReview({ charId: document.getElementById('manChar').value, obs: document.getElementById('manObs').value || APP.today(), category: document.getElementById('manCat').value, extracted: {}, manual: true, typed: true });
+  });
   APP.act('imp-tab', function (el) { APP.state.impTab = el.getAttribute('data-t'); APP.review = null; APP.save(); APP.render(); });
   function readFile(file, asText) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; if (asText) r.readAsText(file); else r.readAsDataURL(file); }); }
   APP.act('imp-run', function () {
@@ -355,19 +476,22 @@
     APP.render();
   }
   function reviewHtml(rv) {
-    var r = rv.r, v = rv.v, ch = BA.getChar(APP.state, r.charId);
-    var h = '<div class="card hl"><div class="row"><h2 style="margin:0;flex:1">Review: ' + e(BA.CATEGORY[r.category]) + ' for ' + e(ch.name) + '</h2><select data-chg="rev-cat">' + Object.keys(BA.CATEGORY).map(function (k) { return '<option value="' + k + '"' + (k === r.category ? ' selected' : '') + '>' + e(BA.CATEGORY[k]) + '</option>'; }).join('') + '</select></div>';
+    var r = rv.r, v = rv.v, ch = r.charId === '__new' ? null : BA.getChar(APP.state, r.charId), af = r.category === 'aionflex', h;
+    if (af) {
+      h = '<div class="card hl"><div class="row"><h2 style="margin:0;flex:1">Check what was read from ' + e((r.sourceNames || ['AionFlex']).join(' + ')) + '</h2><label class="small" for="revChar" style="margin:0">Save to</label><select id="revChar" data-chg="rev-char">' + APP.state.characters.map(function (c) { return '<option value="' + e(c.id) + '"' + (c.id === r.charId ? ' selected' : '') + '>' + e(c.name) + '</option>'; }).join('') + '<option value="__new"' + (r.charId === '__new' ? ' selected' : '') + '>New character: ' + e(r.p.profile.name || '?') + '</option></select></div>' +
+        '<div class="note info">Found ' + v.fields.length + ' values. Ticked rows are new or changed; change any value that is wrong, untick what you do not want, then confirm.' + ((r.sourceNames || []).length > 1 ? ' When the sites disagree, the value from the first one in this order is used: Atool, Shugo.GG, AionFlex (the Flags column shows the others).' : '') + ' The Combat Stats window, Arcana and Pantheon are not on these sites.</div>';
+    } else h = '<div class="card hl"><div class="row"><h2 style="margin:0;flex:1">Review: ' + e(BA.CATEGORY[r.category]) + ' for ' + e(ch.name) + '</h2><select data-chg="rev-cat">' + Object.keys(BA.CATEGORY).map(function (k) { return '<option value="' + k + '"' + (k === r.category ? ' selected' : '') + '>' + e(BA.CATEGORY[k]) + '</option>'; }).join('') + '</select></div>';
     if (r.duplicate) h += '<div class="note">This exact image was imported before.</div>';
     if (r.aiError) h += '<div class="note bad">AI extraction failed: ' + e(r.aiError) + ' You can enter the values by hand.</div>';
-    if (r.manual && !r.aiError) h += '<div class="note info">Manual entry: type the values you see in the screenshot. Leave unknown values empty.</div>';
+    if (r.manual && !r.aiError) h += '<div class="note info">' + (r.dataUrl ? 'Manual entry: type the values you see in the screenshot.' : 'Type the values from the game window.') + ' Leave unknown values empty.</div>';
     if (r.aiNote) h += '<div class="note info">AI note: ' + e(r.aiNote) + '</div>';
     if (v.errors.length) h += '<div class="note bad">' + v.errors.map(e).join('<br>') + '</div>';
-    h += '<div class="review" style="margin-top:12px"><div>' + (r.dataUrl ? '<img src="' + e(r.dataUrl) + '" alt="Uploaded screenshot">' : '<div class="muted small">No image (text import).</div>') + '</div><div><div class="tbl" id="revForm"><table><thead><tr><th>Save</th><th>Field</th><th>Current</th><th>New value</th><th>Flags</th></tr></thead><tbody>' +
+    h += '<div class="review" style="margin-top:12px"><div>' + (r.dataUrl ? '<img src="' + e(r.dataUrl) + '" alt="Uploaded screenshot">' : af ? '<div class="small"><b>' + e(r.p.profile.name || '') + '</b><br>' + e([r.p.profile.cls, r.p.profile.server, r.p.profile.guild].filter(Boolean).join(' · ')) + '<br>Combat Power ' + e(r.p.cp == null ? '?' : f(r.p.cp)) + '<br>Item Level ' + e(r.p.itemLevel == null ? '?' : f(r.p.itemLevel)) + (r.url ? '<br><a href="' + e(r.url) + '" target="_blank" rel="noopener">Profile on AionFlex</a>' : '') + '</div>' : '<div class="muted small">No image (typed or text import).</div>') + '</div><div><div class="tbl" id="revForm"><table><thead><tr><th>Save</th><th>Field</th><th>Current</th><th>New value</th><th>Flags</th></tr></thead><tbody>' +
       v.fields.map(function (fl, i) {
-        var flags = [fl.uncertain ? '<span class="warn">uncertain</span>' : '', fl.error ? '<span class="bad">' + e(fl.error) + '</span>' : '', fl.conflict ? '<span class="bad">' + e(fl.conflict) + '</span>' : ''].filter(Boolean).join(' ');
-        return '<tr class="' + (fl.conflict ? 'conf-row' : fl.error ? 'bad-row' : '') + '"><td><input type="checkbox" name="inc_' + i + '"' + (fl.skip ? '' : ' checked') + ' aria-label="Save this field"></td><td>' + e(fl.label) + '</td><td class="muted">' + e(fl.current == null ? '-' : fl.current) + '</td><td><input name="val_' + i + '" value="' + e(fl.value == null ? '' : fl.value) + '" style="width:130px"></td><td class="small">' + flags + '</td></tr>';
+        var flags = [fl.uncertain ? '<span class="warn">uncertain</span>' : '', fl.error ? '<span class="bad">' + e(fl.error) + '</span>' : '', fl.conflict ? '<span class="bad">' + e(fl.conflict) + '</span>' : '', fl.note ? '<span class="warn">' + e(fl.note) + '</span>' : '', fl.sources && (r.sourceNames || []).length > 1 ? '<span class="muted">' + e(fl.sources.map(function (x) { return BA.SOURCES[x].name; }).join(', ')) + '</span>' : ''].filter(Boolean).join(' ');
+        return '<tr class="' + (fl.conflict ? 'conf-row' : fl.error ? 'bad-row' : '') + '"><td><input type="checkbox" name="inc_' + i + '"' + (fl.skip ? '' : ' checked') + ' aria-label="Save this field"></td><td>' + e(fl.label) + '</td><td class="muted">' + e(fl.current == null ? '-' : fl.current) + '</td><td>' + (fl.kind === 'lines' || fl.kind === 'info' ? '<textarea name="val_' + i + '" rows="2" style="width:260px;min-height:0">' + e(fl.value == null ? '' : fl.value) + '</textarea>' : '<input name="val_' + i + '" value="' + e(fl.value == null ? '' : fl.value) + '" style="width:130px">') + '</td><td class="small">' + flags + '</td></tr>';
       }).join('') + '</tbody></table></div>' +
-      '<div class="form" style="margin-top:10px"><div><label>Observed on</label><input type="date" id="revObs" value="' + e(r.obs) + '"></div><div><label>Status</label><select id="revStatus"><option value="verified">Verified in-game</option><option value="confirmed" selected>User-confirmed</option><option value="imported">Imported from external source</option></select></div></div>' +
+      '<div class="form" style="margin-top:10px"><div><label>Observed on</label><input type="date" id="revObs" value="' + e(r.obs) + '"></div><div><label>Status</label><select id="revStatus"><option value="verified">Verified in-game</option><option value="confirmed"' + (af ? '' : ' selected') + '>User-confirmed</option><option value="imported"' + (af ? ' selected' : '') + '>Imported from external source</option></select></div></div>' +
       '<div class="small muted" style="margin-top:6px">Rows with conflicts are off by default: the current value is newer or stronger. Tick them only if you are sure.</div>' +
       '<div class="row" style="margin-top:10px"><button class="pri" data-act="rev-ok">Confirm and save snapshot</button><button data-act="rev-cancel">Discard</button></div></div></div></div>';
     return h;
@@ -378,12 +502,24 @@
   APP.act('rev-ok', function () {
     var rv = APP.review, r = rv.r, o = APP.form(document.getElementById('revForm')), status = document.getElementById('revStatus').value, obs = document.getElementById('revObs').value || r.obs;
     var data = {}; // rebuild values from the edited inputs, then validate again
-    var fields = rv.v.fields.map(function (fl, i) { var c = BA.clone(fl); c.skip = !o['inc_' + i]; c.raw = o['val_' + i]; if (c.kind === 'text') c.value = (o['val_' + i] || '').replace(/[<>]/g, '').trim().slice(0, 60) || null; else c.value = APP.numOrNull(o['val_' + i]); return c; });
+    var fields = rv.v.fields.map(function (fl, i) { var c = BA.clone(fl); c.skip = !o['inc_' + i]; c.raw = o['val_' + i]; if (c.kind === 'text') c.value = (o['val_' + i] || '').replace(/[<>]/g, '').trim().slice(0, 300) || null; else if (c.kind === 'lines' || c.kind === 'info') c.value = (o['val_' + i] || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 600) || null; else c.value = APP.numOrNull(o['val_' + i]); return c; });
     var keep = fields.filter(function (x) { return !x.skip && x.value != null; });
-    var invalid = keep.filter(function (x) { return x.kind !== 'text' && !rangeOk(x); });
+    var invalid = keep.filter(function (x) { return x.kind !== 'text' && x.kind !== 'lines' && x.kind !== 'info' && !rangeOk(x); });
     if (invalid.length) return APP.toast('Fix or untick invalid values: ' + invalid.map(function (x) { return x.label; }).join(', '));
     if (!keep.length) return APP.toast('Nothing ticked to save.');
+    if (r.charId === '__new') {
+      var pr = r.p.profile, created = BA.newCharacter({ name: (pr.name || 'Character').slice(0, 40), cls: pr.cls, race: pr.race, region: pr.region, server: pr.server, guild: pr.guild, url: r.url, role: APP.state.characters.some(function (c) { return c.role !== 'benchmark'; }) ? 'benchmark' : 'player', observedAt: obs, source: 'AionFlex' });
+      if (!APP.state.characters.some(function (c) { return c.role !== 'benchmark'; })) created.role = 'player';
+      APP.state.characters.push(created); r.charId = created.id;
+      if (created.role === 'player') APP.state.selected.player = created.id;
+    }
     var ch = BA.getChar(APP.state, r.charId), dNow = BA.cur(ch);
+    if (r.category === 'aionflex') {
+      ch.sync = ch.sync || {}; ch.links = ch.links || {};
+      (r.parses || []).forEach(function (pp) { ch.sync[pp.source] = { at: new Date().toISOString(), observedAt: pp.observedAt || obs }; if (pp.url) ch.links[pp.source] = pp.url; if (APP.state.syncInbox) delete APP.state.syncInbox[pp.source]; });
+      keep.forEach(function (x) { if (x.path.indexOf('profile.') === 0) { var k = x.path.slice(8); if (k === 'cls' && BA.CLASSES.indexOf(x.value) < 0) return; ch[k] = String(x.value).slice(0, 40); } });
+      if (r.url && /aionflex\.gg/.test(r.url)) ch.url = r.url.slice(0, 400);
+    }
     // last line of defence: an older observation must not quietly replace a newer one
     var conflicts = keep.map(function (x) { var cur = BA.currentValueAt(dNow, x.path), j = BA.judge(BA.metaAt(dNow, x.path), { observedAt: obs }); return j.action === 'conflict' && cur != null && cur !== x.value ? { path: x.path, label: x.label, old: cur, val: x.value, reason: j.reason, oldObs: (BA.metaAt(dNow, x.path) || {}).observedAt } : null; }).filter(Boolean);
     if (conflicts.length && !APP._ackConflicts) {
@@ -392,11 +528,11 @@
     }
     APP._ackConflicts = false;
     conflicts.forEach(function (c) { APP.state.conflicts.push({ id: BA.uid('cf'), character: ch.id, path: c.path, label: c.label, oldValue: c.old, oldObservedAt: c.oldObs, newValue: c.val, newObservedAt: obs, resolution: 'overridden by user', at: new Date().toISOString() }); });
-    APP.commit(ch, function (d) { BA.applyFields(d, keep, { status: status, source: r.upload ? 'Screenshot ' + r.upload.name : (r.source || 'Pasted text'), observedAt: obs, upload: r.upload ? r.upload.id : null }); }, (r.upload ? 'Screenshot: ' : 'Import: ') + BA.CATEGORY[r.category] + ' (' + keep.length + ' values)', obs);
+    APP.commit(ch, function (d) { if (r.p && r.p.coreMax) d.coreMax = r.p.coreMax; BA.applyFields(d, keep, { status: status, source: r.upload ? 'Screenshot ' + r.upload.name : (r.source || 'Pasted text'), observedAt: obs, upload: r.upload ? r.upload.id : null }); }, (r.upload ? 'Screenshot: ' : r.typed ? 'Typed: ' : 'Import: ') + (BA.CATEGORY[r.category] || 'AionFlex profile') + ' (' + keep.length + ' values)', obs);
     if (r.category === 'dps') saveDps(keep, ch, obs);
     if (r.upload) { r.upload.status = 'confirmed (' + keep.length + ' values)'; r.upload.category = r.category; }
     APP.save(); APP.review = null; APP.toast('Saved ' + keep.length + ' value(s) as a new snapshot.');
-    if (APP.queue && APP.queue.length) nextInQueue(); else location.hash = '#/dashboard';
+    if (APP.queue && APP.queue.length) nextInQueue(); else location.hash = r.category === 'aionflex' ? '#/profile' : '#/dashboard';
     APP.render();
   });
   function rangeOk(x) {

@@ -73,7 +73,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
   });
 
   await t.test('import a screenshot, review, correct and confirm', async () => {
-    go('#/import');
+    w.APP.state.impTab = 'shot'; go('#/import');
     const file = new w.File([new Uint8Array([137, 80, 78, 71, 1, 2, 3])], 'divine.png', { type: 'image/png' });
     const input = d.getElementById('impFile');
     Object.defineProperty(input, 'files', { value: [file] });
@@ -98,7 +98,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
   });
 
   await t.test('older screenshot does not silently overwrite', async () => {
-    go('#/import');
+    w.APP.state.impTab = 'shot'; go('#/import');
     const file = new w.File([new Uint8Array([1, 9, 9])], 'old.png', { type: 'image/png' });
     Object.defineProperty(d.getElementById('impFile'), 'files', { value: [file] });
     d.getElementById('impCat').value = 'divine';
@@ -119,7 +119,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
   });
 
   await t.test('rejects a non-image upload', () => {
-    go('#/import');
+    w.APP.state.impTab = 'shot'; go('#/import');
     const file = new w.File(['hello'], 'notes.txt', { type: 'text/plain' });
     Object.defineProperty(d.getElementById('impFile'), 'files', { value: [file] });
     d.getElementById('impCat').value = 'divine';
@@ -161,7 +161,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     assert.match(first.textContent, /tier list/i);
     click(first);
     await wait(250);
-    assert.equal(w.location.hash, '#/tiers');
+    assert.match(w.location.hash, /^#\/tiers/);
     assert.ok(d.querySelector('.tour-hl'), 'element highlighted');
   });
 
@@ -251,6 +251,60 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     assert.match(C.view(), /61,200/);
     C.go('#/tiers');
     assert.match(C.view(), /no default tier list for Cleric/);
+    C.dom.window.close();
+  });
+
+  await t.test('AionFlex page text: new visitor, no AI, review then save', async () => {
+    const C = await boot();
+    const af = fs.readFileSync(path.join(__dirname, 'aionflex-sample.txt'), 'utf8');
+    C.d.getElementById('setupAf').value = af;
+    C.click('[data-act="setup-af"]');
+    assert.match(C.view(), /Check what was read from AionFlex/);
+    C.d.querySelector('#revForm input[name^=val_]').value = 'lycaa';
+    C.click('[data-act="rev-ok"]');
+    const ch = C.w.APP.player(), cd = C.w.BA.cur(ch);
+    assert.equal(ch.name, 'lycaa'); assert.equal(ch.guild, 'GOONER');
+    assert.equal(C.w.BA.num(cd.cp), 78814);
+    assert.equal(cd.equipment.main_hand.enh, 12);
+    C.go('#/dashboard');
+    assert.match(C.view(), /Where you can still gain Combat Power and Gear Score/);
+    C.go('#/import');
+    C.d.getElementById('afTxt').value = af;
+    C.click('[data-act="af-run"]');
+    assert.equal(C.d.querySelectorAll('#revForm input[type=checkbox]:checked').length, 0, 'unchanged values are not ticked');
+    C.go('#/tiers/pets');
+    assert.match(C.view(), /Cogni/);
+    assert.deepEqual(C.errors, []);
+    C.dom.window.close();
+  });
+
+  await t.test('bookmarklet link opens the review', async () => {
+    const af = fs.readFileSync(path.join(__dirname, 'aionflex-sample.txt'), 'utf8');
+    const C = await boot(seeded());
+    C.w.location.hash = '#/import/aionflex?u=' + encodeURIComponent('https://aionflex.gg/character/global/1305/lycaa') + '&d=' + encodeURIComponent(af);
+    await C.wait(80);
+    assert.match(C.view(), /Check what was read from AionFlex/);
+    assert.equal(C.d.getElementById('revChar').value, 'lycaa');
+    C.dom.window.close();
+  });
+
+  await t.test('profile sync: bookmark page + pasted pages, one review, full profile', async () => {
+    const T = n => fs.readFileSync(path.join(__dirname, n + '-sample.txt'), 'utf8');
+    const C = await boot();
+    C.w.location.hash = '#/profile/in?u=' + encodeURIComponent('https://shugo.gg/character/global/eu-yustiel/lycaa') + '&d=' + encodeURIComponent(T('shugo'));
+    await C.wait(80);
+    assert.deepEqual(Object.keys(C.w.APP.state.syncInbox), ['shugo']);
+    C.d.getElementById('syncTxt').value = T('atool'); C.click('[data-act="sync-paste"]');
+    C.d.getElementById('syncTxt').value = T('aionflex'); C.click('[data-act="sync-paste"]');
+    C.click('[data-act="sync-review"]');
+    assert.match(C.view(), /Check what was read from Atool \+ Shugo.GG \+ AionFlex/);
+    C.click('[data-act="rev-ok"]');
+    const ch = C.w.APP.player();
+    assert.equal(ch.name, 'lycaa'); assert.deepEqual(Object.keys(ch.sync).sort(), ['aionflex', 'atool', 'shugo']);
+    assert.equal(Object.keys(C.w.APP.state.syncInbox).length, 0);
+    C.go('#/profile');
+    assert.match(C.view(), /Gear Score/); assert.match(C.view(), /Might 15/); assert.match(C.view(), /Rank \(Atool\)/);
+    assert.deepEqual(C.errors, []);
     C.dom.window.close();
   });
 

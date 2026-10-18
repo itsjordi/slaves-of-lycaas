@@ -22,10 +22,14 @@
     return [
       { id: 'look', title: 'Read your dashboard', time: '1 min', to: '#/dashboard', done: !!gg.visited.dashboard,
         text: 'Your CP, Item Level, what you can improve and the Best next upgrade. Hover a status pill to see where a number came from and how old it is.' },
-      { id: 'stats', title: 'Import your Combat Stats', time: '3 min', to: '#/import/combatStats', done: Object.keys(d.combatStats || {}).length > 0,
-        text: 'Open the Combat Stats window in game, take a screenshot, and import it. This is the single biggest improvement: without stats the advice can only compare item names and + levels.' },
-      { id: 'skills', title: 'Import your current skill levels', time: '3 min', to: '#/import/skills', done: !d.skills.needsRefresh,
-        text: 'Skills are ignored until their levels are recorded. Import a current screenshot of the Skills window (active, passive and Stigmas), or type them in.' },
+      { id: 'aionflex', title: 'Sync your profile (AionFlex, Shugo.GG, Atool)', time: '3 min', to: '#/profile', done: !d.skills.needsRefresh && Object.keys(d.equipment || {}).length > 0,
+        text: 'On Profile, drag the Send to Build Architect bookmark to your bookmarks bar, open your profile on Atool, Shugo.GG and AionFlex and click it on each (or copy and paste the pages). Review and save: gear with soul engraving and manastones, skills, stats, Daevanion, titles and Gear Score are filled in. No AI or API key needed.' },
+      { id: 'stats', title: 'Type in your Combat Stats', time: '3 min', to: '#/import/combatStats', done: Object.keys(d.combatStats || {}).length > 0,
+        text: 'AionFlex does not show the Combat Stats window (Attack, Critical Hit, Combat Speed...). Open it in game and type the numbers on Import > Type it in. Without stats the advice can only compare item names and + levels.' },
+      { id: 'gain', title: 'See where you can still gain CP', time: '1 min', to: '#/dashboard', done: !!gg.visited.dashboard && Object.keys(d.equipment || {}).length > 0,
+        text: 'The dashboard card "Where you can still gain Combat Power and Gear Score" lists gear, skills, titles, Daevanion, Pantheon, Arcana, pets and stats, and how far each is behind the rest of your character.' },
+      { id: 'genus', title: 'Record your Genus Insight', time: '1 min', to: '#/tiers/pets', done: !!(d.genus && d.genus.cogni), optional: true,
+        text: 'Pets give permanent stats per genus. See the Pets & Genus Insight tier list and record your levels.' },
       { id: 'weapon', title: 'Record your weapon tooltip', time: '2 min', to: '#/equipment', done: (main.base.length + main.rolls.length) > 0,
         text: 'Click Main-hand on the Equipment page and type the stat lines from the tooltip (Stat: value). Then the item comparison can answer "is this dagger better than mine".' },
       { id: 'tiers', title: 'Learn the stat priorities', time: '2 min', to: '#/tiers', done: !!gg.visited.tiers,
@@ -41,7 +45,7 @@
       { id: 'backup', title: 'Export a backup', time: '30 s', to: '#/settings', done: !!gg.exported,
         text: 'Your data lives only in this browser. Export once now and after big updates.' },
       { id: 'ai', title: 'Optional: set up AI (Claude or ChatGPT)', time: '3 min', to: '#/settings', done: APP.aiReady(), optional: true,
-        text: 'With your own Claude or ChatGPT key, screenshots are read automatically and you can ask the assistant questions like "what is my weakest slot?".' }
+        text: 'Not needed for anything above. With your own Claude or ChatGPT key, screenshots are read automatically and you can ask the assistant questions like "what is my weakest slot?".' }
     ];
   }
 
@@ -65,11 +69,13 @@
   var FAQ = [
     ['Why do so many things say "Unknown" or "not recorded"?', 'Because the tool refuses to guess. Import your Combat Stats and item tooltips and most of those fill in.'],
     ['Why is the Best next upgrade not "get a better weapon"?', 'Upgrades that depend on missing data (like item stats) wait until that data is recorded. Switch the ranking mode in the planner to see other orders.'],
-    ['I upgraded something. How do I update?', 'Import a new screenshot, or edit the value on the Character or Equipment page. Each save becomes a new snapshot, so the Progression page shows your improvement.'],
+    ['I upgraded something. How do I update?', 'Copy your AionFlex page again and paste it on Import > From AionFlex (only changed values are ticked), or edit the value on the Character or Equipment page. Each save becomes a new snapshot, so the Progression page shows your improvement.'],
     ['A value is wrong. How do I fix it?', 'Edit it on its page and save. The wrong value stays in the older snapshot as history, but the current state uses your correction.'],
     ['What does "Save anyway" mean?', 'You tried to save a value observed earlier than the one you already have. Saving would replace newer data, so it asks first and logs it.'],
     ['Is my data online?', 'No. Everything stays in this browser. Export a backup to move it to another device.'],
-    ['Does the AI cost money?', 'It uses your own Anthropic API key, so normal API pricing applies to your account. Everything works without it.'],
+    ['Does the AI cost money?', 'It uses your own Claude or ChatGPT API key, so normal API pricing applies to your account. You do not need it: AionFlex import, typing values and all advice work without AI.'],
+    ['Which screenshots do I need?', 'None. Use Import > From AionFlex for gear, skills and stats, and type the Combat Stats window in yourself. Screenshots are only a shortcut if you set up AI.'],
+    ['How do I find my character on AionFlex?', 'Go to aionflex.gg/search, type your character name, pick the region and server, and click your character. That page is what you copy.'],
     ['Where do the tier lists come from?', 'The built-in Assassin list comes from community discussion about PvE. It is a hypothesis, not a formula. Other classes start empty. Change them on Tier lists > Edit ranking.'],
     ['Can other people use this?', 'Yes. Everyone sets up their own character; the data stays in their own browser.'],
     ['How do I put something on my Daily Board?', 'Click "To Daily board" next to any recommendation or task. It appears in My to-do on the Daily Board.'],
@@ -81,7 +87,7 @@
     var h = '<div class="head"><div><h1>Start here</h1><div class="muted">Everything you need to get useful advice out of the Build Architect, in order.</div></div><span class="sp"></span><button class="pri" data-act="tour-start">Take the guided tour</button></div>';
     h += '<div class="grid g2"><div class="card hl"><h2>What this tool does</h2><div class="small">It keeps a history of your character and ranks what to improve next for PvE boss damage. Comparing with another player is there when you want it. Every recommendation tells you <b>what</b> to do, <b>why</b>, what it <b>costs</b>, how <b>confident</b> it is, and what to do <b>next</b>. It never invents numbers: what is not known shows as Unknown.</div>' +
       '<h3>Your progress</h3>' + APP.bar(done/req.length*100) + '<div class="small" style="margin-top:6px">' + done + ' of ' + req.length + ' setup steps done.' + (next ? ' Next: <a href="' + e(next.to) + '">' + e(next.title) + '</a>.' : ' All done. Keep the weekly loop going.') + '</div></div>';
-    h += '<div class="card"><h2>The weekly loop</h2><ol class="small"><li><b>Play and upgrade</b> in game.</li><li><b>Screenshot</b> what changed (Combat Stats, gear tooltip, Pantheon, skills).</li><li><b>Import</b> it and check the values in the review screen.</li><li>Look at <b>Progression</b> to see the difference since last time.</li><li>Open the <b>Upgrade Planner</b> and pick the next step.</li><li><b>Log a DPS run</b> on the same boss to see if it really helped.</li></ol></div></div>';
+    h += '<div class="card"><h2>The weekly loop</h2><ol class="small"><li><b>Play and upgrade</b> in game.</li><li><b>Copy your AionFlex page</b> (Ctrl+A, Ctrl+C) or note what changed.</li><li><b>Import</b> it and check the values in the review screen.</li><li>Look at <b>Progression</b> to see the difference since last time.</li><li>Open the <b>Upgrade Planner</b> and pick the next step.</li><li><b>Log a DPS run</b> on the same boss to see if it really helped.</li></ol></div></div>';
     h += '<div class="card" style="margin-top:14px"><h2>Setup checklist</h2><div class="small muted" style="margin-bottom:6px">Ticks update by themselves when the step is done.</div><ol class="list" style="list-style:none">' + st.map(function (x, i) {
       return '<li class="row" style="align-items:flex-start;flex-wrap:nowrap"><span style="flex:none;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid ' + (x.done ? 'var(--good)' : 'var(--line2)') + ';color:' + (x.done ? 'var(--good)' : 'var(--gold)') + ';font-weight:700">' + (x.done ? '&#10003;' : (i + 1)) + '</span><div style="flex:1"><b class="' + (x.done ? 'muted' : '') + '">' + e(x.title) + '</b> <span class="pill">' + e(x.time) + '</span>' + (x.optional ? ' <span class="pill">optional</span>' : '') + '<div class="small' + (x.done ? ' muted' : '') + '">' + e(x.text) + '</div></div><a class="nowrap small" href="' + e(x.to) + '">' + (x.done ? 'Open' : 'Do it') + ' &rsaquo;</a></li>';
     }).join('') + '</ol></div>';
@@ -97,7 +103,7 @@
 
   /* ------------------------------------------------------------------ per-page help */
   var HELP = {
-    dashboard: 'Top row: your numbers and how much of your data is recorded. "Best next upgrade" is the highest ranked improvement you can act on now; "Collect this data first" lists screenshots that unlock better advice. Hover any status pill for the source and date.',
+    dashboard: 'Top row: your numbers and how much of your data is recorded. "Best next upgrade" is the highest ranked improvement you can act on now; "Where you can still gain" shows which areas are behind; "Collect this data first" lists data that unlocks better advice. Hover any status pill for the source and date.',
     character: 'Tabs for every part of your character. Each "Edit" saves a new snapshot with the date you saw the values. Core stats has a what-if tool; Daevanion lets you add nodes for a route suggestion.',
     equipment: 'Click a slot to see or edit the item, including stat lines (Stat: value per line). Below the grid, compare your item with a candidate; it shows which stats go up or down and leans by tier, without pretending to calculate DPS.',
     compare: 'Optional. Pick any two characters and snapshots. The lists split differences into advantages, disadvantages, missing systems, DPS-relevant and CP-relevant parts. Unknowns tell you what to record before trusting a conclusion.',
@@ -107,7 +113,8 @@
     dps: 'Log DPS-meter results per boss. Runs are only compared with runs on the same boss.',
     tiers: 'S+ is on top. Switch the mode, view as cards or a sortable table, and edit the ranking when testing says otherwise.',
     research: 'Store what you learn with its source, date and confidence. Mark findings reviewed or outdated so old guides do not mislead you.',
-    import: 'Upload screenshots (or paste text, JSON, CSV). Nothing is saved until you confirm in the review screen; unreadable or conflicting values start unticked.',
+    profile: 'Your whole character on one page. Sync: open your profile on AionFlex, Shugo.GG and/or Atool and click the Send to Build Architect bookmark (or copy and paste the page), then Review and save. The sites each show different things; together they fill in gear with soul engraving and manastones, skills, stats, Daevanion, titles and Gear Score.',
+    import: 'From AionFlex: paste your copied profile page and everything readable is filled in. Type it in: enter values from a game window. Screenshots are optional (AI). JSON and CSV for backups. Nothing is saved until you confirm in the review screen; unreadable or conflicting values start unticked.',
     assistant: 'Ask questions about your build. The assistant reads your confirmed data; any change it suggests waits for your approval.',
     settings: 'Optional AI (Claude or ChatGPT, your own key), exports and backups, and starting over.',
     characters: 'All characters saved in this browser. Search them, switch to one, add yours, or add someone to compare with from an AionFlex profile link.'
@@ -123,11 +130,11 @@
   var TOUR = [
     { to: '#/dashboard', sel: '.kpi', title: 'Your numbers', text: 'Combat Power, Item Level, DPS and how much of your data is recorded. The small pill tells you where each number came from. Hover it for the date.' },
     { to: '#/dashboard', sel: '.card.hl', title: 'Best next upgrade', text: 'The top-ranked improvement you can act on now, with the reason it wins. "Add to plan" puts it in your Upgrade Planner.' },
-    { to: '#/dashboard', sel: '.grid.g2 .card:nth-child(2)', title: 'Collect this data first', text: 'Screenshots that unlock much better advice. Start with Combat Stats and Skills.' },
+    { to: '#/dashboard', sel: '.grid.g2 .card:nth-child(2)', title: 'Collect this data first', text: 'Data that unlocks much better advice. Start with the AionFlex import, then the Combat Stats window.' },
     { to: '#/dashboard', sel: '#pickPlayer', title: 'Your character', text: 'Switch between your characters here, or open Manage characters to add one.' },
     { to: '#/dashboard', sel: '#helpBtn', title: 'Help, any time', text: 'Start this tour again, open the guide, or ask Ari, the sprite in the bottom corner, where something is.' },
-    { to: '#/import', sel: '#impCat', title: 'Import a screenshot', text: 'Choose what the screenshot shows, pick the file and the date you took it. Without AI you type the values next to the image; with AI they are read for you.' },
-    { to: '#/import', sel: '[data-act="imp-run"]', title: 'Review before saving', text: 'You always see the screenshot, your current value and the new value. Only ticked rows are saved, as a new snapshot.' },
+    { to: '#/import', sel: '#afTxt', pre: function () { APP.state.impTab = 'aionflex'; APP.review = null; }, title: 'Paste your AionFlex page', text: 'Open your profile on AionFlex, press Ctrl+A and Ctrl+C, paste it here and press Read. No AI or API key needed.' },
+    { to: '#/import', sel: '[data-act="af-run"]', title: 'Review before saving', text: 'You see your current value and the new value for everything that was found. Change what is wrong, untick what you do not want; only ticked rows are saved, as a new snapshot.' },
     { to: '#/tiers', sel: '.tier', title: 'Stat tier lists', text: 'Which stats matter most for boss PvE, S+ on top, with your values next to them. Divine Stats and Core stats have their own tabs.' },
     { to: '#/characters', sel: '#charQ', title: 'Characters', text: 'Search your saved characters, add yours or someone to compare with. Find players on AionFlex and paste their profile link.' },
     { to: '#/compare', sel: '#view .card', title: 'Compare, when you want', text: 'Pick any saved character to see where you are ahead or behind. The rest of the tool looks only at you.' },
@@ -144,6 +151,7 @@
     if (i < 0) i = 0;
     if (i >= TOUR.length) return endTour();
     tourI = i; var s = TOUR[i];
+    if (s.pre) s.pre();
     if (location.hash !== s.to) { location.hash = s.to; }
     else APP.render();
     setTimeout(function () {
@@ -208,9 +216,15 @@
   /* ------------------------------------------------------------------ Ari, the Aether Sprite: a small guide that points things out */
   // [title, keywords, route (or "tour" or a page), element to point at, what Ari says]
   var TOPICS = [
-    ['Import a screenshot', 'import screenshot upload picture image photo', '#/import', '#impFile', 'Pick the screenshot type, choose the file and the date you took it. You check every value before it is saved.'],
-    ['Record your Combat Stats', 'combat stats attack critical crit speed numbers', '#/import/combatStats', '#impCat', 'Screenshot the Combat Stats window in game and import it here. This unlocks most of the advice.'],
-    ['Update skill levels', 'skills stigma skill level passive active', '#/import/skills', '#impCat', 'Import a Skills screenshot, or type the levels on Character > Skills.'],
+    ['Sync my profile', 'sync profile update refresh shugo atool aion2tool aionflex bookmark gear score gs full', '#/profile', '#syncCard', 'Bring in your AionFlex, Shugo.GG and Atool pages with the bookmark button or by pasting, then Review and save.'],
+    ['See my whole profile', 'profile overview everything gear skills stats titles', '#/profile', 'h1', 'Everything about your character on one page, with the source of each value.'],
+    ['Import from AionFlex', 'aionflex import link paste profile copy fill update no ai key', '#/import', '#afTxt', 'Open your AionFlex profile, Ctrl+A, Ctrl+C, paste here and press Read. Everything readable is filled in for you to check.'],
+    ['Find my character on AionFlex', 'find search character aionflex where server name', '#/import', '#afTxt', 'On aionflex.gg/search type your name, pick region and server, click your character. Then copy that page.'],
+    ['Where can I gain CP or Gear Score', 'gain cp combat power gear score gs improve increase where', '#/dashboard', '.card h2', 'The dashboard card "Where you can still gain" lists every area and how far behind it is.'],
+    ['Pets and Genus Insight tier list', 'pet pets genus insight cogni varian natura fera tier', '#/tiers/pets', '.tabs .cur', 'Which genus to collect first (Cogni), what to keep when rolling, and your own levels.'],
+    ['Import a screenshot (optional, AI)', 'import screenshot upload picture image photo', '#/import', '#impFile', 'Pick the screenshot type, choose the file and the date you took it. You check every value before it is saved.'],
+    ['Record your Combat Stats', 'combat stats attack critical crit speed numbers', '#/import/combatStats', '#impCat', 'AionFlex does not show these. Open the Combat Stats window in game and type the numbers (Import > Type it in). This unlocks most of the advice.'],
+    ['Update skill levels', 'skills stigma skill level passive active', '#/import/skills', '#impCat', 'Paste your AionFlex page on Import (skill levels included), or type the levels on Character > Skills.'],
     ['Type stats by hand', 'edit stats manual type enter', '#/character/stats', '[data-act="edit-stats"]', 'Click Edit combat stats and fill in what the game shows. Leave unknown ones empty.'],
     ['Stat tier list', 'tier list best stats priority s+ ranking meta', '#/tiers', '.tier', 'S+ is on top. Switch to the table view to sort or filter.'],
     ['Divine Stat priority', 'divine stats wisdom destruction time death priority order', '#/tiers/divine', '#view table', 'The order to collect Divine Stats in, with your current levels.'],
@@ -292,7 +306,8 @@
     var t = TOPICS[+el.getAttribute('data-i')]; if (!t) return;
     if (t[2] === 'tour') { closeAri(); APP.acts['tour-start'](); return; }
     if (t[2] && !/^#/.test(t[2])) { location.href = t[2]; return; }
-    if (t[2] && location.hash !== t[2]) location.hash = t[2];
+    if (t[2] === '#/import' && /^#af/.test(t[3])) { APP.state.impTab = 'aionflex'; APP.review = null; }
+    if (t[2] && location.hash !== t[2]) location.hash = t[2]; else APP.render();
     point(t[3], t[4]);
   });
   // one friendly nudge per visit, after a quiet moment

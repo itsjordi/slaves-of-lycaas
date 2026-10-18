@@ -1,0 +1,205 @@
+Login
+EN
+AION 2 Armory - Character Search, Profiles & Gear Database
+Shugo.GG
+45
+lycaa
+🌍 Yustiel
+Updated 4 min ago
+Through Hell and Back
+Assassin
+•
+Elyos
+•
+iLvl
+1230
+CP
+78,814
+Failed Entrepreneur
+Saint of Verteron
+Through Hell and Back
+EQUIPMENT
+SKILLS
+DAEVANION
+STATS
+COSMETICS
+Weapons
++12 Spiritforged Dagger
+Main Hand
++10 Spiritforged Guard
+Off-hand
+Armor
++10 Bakarma Breastplate
+Torso
++10 Vakron Greaves
+Legs
++10 Vakron Helm
+Helmet
++10 Vakron Pauldrons
+Shoulders
++10 Vakron Gloves
+Gloves
++10 Vakron Boots
+Boots
++10 Vakron Cloak
+Cape
+Accessories
++3 Noble Belt
+Belt
++7 Pilgrim Necklace
+Necklace
++5 Pilgrim Earrings
+Earring
++5 Unyielding Earrings
+Earring
++5 Pilgrim Ring
+Ring
++5 Pilgrim Ring
+Ring
++10 Ascension Bracelet
+Bracelet
++5 Pilgrim Bracelet
+Bracelet
++3 Revelation Amulet
+Amulet
+Runes
++4 Clash Rune
+Rune Slot 1
++4 Clash Rune
+Rune Slot 2
+Pet & Wings
+Kerubar
+Pet · Lv 3
+Ultimate Daeva Wings
+Wings
+=== SKILLS ===
+Active skills
+(12)
+14
+Quick Slice
+14
+Savage Roar
+14
+Heart Gore
+14
+Insignia Explosion
+13
+Storm Rampage
+12
+Shadowstrike
+12
+Ambush
+12
+Flash Slice
+12
+Infiltrate
+8
+Whirlwind Slice
+8
+Defiance
+3
+Shadow Fall
+Specialty skills
+(13)
+6 equipped
+EQUIPPED
+(6)
+15
+Equipped
+Throw Shadowblade
+6
+Equipped
+Savage Fang
+1
+Equipped
+Swift Contract
+1
+Equipped
+Triniel's Dagger
+0
+Equipped
+Evasion Stance
+0
+Equipped
+Illusive Clone
+NOT ACQUIRED
+(7)
+0
+Smoke Bomb
+Lv 22
+0
+Spiral Slice
+Lv 22
+0
+Shadow Walk
+Lv 22
+0
+Aerial Bind
+Lv 22
+0
+Evasion Contract
+Lv 22
+0
+Assault Ambush
+Lv 22
+0
+Shadowstep
+Lv 22
+
+The specialization of each skill (Specialty Shards) is not exposed by NCSOFT's character API: only the learned and equipped state is known. Hover a skill to see the specialties it can take.
+
+Passive skills
+(10)
+16
+Rear Smite
+16
+Impact Hit
+16
+Ambush Stance
+15
+Exploit Weakness
+15
+Assault Stance
+14
+Heightened Sixth Sense
+14
+Determination
+13
+Defense Break
+10
+Revitalization Contract
+6
+Apply Poison
+
+Open the Assassin skill book for every skill of the class with its learn level and specialties, and a planner to share a build.
+
+=== DAEVANION ===
+Nezekan
+65/88
+Zikel
+64/88
+Vaizel
+54/88
+Triniel
+51/116
+Azphel
+8/152
+Active Effects (32)
+SKILL UPGRADES
+Flash Slice +1
+Heightened Sixth Sense +2
+Ambush +1
+PASSIVE UPGRADES
+Rear Smite +1
+Assault Stance +1
+STAT BONUSES
+HP +800
+MP +400
+Critical Hit Resist +25
+Attack Bonus +24
+Critical Hit +45
+Cooldown Reduction +3%
+Defense Bonus +120
+Combat Speed +3%
+Shugo.GG
+YOUR AION 2 COMPANION

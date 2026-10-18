@@ -183,7 +183,7 @@
   APP.render = function () {
     var r = route(), v = APP.views[r.name] || APP.views.dashboard;
     // nobody set up yet: everything except settings and the characters page leads to the setup screen
-    if (!APP.state.characters.length && ['settings', 'characters', 'setup'].indexOf(r.name) < 0 && APP.views.setup) v = APP.views.setup;
+    if (!APP.state.characters.length && !(r.name === 'import' && (APP.review || r.arg.indexOf('aionflex?') === 0)) && ['settings', 'characters', 'setup', 'profile'].indexOf(r.name) < 0 && APP.views.setup) v = APP.views.setup;
     renderSide(r.name);
     renderPick();
     var el = document.getElementById('view');

@@ -1,0 +1,235 @@
+Home
+Leaderboards
+Meta
+Pricing
+lycaa
+45
+lycaa
+GLOBAL
+Assassin
+|
+Elyos
+|
+Yustiel (EU)
+|
+GOONER
+Through Hell and Back
+COMBAT POWER
+78,814
+ITEM LEVEL
+1,701
+Skill Loadout
+ACTIVE
+14
+Quick Slice
+14
+Savage Roar
+12
+Shadowstrike
+12
+Ambush
+14
+Heart Gore
+13
+Storm Rampage
+8
+Whirlwind Slice
+12
+Flash Slice
+12
+Infiltrate
+3
+Shadow Fall
+14
+Insignia Explosion
+8
+Defiance
+PASSIVE
+14
+Heightened Sixth Sense
+15
+Exploit Weakness
+6
+Apply Poison
+16
+Rear Smite
+15
+Assault Stance
+16
+Impact Hit
+16
+Ambush Stance
+13
+Defense Break
+10
+Revitalization Contract
+14
+Determination
+STIGMA SKILLS
+6
+Savage Fang
+1
+Swift Contract
+15
+Throw Shadowblade
+1
+Triniel's Dagger
+0
+Shadowstep
+Equipment
+WEAPONS
+Spiritforged Dagger
+MainHand
++12
+Spiritforged Guard
+SubHand
++10
+ARMOR
+Bakarma Breastplate
+Torso
++10
+Vakron Greaves
+Pants
++10
+Vakron Helm
+Helmet
++10
+Vakron Pauldrons
+Shoulder
++10
+Vakron Gloves
+Gloves
++10
+Vakron Boots
+Boots
++10
+Vakron Cloak
+Cape
++10
+Noble Belt
+Belt
++3
+ACCESSORIES
+Pilgrim Necklace
+Necklace
++7
+Pilgrim Earrings
+Earring2
++5
+Unyielding Earrings
+Earring1
++5
+Pilgrim Ring
+Ring1
++5
+Pilgrim Ring
+Ring2
++5
+Ascension Bracelet
+Bracelet1
++10
+Pilgrim Bracelet
+Bracelet2
++5
+Revelation Amulet
+Amulet
++3
+RUNES
+Clash Rune
+Rune1
++4
+Clash Rune
+Rune2
++4
+Cosmetics
+Steel Wings (Earrings)
+EarringR
+Silver Bell Fairy's Dream (Breastplate)
+Torso
+Star Prophet (Helm)
+Helmet
+Divine Stats
+Justice
+41
+Freedom
+36
+Illusion
+7
+Life
+13
+Time
+41
+Destruction
+6
+Death
+46
+Wisdom
+7
+Destiny
+13
+Space
+28
+Justice
+41
+Defense increase +4.1%
+Perfect Chance +4.1%
+Freedom
+36
+Accuracy increase +3.6%
+Evasion increase +3.6%
+Core Stats
+Might
+30
+/ 200
+Attack increase +3%
+Dexterity
+53
+/ 200
+Evasion increase +5.3%
+Block increase +5.3%
+Critical Hit Resist increase +5.3%
+Intelligence
+0
+/ 200
+Constitution
+1
+/ 200
+HP increase +0.1%
+Precision
+1
+/ 200
+Accuracy increase +0.1%
+Critical Hit increase +0.1%
+Willpower
+33
+/ 200
+Status Effect Resist +3.3%
+Daevanion
+74%
+Nezekan
+73%
+Zikel
+61%
+Vaizel
+44%
+Triniel
+5%
+Azphel
+Titles
+Collection
+183/297
+Failed Entrepreneur
+Attack
+PvE Attack +25
+Attack Bonus +20
+Pet & Wings
+PET
+Kerubar
+Lv. 3
+WINGS
+Ultimate Daeva Wings
+Unique
+WING SKIN
+Sealing Wings
+Daevanion Board Explorer
+Nezekan74%

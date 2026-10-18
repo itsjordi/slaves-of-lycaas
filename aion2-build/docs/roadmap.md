@@ -24,7 +24,9 @@
 ## Next
 
 - Record real stat lines for lycaa (Combat Stats and item tooltips), then refresh recommendations.
-- Re-import current skill levels from a screenshot.
+- Done since: AionFlex page-text import and bookmarklet, Type it in tab, "Where you can still gain CP and Gear Score" card, weak-skill advice, Pets & Genus Insight tier list and tracking.
+- Profile page and multi-site sync (Atool, Shugo.GG, AionFlex) with item soul engraving and manastones, Gear Score, ranks.
+- Per-genus Insight slot rolls (which lines are on which slot) once the in-game layout is confirmed.
 - Verify Global Arcana sources and Pantheon collectible sources; store them in Research.
 - Add enhancement cost and success data once sourced, with expected vs guaranteed cost.
 - Dungeon AoE and Solo PvE stat rankings from testing.

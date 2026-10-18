@@ -33,9 +33,9 @@ aion2-build/docs/         architecture, game mechanics, imports, roadmap
 
 ## Getting started
 
-New visitors start empty and set up their own character (name, class, server, optional AionFlex profile link; the link fills in the name, region and server). An example character can be loaded to look around. All data stays in the visitor's own browser.
+New visitors start empty and set up their own character (name, class, server, optional AionFlex profile link; the link fills in the name, region and server). An example character can be loaded to look around. The Profile page shows the whole character and syncs it from AionFlex, Shugo.GG and Atool (bookmark button or copy-paste, one merged review). The fastest start is pasting the copied AionFlex profile page on the setup screen: gear, skills, stats, titles and pet are filled in and checked in a review before saving. No AI key is needed for anything except automatic screenshot reading and the assistant. All data stays in the visitor's own browser.
 
-Open the page and take the 1-minute guided tour, or go to **Start here**: a checklist that ticks itself off (import Combat Stats, import skills, record the weapon tooltip, read the tier lists, compare, plan an upgrade, log a DPS run, record titles, export a backup). Every page also has a "How this page works" box. All tables can be sorted by clicking a header (tiers sort S+ first) and filtered with the box above them.
+Open the page and take the 1-minute guided tour, or go to **Start here**: a checklist that ticks itself off (fill in from AionFlex, type in Combat Stats, see where to gain CP, record Genus Insight, record the weapon tooltip, read the tier lists, compare, plan an upgrade, log a DPS run, record titles, export a backup). Every page also has a "How this page works" box. All tables can be sorted by clicking a header (tiers sort S+ first) and filtered with the box above them.
 
 ## Running locally
 

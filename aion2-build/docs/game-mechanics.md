@@ -42,6 +42,15 @@ Dungeon AoE and Solo PvE rankings start as copies of the boss ranking; PvP is a 
 - Higher Combat Power is not treated as higher DPS. DPS comparisons use logged runs on the same boss.
 - Impact is shown as High / Medium / Low / Unknown, never as an invented percentage.
 
+## Pets and Genus Insight (community, October 2026)
+
+Sources: aion2tierlist.com pet tier list (2026-10-17), aion2builds.org pets guide (2026-10-09). Their numbers come from reading the game client; treat as needs verification.
+
+- Genus tiers by share of level-45+ bosses / elites: Cogni S (77% / 52%), Varian A (11% / 26%), Natura B (6% / 11%), Fera C (2% / 4%). Special has no genus line.
+- Each owned pet adds its genus's owned effect (Cogni: HP +30, Critical Hit +2, Might +1).
+- Genus Insight is raised by collecting more pets of the genus; level 4 opens the slot that can roll damage lines. Do not lock lines before level 10. Reroll: 4 crystals + 1,000 Kinah.
+- Keep: DPS Attack / Critical Hit / Damage Boost; tank Damage Tolerance / Defense / Block.
+
 ## Sources
 
 Record checked sources in the app (Research). Priority: official patch notes, official info, in-game tooltips, verified databases, reproducible community tests, top builds, community discussion, older guides.

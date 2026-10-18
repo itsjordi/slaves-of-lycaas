@@ -245,7 +245,7 @@
           collectibles: [],
           m: meta('imported', 'Player report (Pantheon screen)', D, { note: 'Pantheon display effects come from a different interface than the AionFlex Divine Stats. Not merged.' })
         },
-        skills: { needsRefresh: true, list: skillsBlank(meta('outdated', 'AionFlex', D, { note: 'AionFlex skill levels were outdated. Re-import from a current in-game screenshot.' })), rotations: { boss: '', aoe: '', burst: '' } },
+        skills: { needsRefresh: true, list: skillsBlank(meta('outdated', 'AionFlex', D, { note: 'AionFlex skill levels were outdated. Paste a fresh AionFlex page on Import, or type the levels.' })), rotations: { boss: '', aoe: '', burst: '' } },
         titles: { unlocked: null, total: 297, selected: null, bonuses: '', m: meta('unknown', 'none', null) },
         pet: { name: 'Little Ghost', level: 3, rarity: null, effects: '', m: mL() },
         wings: { name: 'Ultimate Daeva Wings', rarity: 'Unique', stats: '', m: mL() },
@@ -387,7 +387,7 @@
       skills: { needsRefresh: true, list: skillsFor(cls, none), rotations: { boss: '', aoe: '', burst: '' } },
       titles: { unlocked: null, total: null, selected: null, bonuses: '', m: none },
       pet: { name: null, level: null, rarity: null, effects: '', m: none }, wings: { name: null, rarity: null, stats: '', m: none },
-      collections: { notes: '', m: none }
+      collections: { notes: '', m: none }, genus: {}
     };
   }
   function newCharacter(o) {
@@ -447,6 +447,387 @@
     return out.sort(function (a, b) { return (a.enh - a.typical) - (b.enh - b.typical); });
   }
 
+  /* ------------------------------------------------------------------ AionFlex profile page text (copied by the player) */
+  // The player opens their public AionFlex profile, selects all and copies it. We read the visible text only.
+  var AF_SLOTS = { MainHand: 'main_hand', SubHand: 'off_hand', Helmet: 'helmet', Torso: 'torso', Shoulder: 'shoulders', Gloves: 'gloves', Pants: 'pants', Boots: 'boots', Cape: 'cape', Belt: 'belt',
+    Necklace: 'necklace', Earring1: 'earring_1', Earring2: 'earring_2', Ring1: 'ring_1', Ring2: 'ring_2', Bracelet1: 'bracelet_1', Bracelet2: 'bracelet_2', Amulet: 'amulet', Rune1: 'rune_1', Rune2: 'rune_2' };
+  function parseAionFlexText(text) {
+    var L = String(text || '').split(/\r?\n/).map(function (s) { return s.replace(/\s+/g, ' ').trim(); }).filter(Boolean).slice(0, 4000);
+    var out = { ok: false, profile: {}, cp: null, itemLevel: null, skills: [], equipment: [], divine: {}, core: {}, coreMax: null, daevanion: {}, titles: null, pet: null, wings: null, warnings: [] };
+    function idx(label, from) { for (var i = from || 0; i < L.length; i++) if (L[i].toUpperCase() === label) return i; return -1; }
+    function isNum(s) { return /^[\d.,]+$/.test(s || ''); }
+    var cpI = idx('COMBAT POWER'), ilI = idx('ITEM LEVEL');
+    if (cpI >= 0) out.cp = parseNum(L[cpI + 1]);
+    if (ilI >= 0) out.itemLevel = parseNum(L[ilI + 1]);
+    if (cpI > 0) {
+      var from = Math.max(0, cpI - 20), ci = -1;
+      for (var i = cpI - 1; i >= from; i--) if (CLASSES.indexOf(L[i]) >= 0) { ci = i; break; }
+      if (ci >= 0) {
+        var p = out.profile;
+        p.cls = L[ci];
+        if (/^(GLOBAL|TW|KR|TAIWAN|KOREA)$/i.test(L[ci - 1] || '')) { p.region = /^global$/i.test(L[ci - 1]) ? 'Global' : /^(tw|taiwan)$/i.test(L[ci - 1]) ? 'Taiwan' : 'Korea'; p.name = L[ci - 2]; if (isNum(L[ci - 3])) p.level = parseNum(L[ci - 3]); }
+        var rest = L.slice(ci + 1, cpI).filter(function (s) { return s !== '|'; });
+        if (/^(Elyos|Asmodian)$/i.test(rest[0] || '')) p.race = rest.shift();
+        if (rest.length && /\(.{2,4}\)$/.test(rest[0])) p.server = rest.shift();
+        if (rest.length > 1) { p.guild = rest.shift(); p.title = rest.shift(); }
+        else if (rest.length) p.title = rest.shift();
+      }
+    }
+    // skills: level then name, per section
+    var secs = [['ACTIVE', 'active'], ['PASSIVE', 'passive'], ['STIGMA SKILLS', 'stigma']], eqI = idx('EQUIPMENT');
+    secs.forEach(function (s) {
+      var i = idx(s[0]); if (i < 0) return;
+      for (var j = i + 1; j + 1 < L.length; j += 2) {
+        if (!/^\d{1,2}$/.test(L[j]) || isNum(L[j + 1]) || /^(ACTIVE|PASSIVE|STIGMA SKILLS|EQUIPMENT)$/i.test(L[j + 1])) break;
+        out.skills.push({ name: L[j + 1].slice(0, 40), level: +L[j], type: s[1] });
+      }
+    });
+    // equipment: name, slot, +N; stop at Cosmetics
+    if (eqI >= 0) {
+      var end = idx('COSMETICS', eqI); if (end < 0) end = idx('DIVINE STATS', eqI); if (end < 0) end = L.length;
+      for (var k = eqI + 1; k + 2 < end + 1 && k < end; k++) {
+        if (AF_SLOTS[L[k + 1]] && /^\+\d{1,2}$/.test(L[k + 2] || '')) { out.equipment.push({ slot: AF_SLOTS[L[k + 1]], name: L[k].slice(0, 60), enh: +L[k + 2].slice(1) }); k += 2; }
+      }
+    }
+    var dvI = idx('DIVINE STATS'), csI = idx('CORE STATS');
+    if (dvI >= 0) DIVINE.forEach(function (dv) { for (var i2 = dvI + 1; i2 < (csI > dvI ? csI : L.length) - 1; i2++) if (L[i2] === dv.name && /^\d{1,4}$/.test(L[i2 + 1])) { out.divine[dv.id] = +L[i2 + 1]; break; } });
+    if (csI >= 0) CORE_STATS.forEach(function (c) { for (var i3 = csI + 1; i3 < Math.min(L.length - 1, csI + 60); i3++) if (L[i3] === c.name && /^\d{1,4}$/.test(L[i3 + 1])) { out.core[c.id] = +L[i3 + 1]; var mx = (L[i3 + 2] || '').match(/^\/\s*(\d+)$/); if (mx) out.coreMax = +mx[1]; break; } });
+    var daI = idx('DAEVANION');
+    if (daI >= 0) for (var i4 = daI + 1; i4 + 1 < Math.min(L.length, daI + 14); i4 += 2) {
+      var m = L[i4].match(/^(\d{1,3})%$/), b = DAEVANION.filter(function (x) { return x.name === L[i4 + 1]; })[0];
+      if (!m || !b) break; out.daevanion[b.id] = +m[1];
+    }
+    var tcI = idx('COLLECTION');
+    if (tcI >= 0) { var tm = (L[tcI + 1] || '').match(/^(\d+)\s*\/\s*(\d+)$/); if (tm) out.titles = { unlocked: +tm[1], total: +tm[2] }; }
+    var peI = idx('PET');
+    if (peI >= 0) { var lv = (L[peI + 2] || '').match(/^Lv\.?\s*(\d+)$/i); out.pet = { name: L[peI + 1].slice(0, 40), level: lv ? +lv[1] : null }; }
+    var wiI = idx('WINGS');
+    if (wiI >= 0) out.wings = { name: L[wiI + 1].slice(0, 40), rarity: /^(Common|Special|Rare|Legend|Unique|Epic|Mythic)$/i.test(L[wiI + 2] || '') ? L[wiI + 2] : null };
+    out.ok = !!(out.cp != null || out.equipment.length || out.skills.length);
+    if (!out.ok) out.warnings.push('This does not look like an AionFlex character page. Open the profile, wait until it has loaded, then select all and copy.');
+    if (out.ok && !out.equipment.length) out.warnings.push('No equipment found in the copied text.');
+    if (out.ok && !out.skills.length) out.warnings.push('No skills found in the copied text.');
+    return out;
+  }
+  // review fields for everything found; existing skill ids are matched by name, unknown ones are added
+  function aionflexFields(p, d) {
+    var f = [];
+    function F(path, label, value, kind, extra) { var o = { path: path, label: label, value: value, uncertain: false, error: null, kind: kind || 'number' }; if (extra) for (var k in extra) o[k] = extra[k]; f.push(o); }
+    var pr = p.profile || {};
+    ['name', 'cls', 'race', 'server', 'region', 'guild'].forEach(function (k) { if (pr[k]) F('profile.' + k, { name: 'Name', cls: 'Class', race: 'Race', server: 'Server', region: 'Region', guild: 'Guild' }[k], String(pr[k]).slice(0, 40), 'text'); });
+    if (pr.level != null) F('level', 'Level', pr.level);
+    if (p.cp != null) F('cp', 'Combat Power', p.cp);
+    if (p.itemLevel != null) F('itemLevel', 'Item Level', p.itemLevel);
+    p.equipment.forEach(function (it) { F('equipment.' + it.slot + '.name', SLOT_BY_ID[it.slot].name + ' item', it.name, 'text', { slot: it.slot }); F('equipment.' + it.slot + '.enh', SLOT_BY_ID[it.slot].name + ' enhancement', it.enh, 'number', { slot: it.slot }); });
+    var have = {}; (d && d.skills ? d.skills.list : []).forEach(function (s) { have[s.id] = s; });
+    p.skills.forEach(function (s) {
+      var id = slug(s.name);
+      if (have[id]) F('skills.' + id, s.name + ' (' + s.type + ')', s.level, 'number', { skillId: id });
+      else F('skills.add.' + id, s.name + ' (' + s.type + ', new)', s.level, 'number', { skillName: s.name, skillType: s.type });
+    });
+    DIVINE.forEach(function (x) { if (p.divine[x.id] != null) F('divine.' + x.id, x.name, p.divine[x.id]); });
+    CORE_STATS.forEach(function (x) { if (p.core[x.id] != null) F('coreStats.' + x.id, x.name + (p.coreMax ? ' (max ' + p.coreMax + ')' : ''), p.core[x.id]); });
+    DAEVANION.forEach(function (x) { if (p.daevanion[x.id] != null) F('daevanion.' + x.id, 'Daevanion ' + x.name + ' %', p.daevanion[x.id]); });
+    if (p.titles) { F('titles.unlocked', 'Titles unlocked', p.titles.unlocked); F('titles.total', 'Titles total', p.titles.total); }
+    if (p.pet) { F('pet.name', 'Pet', p.pet.name, 'text'); if (p.pet.level != null) F('pet.level', 'Pet level', p.pet.level); }
+    if (p.wings) { F('wings.name', 'Wings', p.wings.name, 'text'); if (p.wings.rarity) F('wings.rarity', 'Wings grade', p.wings.rarity, 'text'); }
+    return f;
+  }
+
+  /* ------------------------------------------------------------------ pets and Genus Insight (community sources, Oct 2026) */
+  var GENUS = [
+    { id: 'cogni', name: 'Cogni', tier: 'S', bosses: 77, elites: 52, owned: 'HP +30, Critical Hit +2, Might +1', note: 'About three in four level-45+ bosses are Cogni. Best offensive genus.' },
+    { id: 'varian', name: 'Varian', tier: 'A', bosses: 11, elites: 26, owned: 'Mount sprint cost -0.3%, Evasion Bonus +2, Constitution +1', note: 'A quarter of level-45+ elites. The sensible second genus, more so for solo play.' },
+    { id: 'natura', name: 'Natura', tier: 'B', bosses: 6, elites: 11, owned: 'Stamina, Critical Hit Resist +2, Precision +1', note: 'Rare among endgame bosses.' },
+    { id: 'fera', name: 'Fera', tier: 'C', bosses: 2, elites: 4, owned: 'Mount speed +3, Accuracy Bonus +2, Dexterity +1', note: 'Most pets (65) but barely any endgame bosses.' },
+    { id: 'special', name: 'Special', tier: '-', bosses: 4, elites: 8, owned: 'None; value comes from its general-stat Insight board', note: 'No genus line; does not drop as souls from monsters.' }
+  ];
+  var GENUS_SOURCES = [
+    { name: 'AION 2 Tier List: Pet tier list', url: 'https://aion2tierlist.com/guides/aion-2-pet-tier-list', date: '2026-10-17' },
+    { name: 'AION2 Builds: Pets and Genus Insight guide', url: 'https://aion2builds.org/guides/pets/', date: '2026-10-09' }
+  ];
+
+  /* ------------------------------------------------------------------ where can you still gain Combat Power / Gear Score */
+  function weakSkills(d) {
+    var out = [];
+    ['active', 'passive'].forEach(function (t) {
+      var rows = (d.skills && d.skills.list || []).filter(function (s) { return s.type === t && typeof s.level === 'number' && s.m && s.m.status !== 'outdated'; });
+      if (rows.length < 3) return;
+      var lv = rows.map(function (s) { return s.level; }).sort(function (a, b) { return a - b; }), med = lv[Math.floor(lv.length / 2)];
+      rows.forEach(function (s) { if (s.level <= med - 4) out.push({ id: s.id, name: s.name, type: t, level: s.level, typical: med }); });
+    });
+    return out.sort(function (a, b) { return (a.level - a.typical) - (b.level - b.typical); });
+  }
+  function room(pctv) { return pctv == null ? 'Unknown' : pctv < 50 ? 'High' : pctv < 80 ? 'Medium' : 'Low'; }
+  function gainSources(d) {
+    var rows = [], ws = weakSlots(d), sk = weakSkills(d);
+    var eqCount = SLOTS.filter(function (s) { return d.equipment && d.equipment[s.id]; }).length;
+    rows.push({ area: 'Gear enhancement', to: '#/equipment', room: !eqCount ? 'Unknown' : ws.length >= 3 ? 'High' : ws.length ? 'Medium' : 'Low', state: !eqCount ? 'No gear recorded' : ws.length ? ws.slice(0, 4).map(function (w) { return w.slotName + ' +' + w.enh + ' (others ~+' + w.typical + ')'; }).join(', ') : 'No slot clearly behind your other gear' });
+    var eng = SLOTS.map(function (s) { var it = d.equipment && d.equipment[s.id]; return it && typeof it.engravingPct === 'number' ? { n: s.name, p: it.engravingPct, name: it.name } : null; }).filter(Boolean), engLow = eng.filter(function (x) { return x.p < 100; });
+    rows.push({ area: 'Soul engraving', to: '#/profile', room: !eng.length ? 'Unknown' : engLow.length >= 3 ? 'High' : engLow.length ? 'Medium' : 'Low', state: !eng.length ? 'Not recorded (sync from Atool)' : engLow.length ? engLow.map(function (x) { return x.n + ' ' + x.p + '%'; }).join(', ') : 'All recorded items at 100%', note: engLow.length ? 'Items below 100% still have engraving lines to fill.' : '' });
+    var skillsKnown = (d.skills && d.skills.list || []).some(function (s) { return typeof s.level === 'number' && s.m && s.m.status !== 'outdated'; });
+    rows.push({ area: 'Skill levels', to: '#/character/skills', room: !skillsKnown ? 'Unknown' : sk.length >= 3 ? 'High' : sk.length ? 'Medium' : 'Low', state: !skillsKnown ? 'Not recorded' : sk.length ? sk.slice(0, 4).map(function (s) { return s.name + ' ' + s.level + ' (others ~' + s.typical + ')'; }).join(', ') : 'No skill clearly behind the rest' });
+    var t = d.titles || {}, tp = t.unlocked != null && t.total ? Math.round(t.unlocked / t.total * 100) : null;
+    rows.push({ area: 'Titles', to: '#/character/more', room: room(tp), state: tp == null ? 'Not recorded' : t.unlocked + '/' + t.total + ' (' + tp + '%)' });
+    var da = daevanionAvg(d);
+    rows.push({ area: 'Daevanion boards', to: '#/character/daevanion', room: room(da), state: da == null ? 'Not recorded' : DAEVANION.map(function (b) { var v = num(d.daevanion[b.id]); return b.name + ' ' + (v == null ? '?' : v + '%'); }).join(', ') });
+    var pp = pantheonPct(d);
+    rows.push({ area: 'Pantheon collection', to: '#/pantheon', room: room(pp), state: pp == null ? 'Not recorded' : d.pantheon.collected + '/' + d.pantheon.total });
+    var ar = arcanaState(d);
+    rows.push({ area: 'Arcana', to: '#/character/arcana', room: ar === 'none' ? 'High' : ar === 'equipped' ? 'Unknown' : 'Unknown', state: ar === 'none' ? 'None equipped' : ar === 'equipped' ? d.arcana.items.length + ' equipped' : 'Not recorded' });
+    var g = d.genus || {}, cg = g.cogni && typeof g.cogni.level === 'number' ? g.cogni.level : null;
+    rows.push({ area: 'Pets and Genus Insight', to: '#/tiers/pets', room: cg == null ? 'Unknown' : cg < 4 ? 'High' : cg < 10 ? 'Medium' : 'Low', state: cg == null ? 'Genus Insight not recorded' : GENUS.filter(function (x) { return g[x.id] && typeof g[x.id].level === 'number'; }).map(function (x) { return x.name + ' ' + g[x.id].level; }).join(', ') });
+    var cmax = d.coreMax || null, cs = CORE_STATS.map(function (c) { return c.name + ' ' + (num(d.coreStats[c.id]) == null ? '?' : num(d.coreStats[c.id])) + (cmax ? '/' + cmax : ''); }).join(', ');
+    rows.push({ area: 'Core stats', to: '#/character/core', room: 'Unknown', state: cs, note: 'How many points you can spend is not recorded; check before resetting.' });
+    var dt = divineTotal(d);
+    rows.push({ area: 'Divine Stats', to: '#/tiers/divine', room: 'Unknown', state: dt == null ? 'Not recorded' : 'Total ' + dt + ' (sum of displayed levels)' });
+    return rows;
+  }
+
+  /* ------------------------------------------------------------------ profile sync: Shugo.GG and Atool page text, merged with AionFlex.
+     Nothing is fetched (all three sites block cross-site requests); the user copies the page or uses the bookmark button. */
+  var SOURCES = {
+    atool: { id: 'atool', name: 'Atool', host: 'aion2tool.com', search: 'https://aion2tool.com/', gives: 'Gear Score, ranks, item soul engraving and manastones, skills, titles with effects, Divine and Core Stats, Daevanion nodes' },
+    shugo: { id: 'shugo', name: 'Shugo.GG', host: 'shugo.gg', search: 'https://shugo.gg/character', gives: 'Gear Score, gear, equipped stigmas, Daevanion nodes and bonuses, pet and wings' },
+    aionflex: { id: 'aionflex', name: 'AionFlex', host: 'aionflex.gg', search: 'https://aionflex.gg/search', gives: 'Item Level, gear, skills, Divine and Core Stats with cap, Daevanion %, titles, pet and wings' }
+  };
+  var SOURCE_ORDER = ['atool', 'shugo', 'aionflex']; // when sources disagree, the first one wins (Atool and Shugo show when they last refreshed)
+  var SERVER_IDS = { 'Yustiel (EU)': 1305, 'Ariel (EU)': 1306 };
+  function detectSource(text, url) {
+    var h = ''; try { h = new URL(url).hostname; } catch (e) { }
+    if (/aion2tool\.com$/.test(h)) return 'atool';
+    if (/shugo\.gg$/.test(h)) return 'shugo';
+    if (/aionflex\.gg$/.test(h)) return 'aionflex';
+    var t = String(text || '');
+    if (/\| Atool\b|AION2 TOOL|^aion2tool$/m.test(t)) return 'atool';
+    if (/Shugo\.GG/.test(t) || /^Specialty skills$/m.test(t)) return 'shugo';
+    if (/^COMBAT POWER$/m.test(t) && /^ITEM LEVEL$/m.test(t)) return 'aionflex';
+    return null;
+  }
+  function sourceLinks(ch) {
+    var n = encodeURIComponent((ch && ch.name) || ''), sv = (ch && ch.server) || '', sid = SERVER_IDS[sv];
+    var m = sv.match(/^(.+?)\s*\((EU|NA|NAE|NAW|AS|SA)\)$/i), sl = m ? m[2].toLowerCase() + '-' + m[1].toLowerCase().replace(/[^a-z0-9]+/g, '-') : null;
+    var L = (ch && ch.links) || {};
+    return {
+      aionflex: L.aionflex || (ch && ch.url && /aionflex\.gg/.test(ch.url) ? ch.url : null),
+      shugo: L.shugo || (sl && n ? 'https://shugo.gg/character/global/' + sl + '/' + n : null),
+      atool: L.atool || (sid && n ? 'https://aion2tool.com/global/char/serverid=' + sid + '/' + n : null)
+    };
+  }
+  function linesOf(text) { return String(text || '').replace(/\r/g, '').split('\n').map(function (l) { return l.replace(/ /g, ' ').trim(); }).filter(Boolean); }
+  function intOf(s) { var x = String(s).replace(/[,\s]/g, ''); return /^\d+$/.test(x) ? +x : null; }
+  function emptyParse(src) { return { ok: false, source: src, profile: {}, cp: null, itemLevel: null, gearScore: null, skills: [], equipment: [], items: {}, divine: {}, core: {}, coreMax: null, daevanion: {}, boards: {}, daevEffects: [], titles: null, titleList: [], pet: null, wings: null, ranks: null, hexagon: null, observedAt: null, warnings: [] }; }
+  // slot family for item names when the page gives no slot (Atool) or only a family (Shugo "Earring")
+  var FAMILY = { earring: ['earring_1', 'earring_2'], ring: ['ring_1', 'ring_2'], bracelet: ['bracelet_1', 'bracelet_2'], rune: ['rune_1', 'rune_2'] };
+  var NAME_SLOT = [[/earring/i, 'earring'], [/\bring\b/i, 'ring'], [/bracelet/i, 'bracelet'], [/\brune\b/i, 'rune'], [/amulet/i, 'amulet'], [/necklace|pendant/i, 'necklace'], [/belt|sash/i, 'belt'], [/cloak|cape/i, 'cape'], [/boots|shoes|sandals/i, 'boots'], [/gloves|gauntlets|handguards/i, 'gloves'], [/pauldrons|shoulder|spaulders/i, 'shoulders'], [/helm|hat|hood|headgear|crown/i, 'helmet'], [/greaves|leggings|pants|chausses|tassets/i, 'pants'], [/breastplate|chest|robe|jerkin|hauberk|tunic|armor/i, 'torso'], [/guard|shield|orb|tome|fan|scabbard/i, 'off_hand']];
+  function slotFromName(name, weaponIndex) {
+    for (var i = 0; i < NAME_SLOT.length; i++) if (NAME_SLOT[i][0].test(name)) return NAME_SLOT[i][1];
+    return weaponIndex === 0 ? 'main_hand' : weaponIndex === 1 ? 'off_hand' : null;
+  }
+  var SHUGO_SLOT = { 'main hand': 'main_hand', 'off-hand': 'off_hand', torso: 'torso', legs: 'pants', helmet: 'helmet', shoulders: 'shoulders', gloves: 'gloves', boots: 'boots', cape: 'cape', belt: 'belt', necklace: 'necklace', earring: 'earring', ring: 'ring', bracelet: 'bracelet', amulet: 'amulet', 'rune slot 1': 'rune_1', 'rune slot 2': 'rune_2' };
+
+  function parseShugoText(text) {
+    var L = linesOf(text), out = emptyParse('shugo'), i, j;
+    var up = -1; for (i = 0; i < L.length; i++) if (/^Updated /.test(L[i])) { up = i; break; }
+    if (up >= 2) {
+      out.profile.name = L[up - 2]; out.profile.server = L[up - 1].replace(/^[^A-Za-z]+/, '') || null;
+      if (/^\d{1,2}$/.test(L[up - 3] || '')) out.profile.level = +L[up - 3];
+      for (j = up + 1; j < Math.min(L.length, up + 14); j++) {
+        if (CLASSES.indexOf(L[j]) >= 0 && !out.profile.cls) out.profile.cls = L[j];
+        if (/^(Elyos|Asmodian)$/.test(L[j])) out.profile.race = L[j];
+        if (/^iLvl$/i.test(L[j])) out.gearScore = intOf(L[j + 1]);
+        if (/^CP$/.test(L[j])) out.cp = intOf(L[j + 1]);
+      }
+      if (L[up + 1] && CLASSES.indexOf(L[up + 1]) < 0) out.profile.title = L[up + 1];
+      if (/^\d+ (sec|min|minute|minutes|hour|hours|h|m)s? ago$/i.test(L[up].slice(8)) || /just now/i.test(L[up])) out.observedAt = new Date().toISOString().slice(0, 10);
+    }
+    if (out.profile.server && /^Yustiel$|^Ariel$/i.test(out.profile.server)) out.profile.server += ' (EU)';
+    for (i = 0; i < L.length - 1; i++) {
+      var mm = L[i].match(/^\+(\d{1,2}) (.+)$/), sl = SHUGO_SLOT[(L[i + 1] || '').toLowerCase()];
+      if (mm && sl) out.equipment.push({ family: FAMILY[sl] ? sl : null, slot: FAMILY[sl] ? null : sl, name: mm[2], enh: +mm[1] });
+      if (/^Pet · Lv (\d+)$/.test(L[i + 1]) && !out.pet) out.pet = { name: L[i], level: +L[i + 1].match(/(\d+)$/)[1] };
+      if (L[i + 1] === 'Wings' && !out.wings && !/^\+/.test(L[i]) && L[i] !== 'Pet & Wings') out.wings = { name: L[i], rarity: null };
+    }
+    // the bookmark button sends every tab, so the header (and gear) can appear more than once: keep the first of each
+    var perFamily = { earring: 2, ring: 2, bracelet: 2 }, used = {};
+    out.equipment = out.equipment.filter(function (it) { var c = it.slot || it.family; used[c] = (used[c] || 0) + 1; return used[c] <= (perFamily[c] || 1); });
+    // skills: level line, then name (stigmas: level, "Equipped", name)
+    function sec(startRe, stopRe, type, stigma) {
+      var s = -1; for (var a = 0; a < L.length; a++) if (startRe.test(L[a])) { s = a; break; }
+      if (s < 0) return;
+      for (var b = s + 1; b < L.length - 1; b++) {
+        if (stopRe.test(L[b])) break;
+        if (!/^\d{1,2}$/.test(L[b])) continue;
+        if (stigma) { if (L[b + 1] === 'Equipped' && L[b + 2]) { out.skills.push({ name: L[b + 2], level: +L[b], type: 'stigma', equipped: true }); b += 2; } continue; }
+        if (/^\(\d+\)$/.test(L[b + 1]) || /^\d/.test(L[b + 1])) continue;
+        out.skills.push({ name: L[b + 1], level: +L[b], type: type }); b++;
+      }
+    }
+    sec(/^Active skills$/i, /^Specialty skills$|^Passive skills$|^===/i, 'active');
+    sec(/^EQUIPPED$/, /^NOT ACQUIRED$|^Passive skills$|^===/, 'stigma', true);
+    sec(/^Passive skills$/i, /^Open the |^===|^Shugo\.GG$/i, 'passive');
+    DAEVANION.forEach(function (x) { for (var a = 0; a < L.length - 1; a++) if (L[a] === x.name) { var nm = (L[a + 1] || '').match(/^(\d+)\/(\d+)$/); if (nm) { out.boards[x.id] = { done: +nm[1], total: +nm[2] }; out.daevanion[x.id] = Math.round(+nm[1] / +nm[2] * 100); break; } } });
+    var sb = L.indexOf('STAT BONUSES'); if (sb >= 0) for (j = sb + 1; j < L.length && /[+\-]\d/.test(L[j]) && j < sb + 40; j++) out.daevEffects.push(L[j]);
+    out.ok = !!(out.profile.name && (out.cp != null || out.equipment.length));
+    if (out.ok && !out.equipment.length) out.warnings.push('No gear found: open the Equipment tab on Shugo.GG before copying.');
+    return out;
+  }
+
+  function parseAtoolText(text) {
+    var L = linesOf(text), out = emptyParse('atool'), i, j;
+    for (i = 0; i < L.length; i++) { var t = L[i].match(/^(.+) - (.+) \| Atool$/); if (t) { out.profile.name = t[1]; out.profile.server = t[2]; break; } }
+    for (i = 0; i < L.length; i++) { var lu = L[i].match(/^Last updated: (\d{4})\. ?(\d{1,2})\. ?(\d{1,2})\./); if (lu) { out.observedAt = lu[1] + '-' + ('0' + lu[2]).slice(-2) + '-' + ('0' + lu[3]).slice(-2); if (L[i + 1] === 'Refresh' && L[i + 2] && L[i + 2] !== 'Race') { out.pet = { name: L[i + 2], level: null }; if (L[i + 3] && L[i + 3] !== 'Race') out.wings = { name: L[i + 3], rarity: null }; } break; } }
+    function after(label, from) { for (var a = from || 0; a < L.length - 1; a++) if (L[a] === label) return L[a + 1]; return null; }
+    var rI = L.indexOf('Race'); if (rI < 0) rI = 0;
+    out.profile.race = after('Race', rI); if (!out.profile.server) out.profile.server = after('Server', rI);
+    var c = after('Class', rI); if (CLASSES.indexOf(c) >= 0) out.profile.cls = c;
+    var g = after('Legion', rI); if (g && !/^Server #/.test(g)) out.profile.guild = g;
+    out.gearScore = intOf(after('Gear Score'));
+    var cpI = L.indexOf('Combat Power'); if (cpI >= 0) for (j = cpI + 1; j < cpI + 8; j++) if (intOf(L[j]) != null) { out.cp = intOf(L[j]); break; }
+    var rk = {}; ['Overall Rank', 'Class Rank', 'Server Rank'].forEach(function (k) { var a = L.indexOf(k); if (a >= 0) rk[k.split(' ')[0].toLowerCase()] = { top: L[a + 1], pos: L[a + 2] }; });
+    if (Object.keys(rk).length) out.ranks = rk;
+    var hx = L.indexOf('DPS Stat Hexagon'); if (hx >= 0) { out.hexagon = []; for (j = hx + 2; j < hx + 16 && L[j] !== 'Skills'; j += 2) out.hexagon.push({ name: L[j], value: L[j + 1] }); }
+    // skills: "Name" then "LV n"; the type comes from the last header
+    var type = null, endSk = L.indexOf('Overview');
+    for (i = 0; i < (endSk < 0 ? L.length : endSk); i++) {
+      if (L[i] === 'Active Skills') type = 'active'; else if (L[i] === 'Passive Skills') type = 'passive'; else if (/^Stigma\b/.test(L[i])) type = 'stigma';
+      var lv = L[i].match(/^LV (\d{1,2})$/); if (lv && type && L[i - 1]) out.skills.push({ name: L[i - 1], level: +lv[1], type: type, equipped: type === 'stigma' ? true : undefined });
+    }
+    // equipment with item details
+    var eqS = -1; for (i = 0; i < L.length; i++) if (L[i] === 'Gear Overview') { eqS = i; break; }
+    var eqE = eqS < 0 ? -1 : L.indexOf('Daevanion', eqS);
+    if (eqS >= 0) {
+      var cur = null, mode = null, wi = 0, grade = null;
+      for (i = eqS + 1; i < (eqE < 0 ? L.length : eqE); i++) {
+        var im = L[i].match(/^\+(\d{1,2}) (.+)$/);
+        if (im && !/^\+?\d/.test(im[2])) {
+          var sl = slotFromName(im[2], wi); if (sl === 'main_hand' || sl === 'off_hand') wi++;
+          cur = { slot: FAMILY[sl] ? null : sl, family: FAMILY[sl] ? sl : null, name: im[2], enh: +im[1], base: [], engraving: [], subSkills: [], manastones: [], engravingPct: null };
+          out.equipment.push(cur); mode = null; continue;
+        }
+        if (!cur) continue;
+        var ep = L[i].match(/^Soul engraving ([\d.]+)%$/); if (ep) { cur.engravingPct = +ep[1]; continue; }
+        if (L[i] === 'Base Stats') { mode = 'base'; continue; }
+        if (/^Soul Engraving( \/ Sub-skills)?$/.test(L[i])) { mode = 'engraving'; continue; }
+        if (L[i] === 'Manastones') { mode = 'manastones'; continue; }
+        if (/^Theostone: /.test(L[i])) { cur.theostone = L[i].slice(11); mode = 'skip'; continue; }
+        if (L[i] === 'Accessories' || L[i] === 'Equipment' || mode === 'skip' || !mode) continue;
+        if (mode === 'engraving') {
+          if (/^[SABC]$/.test(L[i])) { grade = L[i]; continue; }
+          var ss = L[i].match(/^(.+) \+(\d+)$/); if (ss && !/\d$/.test(ss[1])) { cur.subSkills.push({ name: ss[1], value: +ss[2] }); continue; }
+          if (L[i + 1] != null && /^[+\-]?[\d.,]+%?/.test(L[i + 1])) { cur.engraving.push({ name: L[i], text: L[i + 1], grade: grade }); grade = null; i++; }
+          continue;
+        }
+        if (L[i + 1] != null && /^[+\-]?[\d.,]+/.test(L[i + 1])) { cur[mode].push({ name: L[i], text: L[i + 1] }); i++; }
+      }
+    }
+    var dvS = eqE >= 0 ? eqE : L.indexOf('Daevanion');
+    DAEVANION.forEach(function (x) { for (var a = Math.max(0, dvS); a < L.length - 1; a++) if (L[a] === x.name) { var nm = (L[a + 1] || '').match(/^(\d+)\/(\d+)$/); if (nm) { out.boards[x.id] = { done: +nm[1], total: +nm[2] }; out.daevanion[x.id] = Math.round(+nm[1] / +nm[2] * 100); break; } } });
+    for (i = 0; i < L.length; i++) {
+      var tt = L[i] === 'Titles' && (L[i + 1] || '').match(/^(\d+)\/(\d+)/);
+      if (tt) {
+        out.titles = { unlocked: +tt[1], total: +tt[2] };
+        for (j = i + 2; j < L.length - 3; j++) {
+          if (/^Divine Stats/.test(L[j])) break;
+          if (/^\d+\/\d+$/.test(L[j + 2]) && L[j + 3] === 'Equip effect:') { var tl = { name: L[j], category: L[j + 1], effects: [] }, k2 = j + 4; while (k2 < L.length && /[+\-]\d/.test(L[k2]) && !/^\d+\/\d+$/.test(L[k2 + 2] || '')) tl.effects.push(L[k2++]); if (k2 < L.length && /[+\-]\d/.test(L[k2])) tl.effects.push(L[k2++]); out.titleList.push(tl); j = k2 - 1; }
+        }
+        break;
+      }
+    }
+    var dS = -1; for (i = 0; i < L.length; i++) if (/^Divine Stats \(Total/.test(L[i])) { dS = i; break; }
+    if (dS >= 0) DIVINE.forEach(function (x) { for (var a = dS; a < Math.min(L.length - 1, dS + 30); a++) if (L[a].split(' [')[0] === x.name && /^\d{1,4}$/.test(L[a + 1])) { out.divine[x.id] = +L[a + 1]; break; } });
+    var cS = L.indexOf('Common Stats');
+    if (cS >= 0) CORE_STATS.forEach(function (x) { for (var a = cS; a < Math.min(L.length - 1, cS + 20); a++) if (L[a] === x.name && /^\d{1,4}$/.test(L[a + 1])) { out.core[x.id] = +L[a + 1]; break; } });
+    if (out.titleList.length) out.profile.title = out.titleList[0].name;
+    out.ok = !!(out.profile.name && (out.cp != null || out.equipment.length));
+    return out;
+  }
+  function parseSourceText(text, url) {
+    var src = detectSource(text, url);
+    var p = src === 'atool' ? parseAtoolText(text) : src === 'shugo' ? parseShugoText(text) : src === 'aionflex' ? parseAionFlexText(text) : emptyParse(null);
+    p.source = src; p.url = url || ''; if (p.ok && !p.observedAt) p.observedAt = new Date().toISOString().slice(0, 10);
+    ['items', 'boards', 'daevEffects', 'titleList'].forEach(function (k) { if (p[k] == null) p[k] = k === 'items' || k === 'boards' ? {} : []; });
+    return p;
+  }
+  // pair slots (earrings, rings, bracelets, runes): keep each item in the slot that already holds it
+  function assignSlots(list, d, hints) {
+    var used = {}; hints = hints || {};
+    list.forEach(function (it) { if (it.slot) used[it.slot] = 1; });
+    return list.map(function (it) {
+      if (it.slot) return it;
+      var fam = FAMILY[it.family] || []; var o = Object.assign({}, it);
+      var same = fam.filter(function (s) { return !used[s] && (hints[s] === it.name || (!hints[s] && d && d.equipment && d.equipment[s] && d.equipment[s].name === it.name)); })[0];
+      o.slot = same || fam.filter(function (s) { return !used[s]; })[0] || null; if (o.slot) used[o.slot] = 1; return o;
+    }).filter(function (it) { return it.slot && SLOT_BY_ID[it.slot]; });
+  }
+  function linesText(arr, withGrade) { return (arr || []).map(function (x) { return x.name + ' ' + (x.text != null ? x.text : (x.value == null ? '' : x.value + (x.unit === '%' && !/%$/.test(String(x.value)) ? '%' : ''))) + (withGrade && x.grade ? ' [' + x.grade + ']' : ''); }).join('; '); }
+  function parseLinesText(s) {
+    return String(s || '').split(';').map(function (x) { return x.trim(); }).filter(Boolean).map(function (x) {
+      var g = x.match(/\s*\[([SABC])\]$/), grade = g ? g[1] : null; if (g) x = x.slice(0, g.index);
+      var m = x.match(/^(.+?)\s+([+\-]?[\d.,]+)(%?)(.*)$/);
+      if (!m) return { stat: statIdFor(x), name: x.slice(0, 60), value: null, unit: '', text: '', grade: grade };
+      var v = parseFloat(m[2].replace(/,/g, '')); return { stat: statIdFor(m[1]), name: m[1].slice(0, 60), value: isFinite(v) ? v : null, unit: m[3] || '', text: (m[2] + m[3] + m[4]).trim().slice(0, 40), grade: grade };
+    }).slice(0, 12);
+  }
+  // review rows for one parsed page
+  function sourceFields(p, d, hints) {
+    var f = [], label = (SOURCES[p.source] || {}).name || 'Pasted page';
+    function F(path, lab, value, kind, extra) { if (value == null || value === '') return; var o = { path: path, label: lab, value: value, uncertain: false, error: null, kind: kind || 'number', source: p.source }; if (extra) for (var k in extra) o[k] = extra[k]; f.push(o); }
+    var pr = p.profile || {};
+    ['name', 'cls', 'race', 'server', 'region', 'guild', 'title'].forEach(function (k) { if (pr[k]) F('profile.' + k, { name: 'Name', cls: 'Class', race: 'Race', server: 'Server', region: 'Region', guild: 'Guild', title: 'Title' }[k], String(pr[k]).slice(0, 40), 'text'); });
+    F('level', 'Level', pr.level); F('cp', 'Combat Power', p.cp); F('itemLevel', 'Item Level', p.itemLevel); F('gearScore', 'Gear Score', p.gearScore);
+    assignSlots(p.equipment || [], d, hints).forEach(function (it) {
+      var sn = SLOT_BY_ID[it.slot].name;
+      F('equipment.' + it.slot + '.name', sn + ' item', it.name, 'text', { slot: it.slot }); F('equipment.' + it.slot + '.enh', sn + ' enhancement', it.enh, 'number', { slot: it.slot });
+      if (it.base && it.base.length) F('equipment.' + it.slot + '.lines.base', sn + ': base stats', linesText(it.base), 'lines', { slot: it.slot });
+      if (it.engraving && (it.engraving.length || it.subSkills.length)) F('equipment.' + it.slot + '.lines.soulBinding', sn + ': soul engraving' + (it.engravingPct != null ? ' (' + it.engravingPct + '%)' : ''), linesText(it.engraving, true) + (it.subSkills.length ? (it.engraving.length ? '; ' : '') + it.subSkills.map(function (s) { return s.name + ' +' + s.value + ' [skill]'; }).join('; ') : ''), 'lines', { slot: it.slot, engravingPct: it.engravingPct });
+      if (it.manastones && it.manastones.length) F('equipment.' + it.slot + '.lines.manastones', sn + ': manastones', linesText(it.manastones), 'lines', { slot: it.slot });
+    });
+    var have = {}; (d && d.skills ? d.skills.list : []).forEach(function (s) { have[s.id] = s; });
+    var seenSk = {};
+    (p.skills || []).forEach(function (s) {
+      var id = slug(s.name); if (seenSk[id]) return; seenSk[id] = 1;
+      if (have[id]) F('skills.' + id, s.name + ' (' + s.type + (s.equipped ? ', equipped' : '') + ')', s.level, 'number', { skillId: id, equipped: s.equipped });
+      else F('skills.add.' + id, s.name + ' (' + s.type + ', new)', s.level, 'number', { skillName: s.name, skillType: s.type, equipped: s.equipped });
+    });
+    DIVINE.forEach(function (x) { F('divine.' + x.id, x.name, p.divine[x.id]); });
+    CORE_STATS.forEach(function (x) { F('coreStats.' + x.id, x.name + (p.coreMax ? ' (max ' + p.coreMax + ')' : ''), p.core[x.id]); });
+    DAEVANION.forEach(function (x) { var b = p.boards && p.boards[x.id]; F('daevanion.' + x.id, 'Daevanion ' + x.name + ' %' + (b ? ' (' + b.done + '/' + b.total + ' nodes)' : ''), p.daevanion[x.id], 'number', b ? { nodes: b } : null); });
+    if (p.titles) { F('titles.unlocked', 'Titles unlocked', p.titles.unlocked); F('titles.total', 'Titles total', p.titles.total); }
+    if (p.titleList && p.titleList.length) { F('titles.selected', 'Equipped titles', p.titleList.map(function (t) { return t.name; }).join(', ').slice(0, 120), 'text'); F('titles.bonuses', 'Title equip effects', p.titleList.map(function (t) { return t.effects.join(', '); }).join('; ').slice(0, 300), 'text'); }
+    if (p.pet) { F('pet.name', 'Pet', p.pet.name, 'text'); F('pet.level', 'Pet level', p.pet.level); }
+    if (p.wings) { F('wings.name', 'Wings', p.wings.name, 'text'); F('wings.rarity', 'Wings grade', p.wings.rarity, 'text'); }
+    if (p.ranks || p.hexagon || (p.daevEffects && p.daevEffects.length)) {
+      var info = [];
+      if (p.ranks) info.push('Ranks: ' + Object.keys(p.ranks).map(function (k) { return k + ' ' + p.ranks[k].pos + ' (top ' + p.ranks[k].top + ')'; }).join(', '));
+      if (p.hexagon) info.push('DPS hexagon: ' + p.hexagon.map(function (h) { return h.name + ' ' + h.value; }).join(', '));
+      if (p.daevEffects && p.daevEffects.length) info.push('Daevanion bonuses: ' + p.daevEffects.join(', '));
+      F('external.' + p.source, label + ' extras (shown on Profile)', info.join(' | ').slice(0, 600), 'info', { payload: { ranks: p.ranks, hexagon: p.hexagon, daevEffects: p.daevEffects, at: p.observedAt } });
+    }
+    return f;
+  }
+  // several pages at once: one row per value; disagreements are flagged and the preferred source wins
+  function syncFields(parses, d) {
+    var by = {}, order = [], hints = {};
+    parses.forEach(function (p) { (p.equipment || []).forEach(function (it) { if (it.slot && /_\d$/.test(it.slot)) hints[it.slot] = it.name; }); });
+    parses.slice().sort(function (a, b) { return SOURCE_ORDER.indexOf(a.source) - SOURCE_ORDER.indexOf(b.source); }).forEach(function (p) {
+      sourceFields(p, d, hints).forEach(function (fl) {
+        if (!by[fl.path]) { by[fl.path] = fl; fl.sources = [fl.source]; fl.seen = [{ s: fl.source, v: fl.value }]; order.push(fl.path); return; }
+        var w = by[fl.path]; w.sources.push(fl.source); w.seen.push({ s: fl.source, v: fl.value });
+      });
+    });
+    return order.map(function (k) {
+      var fl = by[k], vals = {}; fl.seen.forEach(function (x) { vals[String(x.v)] = 1; });
+      if (Object.keys(vals).length > 1 && fl.kind !== 'info' && fl.kind !== 'lines') fl.note = 'Sources differ: ' + fl.seen.map(function (x) { return SOURCES[x.s].name + ' ' + x.v; }).join(', ');
+      delete fl.seen; return fl;
+    });
+  }
+  function mergedProfile(parses) {
+    var pr = {}, coreMax = null;
+    parses.slice().sort(function (a, b) { return SOURCE_ORDER.indexOf(b.source) - SOURCE_ORDER.indexOf(a.source); }).forEach(function (p) { for (var k in p.profile) if (p.profile[k] != null) pr[k] = p.profile[k]; if (p.coreMax) coreMax = p.coreMax; });
+    return { profile: pr, coreMax: coreMax };
+  }
+
   /* ------------------------------------------------------------------ comparison engine */
   function compare(a, b, opts) {
     opts = opts || {};
@@ -494,10 +875,10 @@
     var ta = a.titles && a.titles.unlocked, tb = b.titles && b.titles.unlocked;
     if (ta == null) res.unknowns.push({ system: 'titles', text: 'Your title collection count is not recorded (benchmark: ' + (tb == null ? 'unknown' : tb + '/' + b.titles.total) + ').' });
     // skills
-    if (a.skills && a.skills.needsRefresh) res.unknowns.push({ system: 'skills', text: 'Your skill levels need a fresh in-game screenshot. The AionFlex levels were outdated.' });
+    if (a.skills && a.skills.needsRefresh) res.unknowns.push({ system: 'skills', text: 'Your skill levels need a refresh: paste a fresh AionFlex page on Import, or type them on Character > Skills.' });
     if (b.skills && b.skills.list.every(function (s) { return s.level == null; })) res.unknowns.push({ system: 'skills', text: 'Benchmark skill levels are not recorded.' });
     // stats and sub-stats
-    if (!Object.keys(a.combatStats || {}).length) res.unknowns.push({ system: 'stats', text: 'No combat stats recorded for you yet (Combat Stats screenshot).' });
+    if (!Object.keys(a.combatStats || {}).length) res.unknowns.push({ system: 'stats', text: 'No combat stats recorded for you yet (type in the Combat Stats window).' });
     if (!Object.keys(b.combatStats || {}).length) res.unknowns.push({ system: 'stats', text: 'No combat stats recorded for the benchmark.' });
     var noRolls = SLOTS.every(function (s) { var it = a.equipment && a.equipment[s.id]; return !it || !it.rolls.length; });
     if (noRolls) res.unknowns.push({ system: 'equipment', text: 'Item rolls, Soul Binding and Manastones are not recorded, so item-versus-item value cannot be judged yet.' });
@@ -551,8 +932,8 @@
   function recommendations(player, bench, opts) {
     opts = opts || {};
     var out = [], c = bench ? compare(player, bench, opts) : null;
-    if (player.skills && player.skills.needsRefresh) out.push(rec({ id: 'data_skills', title: 'Refresh skill levels', system: 'skills', description: 'Upload a current Skills screenshot so skill advice is based on real levels.', current: 'Outdated', proposed: 'Current levels recorded', dps: 'Unknown', cp: 'Low', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'High', source: 'Data quality', why: 'Every skill recommendation depends on it, and it costs nothing.' }));
-    if (!Object.keys(player.combatStats || {}).length) out.push(rec({ id: 'data_stats', title: 'Record your Combat Stats', system: 'stats', description: 'Upload a Combat Stats screenshot. Stat-based advice (rerolls, caps, priorities) needs it.', current: 'Not recorded', proposed: 'Recorded', dps: 'Unknown', cp: 'Low', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'High', source: 'Data quality', why: 'Without stats the engine can only compare item names and enhancement levels.' }));
+    if (player.skills && player.skills.needsRefresh) out.push(rec({ id: 'data_skills', title: 'Refresh skill levels', system: 'skills', description: 'Import your profile from AionFlex (no AI needed), or type the levels on Character > Skills.', current: 'Outdated', proposed: 'Current levels recorded', dps: 'Unknown', cp: 'Low', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'High', source: 'Data quality', why: 'Every skill recommendation depends on it, and it costs nothing.' }));
+    if (!Object.keys(player.combatStats || {}).length) out.push(rec({ id: 'data_stats', title: 'Record your Combat Stats', system: 'stats', description: 'Type the Combat Stats window values on Character > Combat stats (or import a screenshot if you use AI). Stat-based advice needs them.', current: 'Not recorded', proposed: 'Recorded', dps: 'Unknown', cp: 'Low', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'High', source: 'Data quality', why: 'Without stats the engine can only compare item names and enhancement levels.' }));
     if (arcanaState(player) === 'none') out.push(rec({ id: 'arcana_start', title: 'Start Arcana progression', system: 'arcana', description: 'Your Arcana slots are empty' + (c && arcanaState(bench) === 'equipped' ? '; ' + (opts.benchName || 'the benchmark') + ' has ' + bench.arcana.items.length + ' equipped' : '') + '. Look up how Arcana is obtained on Global before spending resources.', current: 'None equipped', proposed: 'First Arcana equipped', dps: 'Unknown', cp: 'Medium', cost: 'Unknown', time: 'Unknown', availability: 'Not verified', difficulty: 'Unknown', risk: 'Low', confidence: 'Medium', longterm: 'High', why: 'A whole system you are not using yet. Its stats are not recorded, so the DPS effect is unknown, but empty slots are rarely the right answer.' }));
     var d = player.divine ? divineTotal(player) : null, db = bench ? divineTotal(bench) : null;
     if (d != null) {
@@ -576,6 +957,12 @@
       var low = DAEVANION.map(function (b2) { return { name: b2.name, v: num(player.daevanion && player.daevanion[b2.id]) }; }).filter(function (x) { return x.v != null; }).sort(function (a2, b2) { return a2.v - b2.v; });
       if (low.length && low[0].v < 50) out.push(rec({ id: 'daevanion_low', title: 'Daevanion: work on ' + low[0].name + ' (' + low[0].v + '%)', system: 'daevanion', description: 'Your least developed board' + (low[1] && low[1].v < 50 ? 's: ' + low.filter(function (x) { return x.v < 50; }).map(function (x) { return x.name + ' ' + x.v + '%'; }).join(', ') : '') + '. Prefer nodes with offensive bonuses.', current: low[0].v + '%', proposed: 'Offensive nodes first', dps: 'Unknown', cp: 'Medium', cost: 'Unknown', time: 'Medium', availability: 'Now', difficulty: 'Medium', risk: 'Low', confidence: 'Low', longterm: 'High', source: 'Your own boards', why: 'Node bonuses are not recorded yet, so this only points at the board.' }));
     }
+    weakSkills(player).slice(0, 6).forEach(function (sk) {
+      out.push(rec({ id: 'skill_' + sk.id, title: 'Level up ' + sk.name + ' (' + sk.level + ')', system: 'skills', description: 'Your other ' + sk.type + ' skills are around level ' + sk.typical + '.', current: 'Level ' + sk.level, proposed: 'Towards ' + sk.typical, dps: sk.type === 'active' ? 'Medium' : 'Low', cp: 'Medium', cost: 'Unknown', time: 'Medium', availability: 'Now', difficulty: 'Medium', risk: 'Low', confidence: 'Medium', longterm: 'Medium', source: 'Your own skill levels', why: 'Well behind your other skills of the same type. Whether this skill matters for your rotation is up to you; check your DPS log.' }));
+    });
+    var gn = player.genus || {};
+    if (!gn.cogni || typeof gn.cogni.level !== 'number') out.push(rec({ id: 'data_genus', title: 'Record your Genus Insight levels', system: 'pets', description: 'Pets give Combat Power through owned effects and Genus Insight. Type your levels on Character > Pets, titles, wings.', current: 'Not recorded', proposed: 'Recorded', dps: 'Unknown', cp: 'Unknown', cost: 'Low', time: 'Low', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'High', longterm: 'Medium', source: 'Data quality', why: 'Needed before pet advice is possible.' }));
+    else if (gn.cogni.level < 4) out.push(rec({ id: 'pets_cogni', title: 'Raise Cogni Genus Insight to level 4', system: 'pets', description: 'Collect more Cogni pets. Level 4 opens the slot that can roll damage lines; about three in four level-45+ bosses are Cogni.', current: 'Level ' + gn.cogni.level, proposed: 'Level 4', dps: 'Medium', cp: 'Medium', cost: 'Low', time: 'Medium', availability: 'Now', difficulty: 'Low', risk: 'Low', confidence: 'Medium', longterm: 'High', source: 'Community guides (aion2tierlist.com, aion2builds.org), Oct 2026', why: 'Cheap permanent power according to community guides; numbers are from their reading of the game client, not verified here.' }));
     var core = player.coreStats || {};
     if (num(core.precision) === 0) out.push(rec({ id: 'core_review', title: 'Review Core Stat allocation (Precision, Might)', system: 'core', description: 'Precision is 0 and Dexterity (defensive) is 68. Precision maps to Accuracy and Critical Hit, Might to Attack Increase. Check point totals and reset rules first; this is a what-if, not an instruction.', current: 'Might ' + num(core.might) + ', Dex ' + num(core.dexterity) + ', Precision 0', proposed: 'Simulate a redistribution', dps: 'Medium', cp: 'Unknown', cost: 'Unknown', time: 'Low', availability: 'Not verified', difficulty: 'Low', risk: 'Low', confidence: 'Low', longterm: 'Medium', source: 'Core Stat tooltip mapping + provisional priority', why: 'Points in defensive Dexterity may be worth more in offensive stats for boss DPS, if resets are possible.' }));
     if (c) {
@@ -782,12 +1169,23 @@
         var slot = p[1]; if (!SLOT_BY_ID[slot]) return;
         d.equipment[slot] = d.equipment[slot] || { name: null, enh: null, rarity: null, itemLevel: null, base: [], rolls: [], soulBinding: [], manastones: [], set: null, acquisition: null, m: m };
         var it = d.equipment[slot];
+        if (p[2] === 'lines') {
+          var ls = parseLinesText(f.value), kind = p[3];
+          if (kind === 'soulBinding') { it.subSkills = ls.filter(function (x) { return /\[skill\]/.test(x.text); }).map(function (x) { return { name: x.name, value: x.value }; }); ls = ls.filter(function (x) { return !/\[skill\]/.test(x.text); }); if (f.engravingPct != null) it.engravingPct = f.engravingPct; }
+          if (kind === 'base' || kind === 'soulBinding' || kind === 'manastones') it[kind] = ls;
+          it.m = m; return;
+        }
+        if (p[2] === 'name' && it.name && it.name !== f.value) { it.base = []; it.rolls = []; it.soulBinding = []; it.manastones = []; it.rarity = null; it.itemLevel = null; }
         if (p[2] === 'rolls' || p[2] === 'soulBinding' || p[2] === 'manastones') { if (!cleared[slot + p[2]]) { it[p[2]] = []; cleared[slot + p[2]] = true; } it[p[2]].push({ stat: f.statId, name: f.statName, value: f.value, unit: f.unit }); }
         else it[p[2]] = f.value;
         it.m = m; return;
       }
-      if (p[0] === 'skills') { var s = (d.skills.list || []).filter(function (x) { return x.id === p[1]; })[0]; if (s){ s.level = f.value; s.m = m; } return; }
-      if (p[0] === 'divine' || p[0] === 'coreStats' || p[0] === 'daevanion') { d[p[0]] = d[p[0]] || {}; d[p[0]][p[1]] = { v: f.value, m: m }; return; }
+      if (p[0] === 'profile') return;
+      if (p[0] === 'skills' && p[1] === 'add') { if (!(d.skills.list || []).some(function (x) { return x.id === p[2]; })) d.skills.list.push({ id: p[2], name: f.skillName || p[2], type: f.skillType || 'active', level: f.value, unlocked: null, custom: true, equipped: f.equipped, m: m }); return; }
+      if (p[0] === 'skills') { var s = (d.skills.list || []).filter(function (x) { return x.id === p[1]; })[0]; if (s){ s.level = f.value; s.m = m; if (f.equipped != null) s.equipped = f.equipped; } return; }
+      if (p[0] === 'external') { d.external = d.external || {}; d.external[p[1]] = Object.assign({ info: f.value, m: m }, f.payload || {}); return; }
+      if (p[0] === 'pet' || p[0] === 'wings') { d[p[0]] = d[p[0]] || { m: m }; d[p[0]][p[1]] = f.value; d[p[0]].m = m; return; }
+      if (p[0] === 'divine' || p[0] === 'coreStats' || p[0] === 'daevanion') { d[p[0]] = d[p[0]] || {}; d[p[0]][p[1]] = { v: f.value, m: m }; if (p[0] === 'daevanion' && f.nodes) { d.daevanionBoards = d.daevanionBoards || {}; d.daevanionBoards[p[1]] = { done: f.nodes.done, total: f.nodes.total }; } return; }
       if (p[0] === 'pantheon') { if (p[1] === 'effects') { d.pantheon.effects[p[2]] = f.value; } else d.pantheon[p[1]] = f.value; d.pantheon.m = m; return; }
       if (p[0] === 'titles') { d.titles[p[1]] = f.value; d.titles.m = m; return; }
       if (p[0] === 'arcana') {
@@ -795,10 +1193,11 @@
         var i = +p[2]; d.arcana.items[i] = d.arcana.items[i] || { name: null, enh: null, rarity: null, stats: [], m: m };
         d.arcana.items[i][p[3]] = f.value; d.arcana.items[i].m = m; d.arcana.state = 'equipped'; d.arcana.m = m; return;
       }
-      if (p.length === 1 && (p[0] === 'cp' || p[0] === 'itemLevel' || p[0] === 'level')) { d[p[0]] = { v: f.value, m: m }; return; }
+      if (p.length === 1 && (p[0] === 'cp' || p[0] === 'itemLevel' || p[0] === 'level' || p[0] === 'gearScore')) { d[p[0]] = { v: f.value, m: m }; return; }
     });
     if (fields.some(function (f) { return !f.skip && f.value != null && f.path.indexOf('skills.') === 0; })) {
-      d.skills.needsRefresh = d.skills.list.some(function (s) { return s.level == null; });
+      var stigKnown = d.skills.list.some(function (s) { return s.type === 'stigma' && typeof s.level === 'number'; }); // AionFlex lists only the equipped stigmas
+      d.skills.needsRefresh = d.skills.list.some(function (s) { return (s.level == null && !(s.type === 'stigma' && stigKnown)) || (s.m && s.m.status === 'outdated'); });
     }
     return d;
   }
@@ -808,6 +1207,9 @@
     try {
       if (p[0] === 'combatStats') return d.combatStats[p[1]] && d.combatStats[p[1]].m;
       if (p[0] === 'equipment') return d.equipment[p[1]] && d.equipment[p[1]].m;
+      if (p[0] === 'profile' || (p[0] === 'skills' && p[1] === 'add')) return null;
+      if (p[0] === 'external') return d.external && d.external[p[1]] && d.external[p[1]].m;
+      if (p[0] === 'pet' || p[0] === 'wings') return d[p[0]] && d[p[0]].m;
       if (p[0] === 'skills') { var s = d.skills.list.filter(function (x) { return x.id === p[1]; })[0]; return s && s.m; }
       if (p[0] === 'divine' || p[0] === 'coreStats' || p[0] === 'daevanion') return d[p[0]][p[1]] && d[p[0]][p[1]].m;
       if (p[0] === 'pantheon') return d.pantheon.m;
@@ -821,7 +1223,11 @@
     var p = path.split('.');
     try {
       if (p[0] === 'combatStats') return val(d.combatStats[p[1]]);
+      if (p[0] === 'external') return d.external && d.external[p[1]] ? d.external[p[1]].info : null;
+      if (p[0] === 'equipment' && p[2] === 'lines') { var il = d.equipment[p[1]]; if (!il || !(il[p[3]] || []).length && !(p[3] === 'soulBinding' && (il.subSkills || []).length)) return null; var tx = linesText(il[p[3]], p[3] === 'soulBinding'); if (p[3] === 'soulBinding' && (il.subSkills || []).length) tx += (tx ? '; ' : '') + il.subSkills.map(function (x) { return x.name + ' +' + x.value + ' [skill]'; }).join('; '); return tx || null; }
       if (p[0] === 'equipment') { var it = d.equipment[p[1]]; if (!it) return null; if (p[2] === 'rolls' || p[2] === 'soulBinding' || p[2] === 'manastones') { var r = it[p[2]][+p[3]]; return r ? r.value : null; } return it[p[2]]; }
+      if (p[0] === 'profile' || (p[0] === 'skills' && p[1] === 'add')) return null;
+      if (p[0] === 'pet' || p[0] === 'wings') return d[p[0]] ? d[p[0]][p[1]] : null;
       if (p[0] === 'skills') { var s = d.skills.list.filter(function (x) { return x.id === p[1]; })[0]; return s ? s.level : null; }
       if (p[0] === 'divine' || p[0] === 'coreStats' || p[0] === 'daevanion') return val(d[p[0]][p[1]]);
       if (p[0] === 'pantheon') return p[1] === 'effects' ? d.pantheon.effects[p[2]] : d.pantheon[p[1]];
@@ -873,6 +1279,7 @@
     if (!state.version) state.version = SCHEMA_VERSION;
     ['tasks', 'resources', 'dps', 'research', 'proposals', 'conflicts', 'uploads'].forEach(function (k) { if (!Array.isArray(state[k])) state[k] = []; });
     state.customTiers = state.customTiers || {};
+    if (!state.research.some(function (r) { return r.topic === 'Pets and Genus Insight'; })) state.research.push({ id: uid('res'), topic: 'Pets and Genus Insight', summary: 'Genus tiers by share of level-45+ bosses: S Cogni 77%, A Varian 11%, B Natura 6%, C Fera 2%; Special has no genus line. Owned effects are shared per genus. Genus Insight has 9 slots (levels 1-9, board max 10); level 4 opens the damage slot. Do not lock lines before level 10. Souls: 5 to unlock, 105 for Insight 3.', source: 'aion2tierlist.com and aion2builds.org', url: 'https://aion2tierlist.com/guides/aion-2-pet-tier-list', published: '2026-10-17', region: 'Global', confidence: 'Medium', freshness: 'Current', kind: 'meta', addedAt: '2026-10-18', reviewedAt: null });
     if (state.selfFocus !== 1) { state.selfFocus = 1; if (state.selected) state.selected.benchmark = ''; }
     state.settings = state.settings || { model: 'claude-sonnet-5-5', apiKey: '', aiEnabled: false };
     var st = state.settings; if (!st.provider) st.provider = 'anthropic'; if (st.openaiKey == null) st.openaiKey = ''; if (!st.openaiModel) st.openaiModel = 'gpt-5';
@@ -913,7 +1320,7 @@
     TIER_ORDER: TIER_ORDER, STAT_TIERS_BOSS: STAT_TIERS_BOSS, MODES: MODES, CORE_STATS: CORE_STATS, DIVINE: DIVINE, DIVINE_PRIORITY: DIVINE_PRIORITY,
     DAEVANION: DAEVANION, SLOTS: SLOTS, SLOT_BY_ID: SLOT_BY_ID, SKILLS: SKILLS, CATEGORY: CATEGORY, RANK_MODES: RANK_MODES,
     meta: meta, fv: fv, val: val, num: num, uid: uid, clone: clone, freeze: freeze, slug: slug, fmt: fmt,
-    seedState: seedState, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
+    seedState: seedState, SOURCES: SOURCES, SOURCE_ORDER: SOURCE_ORDER, SERVER_IDS: SERVER_IDS, detectSource: detectSource, sourceLinks: sourceLinks, parseShugoText: parseShugoText, parseAtoolText: parseAtoolText, parseSourceText: parseSourceText, sourceFields: sourceFields, syncFields: syncFields, mergedProfile: mergedProfile, parseLinesText: parseLinesText, linesText: linesText, parseAionFlexText: parseAionFlexText, aionflexFields: aionflexFields, GENUS: GENUS, GENUS_SOURCES: GENUS_SOURCES, weakSkills: weakSkills, gainSources: gainSources, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
     statIdFor: statIdFor, slotIdFor: slotIdFor, tiersFor: tiersFor, tierOf: tierOf, itemLine: itemLine,
     cpGap: cpGap, divineTotal: divineTotal, pct: pct, pantheonPct: pantheonPct, daevanionAvg: daevanionAvg, arcanaState: arcanaState, enhTotal: enhTotal,
     snapshotSummary: snapshotSummary, snapshotDiff: snapshotDiff, compare: compare, recommendations: recommendations, divineNeeds: divineNeeds,

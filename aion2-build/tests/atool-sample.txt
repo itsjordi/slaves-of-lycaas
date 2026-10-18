@@ -1,0 +1,471 @@
+Atool
+🌐
+GLOBAL
+Home
+Ranking
+Legion
+Build/Statistics
+Compare
+lycaa - Yustiel (EU) | Atool
+🔍 Character Search
+Europe
+Search
+Recent:
+lycaa · Yustiel EU
+lycaa
+☆
+Last updated: 2026. 10. 19. 04:48:23
+Refresh
+Kerubar
+Ultimate Daeva Wings
+Race
+Elyos
+Server
+Yustiel (EU)
+Class
+Assassin
+Legion
+GOONER
+Server #14 (top 63.64%)
+Search Legion >>
+Gear Score
+1,230
+Compare with mine >
+Combat Power
+Highest Combat Power: 78,814
+Top 100%
+Top 40%
+78,814
+Overall Rank
+60.39%
+2,851/4,721
+Class Rank
+64.05%
+335/523
+Server Rank
+47.06%
+32/68
+My gear score bracket (900~1,500) Top Combat Power 4.52% (35/753)
+DPS Stat Hexagon
+Rank within class · Assassin 471 players · Excludes Daevanion
+Attack
+832
+DMG Boost
++1.5%
+Wpn DMG Boost
++10.0%
+Front/Back Boost
++0.0%
+Combat Speed
++9.2%
+Double
++0.0%
+Skills
+Top rankers' skills >
+Active Skills
+Quick Slice
+LV 14
+Quick Slice
+Lv 14 (Other points 14)
+Deals damage to enemies and restores MP.
+Non-target / Movable
+Savage Roar
+LV 14
+Savage Roar
+Lv 14 (Other points 14)
+Deals damage to enemies and engraves 1 [Insignia].
+Non-target / Movable
+Heart Gore
+LV 14
+Heart Gore
+Lv 14 (Other points 14)
+Activates on a Critical Hit. Deals damage to enemies and restores MP. Groggy gauge damage
+Movable
+Shadow Fall
+LV 3
+Shadow Fall
+Lv 3 (Other points 3)
+Deals damage to a Stunned target and knocks it down for a duration.
+Passive Skills
+Rear Smite
+LV 16
+Rear Smite
+Lv 16 (Other points 16)
+Increases your rear Damage Amplification and PvE/PvP Damage Amplification.
+Impact Hit
+LV 16
+Impact Hit
+Lv 16 (Gear 1 + Other points 15)
+Increases impact status effect accuracy and Strike.
+Apply Poison
+LV 6
+Apply Poison
+Lv 6 (Gear 1 + Other points 5)
+Each hit has a chance to reduce the target's healing received and Poison it (damage over time).
+Stigma (Stigma shards used: 44) All servers #2,466(top 62.76%)
+Throw Shadowblade
+LV 15
+Throw Shadowblade
+Lv 15 (Other points 15)
+Deals damage to the target and Slows its movement. Groggy gauge damage
+Movable
+Savage Fang
+LV 6
+Savage Fang
+Lv 6 (Other points 6)
+Deals damage to enemies and engraves an Insignia. Groggy gauge damage
+Non-target
+Overview
+Daevanion
+Growth
+Equipment
+?
+Gear Overview
+Equipment
++12 Spiritforged Dagger
+Soul engraving 100%
+Base Stats
+Attack
+160 ~ 206 (+60)
+Accuracy
+50
+Critical Hit
+200
+Block
+50
+Soul Engraving
+S
+Might
+15
+A
+Critical Hit
+16
+B
+MP
+57
+B
+Block
+23
+Manastones
+Critical Hit
++7
+Evasion Bonus
++5
+HP
++60
+Attack
++1
+Theostone: Aulak's Roar
+Has a 3% chance to inflict Stun for 1s on attack Effect Activation Cooldown: 5s Only one Theostone's effect applies when identical Theostones are engraved.
++10 Spiritforged Guard
+Base Stats
++10 Bakarma Breastplate
+Soul engraving 93.1%
+Base Stats
+Defense
+397 (+154)
+HP
+216 (+126)
+Soul Engraving / Sub-skills
+A
+Attack
+25
+Impact Hit +1
+Apply Poison +1
+Ambush Stance +1
+Manastones
+Defense
++50
+Accuracy Bonus
++7
+Defense
++50
+Defense
++30
++10 Vakron Greaves
+Base Stats
++10 Vakron Helm
+Base Stats
++10 Vakron Pauldrons
+Base Stats
++10 Vakron Gloves
+Base Stats
++10 Vakron Boots
+Base Stats
++10 Vakron Cloak
+Base Stats
++3 Noble Belt
+Base Stats
+Accessories
++7 Pilgrim Necklace
+Soul engraving 100%
+Base Stats
+Attack
+65 (+15)
+Defense
+157 (+42)
+Soul Engraving
+B
+Defense
+47
+B
+MP
+30
+B
+Natural MP Regen
+10
+Manastones
+Attack
++3
+Accuracy Bonus
++5
+Evasion Bonus
++5
++5 Pilgrim Earrings
+Soul engraving 100%
+Base Stats
+Attack
+55 (+10)
+Defense
+131 (+30)
+Soul Engraving
+A
+Accuracy
+13
+B
+MP
+25
+B
+Natural MP Regen
+8
+Manastones
+Attack
++3
+Evasion Bonus
++7
+Block
++10
++5 Unyielding Earrings
+Soul engraving 37.6%
+Base Stats
+Attack
+53 (+10)
+Defense
+128 (+29)
+Soul Engraving / Sub-skills
+B
+Critical Hit Resist
+30
+B
+Flight Power
+163
+Ambush Stance +1
+Manastones
+Critical Hit
++7
+Evasion Bonus
++7
+Evasion Bonus
++5
++5 Pilgrim Ring
+Soul engraving 100%
+Base Stats
+Attack
+44 (+10)
+Defense
+105 (+30)
+Soul Engraving
+B
+Defense
+31
+B
+MP
+20
+B
+Natural MP Regen
+7
+Manastones
+Defense
++10
+Critical Hit
++7
+Evasion Bonus
++7
++5 Pilgrim Ring
+Soul engraving 100%
+Base Stats
+Attack
+44 (+10)
+Defense
+105 (+30)
+Soul Engraving
+B
+Defense
+31
+B
+MP
+20
+B
+Natural MP Regen
+7
+Manastones
+Critical Hit Resist
++5
+Evasion Bonus
++5
+Accuracy Bonus
++7
++10 Ascension Bracelet
+Soul engraving 100%
+Base Stats
+Attack
+65 (+28)
+Defense
+156 (+70)
+Soul Engraving
+A
+Critical Hit
+9
+B
+Evasion
+12
+B
+MP
+26
+B
+Natural MP Regen
+9
+Manastones
+Attack
++1
+Critical Hit Resist
++7
+Attack
++3
+Block
++7
++5 Pilgrim Bracelet
+Soul engraving 100%
+Base Stats
+Attack
+55 (+10)
+Defense
+131 (+30)
+Soul Engraving
+A
+Critical Hit
+8
+B
+MP
+22
+B
+Natural MP Regen
+8
+Manastones
+HP
++60
+Critical Hit
++5
+Attack
++1
++4 Clash Rune
+Base Stats
++4 Clash Rune
+Soul engraving 100%
+Base Stats
+Combat Speed
+1%
+Penetration
+100
+Multi-Hit Chance
+1%
+PvE Damage Amplification
+0.5% (+1%)
+PvE Damage Tolerance
+0.5% (+2%)
++3 Revelation Amulet
+Soul engraving 100%
+Base Stats
+Penetration
+700 (+90)
+Power Shard Damage Bonus
+40 (+9)
+Weapon Damage Amplification
+10%
+Perfect
+5%
+Daevanion
+Nezekan
+65/88
+Zikel
+64/88
+Vaizel
+54/88
+Triniel
+51/116
+Azphel
+8/152
+Titles
+183/297 All servers #2,657(top 66.09%)
+Through Hell and Back
+Etc
+63/99
+Equip effect:
+Cooldown Reduction +3%
+HP +900
+Stamina +225
+Failed Entrepreneur
+Attack
+63/103
+Equip effect:
+PvE Attack +25
+Attack Bonus +20
+Saint of Verteron
+Defense
+57/95
+Equip effect:
+Defense Bonus +300
+Damage Tolerance +3%
+Block +100
+Divine Stats (Total: 238) All servers #2,598(top 64.29%)
+Justice [Nezekan]
+41
+Freedom [Vaizel]
+36
+Illusion [Kaisinel]
+7
+Life [Yustiel]
+13
+Time [Siel]
+41
+Destruction [Zikel]
+6
+Death [Triniel]
+46
+Wisdom [Lumiel]
+7
+Destiny [Marchutan]
+13
+Space [Israphel]
+28
+Common Stats
+Might
+30
+Dexterity
+53
+Intelligence
+0
+Constitution
+1
+Precision
+1
+Willpower
+33
+Contact
+|
+Terms
+|
+Privacy Policy
+This is an unofficial fan site, not affiliated with NCSOFT.
+© 2026 AION2 TOOL All Rights Reserved.
+aion2tool
