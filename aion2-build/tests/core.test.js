@@ -414,3 +414,29 @@ test('profile links are built from name and server', () => {
   const L = BA.sourceLinks({ name: 'lycaa', server: 'Yustiel (EU)' });
   assert.equal(L.shugo, 'https://shugo.gg/character/global/eu-yustiel/lycaa'); assert.equal(L.atool, 'https://aion2tool.com/global/char/serverid=1305/lycaa');
 });
+
+test('next steps are concrete and ordered', () => {
+  const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
+  const d = BA.blankData('Assassin'); BA.applyFields(d, BA.syncFields(ps, d), BA.meta('imported', 'sync', '2026-10-18'));
+  const st = BA.nextSteps(d);
+  assert.equal(st[0].title, 'Enhance Noble Belt +3 to +10'); assert.ok(st[0].il && st[0].cp);
+  assert.ok(st.some(s => /soul engraving on Unyielding Earrings \(37.6%\)/.test(s.title) && !s.il));
+  assert.ok(st.some(s => /Shadow Fall 3/.test(s.title)));
+  assert.ok(st.some(s => /Daevanion Azphel: 8\/152 nodes/.test(s.title)));
+  assert.equal(d.skills.needsRefresh, false, 'skills count as current after a sync');
+});
+test('a sync clears outdated stigmas that are not equipped', () => {
+  const s = BA.seedState(), d = BA.clone(BA.cur(BA.getChar(s, 'lycaa')));
+  BA.applyFields(d, BA.syncFields([BA.parseSourceText(SH, '')], d), BA.meta('imported', 'Shugo.GG', '2026-10-18'));
+  assert.equal(d.skills.needsRefresh, false);
+  assert.ok(d.skills.list.filter(x => x.type === 'stigma' && x.equipped === false).length > 0);
+});
+test('compare another player from their page, pairs aligned', () => {
+  const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
+  const me = BA.blankData('Assassin'); BA.applyFields(me, BA.syncFields(ps, me), BA.meta('imported', 'sync', '2026-10-18'));
+  const p = BA.parseShugoText(SH); p.cp = 90000; p.equipment[9].enh = 10; // belt +10
+  const c = BA.compareProfiles(me, BA.dataFromParse(p));
+  assert.ok(c.ahead.some(a => a.label === 'Belt enhancement' && a.them === '+10'));
+  assert.ok(!c.ahead.some(a => /Earring/.test(a.label)), 'same earrings in swapped slots are not a difference');
+  assert.equal(c.rows.find(r => r.label === 'Combat Power').diff, 90000 - 78814);
+});

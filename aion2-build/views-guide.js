@@ -18,6 +18,10 @@
 
   /* ------------------------------------------------------------------ the checklist */
   function steps() {
+    var all = stepsAll();
+    return APP.advanced && !APP.advanced() ? all.filter(function (x) { return ['aionflex', 'gain', 'compare', 'genus', 'backup'].indexOf(x.id) >= 0; }) : all;
+  }
+  function stepsAll() {
     var d = APP.pd(), s = APP.state, gg = g(), main = d.equipment.main_hand || { base: [], rolls: [] };
     return [
       { id: 'look', title: 'Read your dashboard', time: '1 min', to: '#/dashboard', done: !!gg.visited.dashboard,
@@ -26,8 +30,8 @@
         text: 'On Profile, drag the Send to Build Architect bookmark to your bookmarks bar, open your profile on Atool, Shugo.GG and AionFlex and click it on each (or copy and paste the pages). Review and save: gear with soul engraving and manastones, skills, stats, Daevanion, titles and Gear Score are filled in. No AI or API key needed.' },
       { id: 'stats', title: 'Type in your Combat Stats', time: '3 min', to: '#/import/combatStats', done: Object.keys(d.combatStats || {}).length > 0,
         text: 'AionFlex does not show the Combat Stats window (Attack, Critical Hit, Combat Speed...). Open it in game and type the numbers on Import > Type it in. Without stats the advice can only compare item names and + levels.' },
-      { id: 'gain', title: 'See where you can still gain CP', time: '1 min', to: '#/dashboard', done: !!gg.visited.dashboard && Object.keys(d.equipment || {}).length > 0,
-        text: 'The dashboard card "Where you can still gain Combat Power and Gear Score" lists gear, skills, titles, Daevanion, Pantheon, Arcana, pets and stats, and how far each is behind the rest of your character.' },
+      { id: 'gain', title: 'Do the first step on Home', time: '1 min', to: '#/dashboard', done: !!gg.visited.dashboard && Object.keys(d.equipment || {}).length > 0,
+        text: 'Home shows "Do this next": concrete steps for more Combat Power and Item Level, worked out from your own character. Filter on Item Level if that is what you need.' },
       { id: 'genus', title: 'Record your Genus Insight', time: '1 min', to: '#/tiers/pets', done: !!(d.genus && d.genus.cogni), optional: true,
         text: 'Pets give permanent stats per genus. See the Pets & Genus Insight tier list and record your levels.' },
       { id: 'weapon', title: 'Record your weapon tooltip', time: '2 min', to: '#/equipment', done: (main.base.length + main.rolls.length) > 0,
@@ -35,7 +39,7 @@
       { id: 'tiers', title: 'Learn the stat priorities', time: '2 min', to: '#/tiers', done: !!gg.visited.tiers,
         text: 'The Tier lists page shows which stats matter most for boss PvE (S+ on top), the Divine Stat collection order and the Core Stat guide. All provisional, all editable.' },
       { id: 'compare', title: 'Compare with someone (when you want)', time: '2 min', to: '#/compare', done: !!gg.visited.compare, optional: true,
-        text: 'Add another player from AionFlex and see where you are ahead or behind. Entirely optional.' },
+        text: 'On Compare, type their name or paste their profile link, open their page and click your bookmark. You see where they are ahead; nothing is saved.' },
       { id: 'plan', title: 'Put an upgrade in your plan', time: '1 min', to: '#/planner', done: s.tasks.length > 0,
         text: 'Click "Add to plan" on the Best next upgrade. Mark it completed when done and write what changed.' },
       { id: 'dps', title: 'Log a DPS run', time: '2 min', to: '#/dps', done: (s.dps || []).length > 0,
@@ -103,7 +107,7 @@
 
   /* ------------------------------------------------------------------ per-page help */
   var HELP = {
-    dashboard: 'Top row: your numbers and how much of your data is recorded. "Best next upgrade" is the highest ranked improvement you can act on now; "Where you can still gain" shows which areas are behind; "Collect this data first" lists data that unlocks better advice. Hover any status pill for the source and date.',
+    dashboard: 'Home: your Combat Power and Item Level, and "Do this next": concrete steps worked out from your own character, most useful first. Filter on Item Level or Combat Power, mark a step Done or send it to the Daily Board. Sync again after you play to refresh the list. More tools (bottom of the menu) adds the detailed analysis.',
     character: 'Tabs for every part of your character. Each "Edit" saves a new snapshot with the date you saw the values. Core stats has a what-if tool; Daevanion lets you add nodes for a route suggestion.',
     equipment: 'Click a slot to see or edit the item, including stat lines (Stat: value per line). Below the grid, compare your item with a candidate; it shows which stats go up or down and leans by tier, without pretending to calculate DPS.',
     compare: 'Optional. Pick any two characters and snapshots. The lists split differences into advantages, disadvantages, missing systems, DPS-relevant and CP-relevant parts. Unknowns tell you what to record before trusting a conclusion.',
@@ -143,12 +147,23 @@
     { to: '#/settings', sel: '#aiForm', title: 'Optional AI and backups', text: 'Use Claude or ChatGPT with your own key for automatic screenshot reading and the assistant. Export backups here; your data lives only in this browser.' },
     { to: '#/guide', sel: '.card.hl', title: 'That is it', text: 'Follow the setup checklist on this page. It ticks itself off as you go.' }
   ];
+  var SIMPLE_TOUR = [
+    { to: '#/dashboard', sel: '.kpi', title: 'Your numbers', text: 'Combat Power and Item Level (Gear Score), straight from your synced character.' },
+    { to: '#/dashboard', sel: '.steps, .card.hl', title: 'Do this next', text: 'Concrete steps for more Combat Power and Item Level, most useful first. Filter on Item Level, mark steps Done or send them to the Daily Board.' },
+    { to: '#/profile', sel: '#syncCard', title: 'Keep it up to date', text: 'Drag the Send to Build Architect button to your bookmarks bar once. Click it on your Atool, Shugo.GG or AionFlex page after you play, then Save.' },
+    { to: '#/compare', sel: '#cmpName', title: 'Compare with anyone', text: 'Type a name or paste their profile link, open their page and click the bookmark. You see where they are ahead. Nothing is saved.' },
+    { to: '#/tiers', sel: '.tabs', title: 'Tier lists', text: 'Which stats matter most, and the pets and Genus Insight tier list.' },
+    { to: '#/dashboard', sel: '.mode-toggle', title: 'More tools', text: 'Want every detail (planner, DPS log, snapshots, stat analysis, AI)? Turn on More tools at the bottom of the menu.' },
+    { to: '#/dashboard', sel: '#helpBtn', title: 'Help, any time', text: 'Start this tour again, open the guide, or ask Ari, the sprite in the bottom corner.' }
+  ];
+  function tourList() { return APP.advanced && !APP.advanced() ? SIMPLE_TOUR : TOUR; }
   var tourI = -1, pop = null, hl = null;
   function clearHl() { if (hl) { hl.classList.remove('tour-hl'); hl = null; } }
   function endTour() { clearHl(); if (pop) pop.remove(); pop = null; tourI = -1; g().tourDone = true; APP.save(); document.removeEventListener('keydown', tourKey); }
   function tourKey(ev) { if (ev.key === 'Escape') endTour(); else if (ev.key === 'ArrowRight') showStep(tourI + 1); else if (ev.key === 'ArrowLeft') showStep(tourI - 1); }
   function showStep(i) {
     if (i < 0) i = 0;
+    var TOUR = tourList();
     if (i >= TOUR.length) return endTour();
     tourI = i; var s = TOUR[i];
     if (s.pre) s.pre();
@@ -158,7 +173,7 @@
       clearHl();
       var el = document.querySelector(s.sel);
       if (!pop) { pop = document.createElement('div'); pop.className = 'tour-pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-live', 'polite'); document.body.appendChild(pop); }
-      pop.innerHTML = '<div class="small muted">Step ' + (i + 1) + ' of ' + TOUR.length + '</div><h2 style="margin:4px 0 6px">' + e(s.title) + '</h2><div class="small">' + e(s.text) + '</div><div class="row" style="margin-top:12px"><button class="sm ghost" data-act="tour-end">Skip tour</button><span style="flex:1"></span>' + (i ? '<button class="sm" data-act="tour-prev">Back</button>' : '') + '<button class="sm pri" data-act="tour-next">' + (i === TOUR.length - 1 ? 'Finish' : 'Next') + '</button></div>';
+      pop.innerHTML = '<div class="small muted">Step ' + (i + 1) + ' of ' + tourList().length + '</div><h2 style="margin:4px 0 6px">' + e(s.title) + '</h2><div class="small">' + e(s.text) + '</div><div class="row" style="margin-top:12px"><button class="sm ghost" data-act="tour-end">Skip tour</button><span style="flex:1"></span>' + (i ? '<button class="sm" data-act="tour-prev">Back</button>' : '') + '<button class="sm pri" data-act="tour-next">' + (i === TOUR.length - 1 ? 'Finish' : 'Next') + '</button></div>';
       if (el) {
         hl = el; el.classList.add('tour-hl'); el.scrollIntoView({ block: 'center', behavior: 'smooth' });
         setTimeout(place, 320);

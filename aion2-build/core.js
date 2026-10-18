@@ -828,6 +828,70 @@
     return { profile: pr, coreMax: coreMax };
   }
 
+  /* ------------------------------------------------------------------ next steps: concrete things to do for more Combat Power and Item Level */
+  function median(a) { var s = a.slice().sort(function (x, y) { return x - y; }); return s.length ? s[Math.floor((s.length - 1) / 2)] : null; }
+  function nextSteps(d) {
+    var out = [];
+    function S(o) { out.push(o); }
+    // 1. enhancement, per group: bring stragglers up to what the rest of the group has
+    var groups = [['gear', function (s) { return s.group === 'weapon' || s.group === 'armor'; }, 'weapons and armor'], ['acc', function (s) { return s.group === 'accessory'; }, 'accessories'], ['rune', function (s) { return s.group === 'rune'; }, 'runes']];
+    groups.forEach(function (g) {
+      var items = SLOTS.filter(g[1]).map(function (s) { var it = d.equipment && d.equipment[s.id]; return it && typeof it.enh === 'number' ? { s: s, it: it } : null; }).filter(Boolean);
+      if (!items.length) return;
+      var med = median(items.map(function (x) { return x.it.enh; })), behind = items.filter(function (x) { return x.it.enh < med; });
+      behind.sort(function (a, b) { return a.it.enh - b.it.enh; }).forEach(function (x) {
+        S({ id: 'enh_' + x.s.id, area: 'Gear', title: 'Enhance ' + x.it.name + ' +' + x.it.enh + ' to +' + med, detail: 'Your other ' + g[2] + ' are at +' + med + '. Cheapest Item Level and Combat Power you can get.', il: true, cp: true, prio: 100 + (med - x.it.enh) * 4 + (x.s.group === 'weapon' ? 10 : 0), to: '#/equipment' });
+      });
+      if (!behind.length) {
+        var low = items.slice().sort(function (a, b) { return a.it.enh - b.it.enh || (a.s.group === 'weapon' ? -1 : 1); })[0];
+        S({ id: 'enh_' + low.s.id + '_' + (low.it.enh + 1), area: 'Gear', title: 'Enhance ' + low.it.name + ' +' + low.it.enh + ' to +' + (low.it.enh + 1), detail: 'All your ' + g[2] + ' are level; this is the next one to push.', il: true, cp: true, prio: 60 + (low.s.group === 'weapon' ? 10 : 0), to: '#/equipment' });
+      }
+    });
+    // 2. item grade, when known
+    SLOTS.forEach(function (s) { var it = d.equipment && d.equipment[s.id]; if (it && /^(common|rare|epic)$/i.test(it.rarity || '')) S({ id: 'grade_' + s.id, area: 'Gear', title: 'Replace ' + it.name + ' (' + it.rarity + ') with a higher grade item', detail: 'A higher grade item has a higher Item Level at the same enhancement.', il: true, cp: true, prio: 90, to: '#/equipment' }); });
+    // 3. soul engraving not complete
+    SLOTS.forEach(function (s) { var it = d.equipment && d.equipment[s.id]; if (it && typeof it.engravingPct === 'number' && it.engravingPct < 100) S({ id: 'eng_' + s.id, area: 'Gear', title: 'Finish soul engraving on ' + it.name + ' (' + it.engravingPct + '%)', detail: 'Engraving lines add stats straight to Combat Power.', il: false, cp: true, prio: 80 + Math.round((100 - it.engravingPct) / 5), to: '#/profile' }); });
+    // 4. skills that lag behind
+    weakSkills(d).slice(0, 4).forEach(function (sk) { S({ id: 'skill_' + sk.id, area: 'Skills', title: 'Level up ' + sk.name + ' ' + sk.level + ' to about ' + sk.typical, detail: 'Your other ' + sk.type + ' skills are around ' + sk.typical + '. Skill levels count for Combat Power.', il: false, cp: true, prio: 70 + (sk.typical - sk.level), to: '#/character/skills' }); });
+    var st = (d.skills && d.skills.list || []).filter(function (s) { return s.type === 'stigma' && s.equipped && typeof s.level === 'number'; });
+    if (st.length) { var top = Math.max.apply(null, st.map(function (s) { return s.level; })); st.filter(function (s) { return s.level <= Math.max(1, top - 8); }).sort(function (a, b) { return a.level - b.level; }).slice(0, 3).forEach(function (s) { S({ id: 'stig_' + s.id, area: 'Skills', title: 'Level up stigma ' + s.name + ' (' + s.level + ')', detail: 'Equipped but far behind your best stigma (' + top + '). Uses stigma shards.', il: false, cp: true, prio: 55 + (top - s.level), to: '#/character/skills' }); }); }
+    // 5. collections and boards
+    var t = d.titles || {}; if (t.unlocked != null && t.total && t.unlocked < t.total) S({ id: 'titles', area: 'Collections', title: 'Unlock more titles (' + t.unlocked + '/' + t.total + ')', detail: 'Every title adds collection stats, even when not equipped.', il: false, cp: true, prio: 40 + Math.round((1 - t.unlocked / t.total) * 30), to: '#/character/more' });
+    var bd = d.daevanionBoards || {};
+    DAEVANION.map(function (b) { var x = bd[b.id], v = num(d.daevanion && d.daevanion[b.id]); return { b: b, v: v, x: x }; }).filter(function (o) { return o.v != null && o.v < 100; }).sort(function (a, b) { return a.v - b.v; }).slice(0, 2).forEach(function (o) {
+      S({ id: 'dae_' + o.b.id, area: 'Daevanion', title: 'Daevanion ' + o.b.name + ': ' + (o.x ? o.x.done + '/' + o.x.total + ' nodes' : o.v + '%'), detail: 'Your least developed board. Nodes give stats and skill levels.', il: false, cp: true, prio: 45 + Math.round((100 - o.v) / 4), to: '#/character/daevanion' });
+    });
+    var gn = d.genus || {}, cg = gn.cogni && typeof gn.cogni.level === 'number' ? gn.cogni.level : null;
+    if (cg == null || cg < 4) S({ id: 'genus', area: 'Collections', title: cg == null ? 'Collect pets: start with Cogni' : 'Raise Cogni Genus Insight ' + cg + ' to 4', detail: 'Each pet you own adds stats; Cogni is the best genus for endgame bosses. See the pet tier list.', il: false, cp: true, prio: 35, to: '#/tiers/pets' });
+    var dt = divineTotal(d); if (dt != null) S({ id: 'pantheon', area: 'Collections', title: 'Collect Pantheon pieces (Divine Stats total ' + dt + ')', detail: 'Pantheon pieces raise your Divine Stats. Death and Time first for damage.', il: false, cp: true, prio: 30, to: '#/tiers/divine' });
+    if (arcanaState(d) === 'none') S({ id: 'arcana', area: 'Gear', title: 'Equip Arcana', detail: 'You have no Arcana equipped; any set adds stats.', il: false, cp: true, prio: 85, to: '#/character/arcana' });
+    return out.sort(function (a, b) { return b.prio - a.prio; });
+  }
+
+  /* ------------------------------------------------------------------ compare with another player's page (temporary, nothing saved) */
+  function dataFromParse(p) {
+    var d = blankData(p.profile && p.profile.cls || 'Assassin');
+    applyFields(d, syncFields([p], d), meta('imported', (SOURCES[p.source] || {}).name || 'Page', p.observedAt || null));
+    if (p.coreMax) d.coreMax = p.coreMax;
+    return d;
+  }
+  function compareProfiles(a, b) {
+    var rows = [], ahead = [];
+    function R(group, label, x, y, higher) { if (x == null && y == null) return; var diff = x != null && y != null ? y - x : null; rows.push({ group: group, label: label, me: x, them: y, diff: diff }); if (diff != null && diff > 0 && higher) ahead.push({ label: label, me: x, them: y, diff: diff, w: higher }); }
+    R('Overview', 'Combat Power', num(a.cp), num(b.cp), 0); R('Overview', 'Item Level (Gear Score)', num(a.itemLevel), num(b.itemLevel), 0);
+    var be = {}; SLOTS.forEach(function (s) { be[s.id] = b.equipment[s.id]; });
+    Object.keys(FAMILY).forEach(function (k) { var f = FAMILY[k], a1 = a.equipment[f[0]], b1 = be[f[0]], b2 = be[f[1]]; if (a1 && b1 && b2 && a1.name !== b1.name && a1.name === b2.name) { be[f[0]] = b2; be[f[1]] = b1; } });
+    SLOTS.forEach(function (s) { var x = a.equipment[s.id], y = be[s.id]; if (!x && !y) return; rows.push({ group: 'Gear', label: s.name, me: x ? x.name + ' +' + x.enh : null, them: y ? y.name + ' +' + y.enh : null, diff: x && y && typeof x.enh === 'number' && typeof y.enh === 'number' ? y.enh - x.enh : null, text: true }); if (x && y && y.enh > x.enh) ahead.push({ label: s.name + ' enhancement', me: '+' + x.enh, them: '+' + y.enh, diff: y.enh - x.enh, w: 3 }); if (x && y && x.name !== y.name) ahead.push({ label: s.name + ': they use ' + y.name, me: x.name, them: y.name, diff: 1, w: 1 }); });
+    var bs = {}; (b.skills.list || []).forEach(function (s) { bs[s.id] = s; });
+    (a.skills.list || []).forEach(function (s) { var o = bs[s.id]; if (!o || (typeof s.level !== 'number' && typeof o.level !== 'number')) return; R('Skills', s.name, typeof s.level === 'number' ? s.level : null, typeof o.level === 'number' ? o.level : null, s.type === 'stigma' ? 1 : 2); });
+    DIVINE.forEach(function (x) { R('Divine Stats', x.name, num(a.divine[x.id]), num(b.divine[x.id]), 1); });
+    CORE_STATS.forEach(function (x) { R('Core Stats', x.name, num(a.coreStats[x.id]), num(b.coreStats[x.id]), 1); });
+    DAEVANION.forEach(function (x) { R('Daevanion %', x.name, num(a.daevanion[x.id]), num(b.daevanion[x.id]), 2); });
+    R('Collections', 'Titles unlocked', a.titles.unlocked, b.titles.unlocked, 1);
+    ahead.sort(function (p, q) { return q.diff * q.w - p.diff * p.w; });
+    return { rows: rows, ahead: ahead };
+  }
+
   /* ------------------------------------------------------------------ comparison engine */
   function compare(a, b, opts) {
     opts = opts || {};
@@ -1196,8 +1260,11 @@
       if (p.length === 1 && (p[0] === 'cp' || p[0] === 'itemLevel' || p[0] === 'level' || p[0] === 'gearScore')) { d[p[0]] = { v: f.value, m: m }; return; }
     });
     if (fields.some(function (f) { return !f.skip && f.value != null && f.path.indexOf('skills.') === 0; })) {
-      var stigKnown = d.skills.list.some(function (s) { return s.type === 'stigma' && typeof s.level === 'number'; }); // AionFlex lists only the equipped stigmas
-      d.skills.needsRefresh = d.skills.list.some(function (s) { return (s.level == null && !(s.type === 'stigma' && stigKnown)) || (s.m && s.m.status === 'outdated'); });
+      var sent = {}; fields.forEach(function (f) { if (!f.skip && f.value != null && /^skills\./.test(f.path)) sent[f.path.split('.').pop()] = 1; });
+      var stigKnown = d.skills.list.some(function (s) { return s.type === 'stigma' && sent[s.id]; });
+      // profile pages only list equipped stigmas: the others are simply not equipped, not "unknown"
+      if (stigKnown) d.skills.list.forEach(function (s) { if (s.type === 'stigma' && !sent[s.id]) { s.equipped = false; if (s.m && s.m.status === 'outdated') s.m = meta('imported', provenance.source, provenance.observedAt, { note: 'Not equipped on the synced page.' }); } });
+      d.skills.needsRefresh = d.skills.list.some(function (s) { return s.type !== 'stigma' && (s.level == null || (s.m && s.m.status === 'outdated')); });
     }
     return d;
   }
@@ -1320,7 +1387,7 @@
     TIER_ORDER: TIER_ORDER, STAT_TIERS_BOSS: STAT_TIERS_BOSS, MODES: MODES, CORE_STATS: CORE_STATS, DIVINE: DIVINE, DIVINE_PRIORITY: DIVINE_PRIORITY,
     DAEVANION: DAEVANION, SLOTS: SLOTS, SLOT_BY_ID: SLOT_BY_ID, SKILLS: SKILLS, CATEGORY: CATEGORY, RANK_MODES: RANK_MODES,
     meta: meta, fv: fv, val: val, num: num, uid: uid, clone: clone, freeze: freeze, slug: slug, fmt: fmt,
-    seedState: seedState, SOURCES: SOURCES, SOURCE_ORDER: SOURCE_ORDER, SERVER_IDS: SERVER_IDS, detectSource: detectSource, sourceLinks: sourceLinks, parseShugoText: parseShugoText, parseAtoolText: parseAtoolText, parseSourceText: parseSourceText, sourceFields: sourceFields, syncFields: syncFields, mergedProfile: mergedProfile, parseLinesText: parseLinesText, linesText: linesText, parseAionFlexText: parseAionFlexText, aionflexFields: aionflexFields, GENUS: GENUS, GENUS_SOURCES: GENUS_SOURCES, weakSkills: weakSkills, gainSources: gainSources, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
+    seedState: seedState, nextSteps: nextSteps, compareProfiles: compareProfiles, dataFromParse: dataFromParse, SOURCES: SOURCES, SOURCE_ORDER: SOURCE_ORDER, SERVER_IDS: SERVER_IDS, detectSource: detectSource, sourceLinks: sourceLinks, parseShugoText: parseShugoText, parseAtoolText: parseAtoolText, parseSourceText: parseSourceText, sourceFields: sourceFields, syncFields: syncFields, mergedProfile: mergedProfile, parseLinesText: parseLinesText, linesText: linesText, parseAionFlexText: parseAionFlexText, aionflexFields: aionflexFields, GENUS: GENUS, GENUS_SOURCES: GENUS_SOURCES, weakSkills: weakSkills, gainSources: gainSources, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
     statIdFor: statIdFor, slotIdFor: slotIdFor, tiersFor: tiersFor, tierOf: tierOf, itemLine: itemLine,
     cpGap: cpGap, divineTotal: divineTotal, pct: pct, pantheonPct: pantheonPct, daevanionAvg: daevanionAvg, arcanaState: arcanaState, enhTotal: enhTotal,
     snapshotSummary: snapshotSummary, snapshotDiff: snapshotDiff, compare: compare, recommendations: recommendations, divineNeeds: divineNeeds,

@@ -14,7 +14,7 @@ function html() {
     .replace(/<script src="(aion2-build\/[^"]+)"><\/script>/g, (m, p) => '<script>' + fs.readFileSync(path.join(ROOT, p), 'utf8') + '</script>');
 }
 const BA = require('../core.js');
-function seeded() { const st = BA.seedState(); st.guide = { welcomed: true, visited: {} }; return { aion2_build_v1: JSON.stringify(st) }; }
+function seeded() { const st = BA.seedState(); st.guide = { welcomed: true, visited: {} }; st.settings.advanced = true; return { aion2_build_v1: JSON.stringify(st) }; }
 async function boot(storage) {
   const errors = [];
   const dom = new JSDOM(html(), {
@@ -52,7 +52,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
 
   await t.test('compare shows equipment by slot and 68 vs 303', () => {
     w.APP.state.cmp = { a: 'lycaa', b: 'novin' };
-    go('#/compare');
+    go('#/compare-saved');
     const v = view();
     assert.match(v, /Spiritforged Dagger/); assert.match(v, /Aulamus Dagger/);
     assert.match(v, /68 vs 303/);
@@ -259,7 +259,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     const af = fs.readFileSync(path.join(__dirname, 'aionflex-sample.txt'), 'utf8');
     C.d.getElementById('setupAf').value = af;
     C.click('[data-act="setup-af"]');
-    assert.match(C.view(), /Check what was read from AionFlex/);
+    assert.match(C.view(), /From AionFlex: \d+ change/);
     C.d.querySelector('#revForm input[name^=val_]').value = 'lycaa';
     C.click('[data-act="rev-ok"]');
     const ch = C.w.APP.player(), cd = C.w.BA.cur(ch);
@@ -267,7 +267,8 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     assert.equal(C.w.BA.num(cd.cp), 78814);
     assert.equal(cd.equipment.main_hand.enh, 12);
     C.go('#/dashboard');
-    assert.match(C.view(), /Where you can still gain Combat Power and Gear Score/);
+    assert.match(C.view(), /Do this next/); assert.match(C.view(), /Enhance Noble Belt \+3 to \+10/);
+    assert.ok(!/Planner/.test(C.d.getElementById('side').textContent), 'short menu by default');
     C.go('#/import');
     C.d.getElementById('afTxt').value = af;
     C.click('[data-act="af-run"]');
@@ -283,7 +284,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     const C = await boot(seeded());
     C.w.location.hash = '#/import/aionflex?u=' + encodeURIComponent('https://aionflex.gg/character/global/1305/lycaa') + '&d=' + encodeURIComponent(af);
     await C.wait(80);
-    assert.match(C.view(), /Check what was read from AionFlex/);
+    assert.match(C.view(), /From AionFlex: \d+ change/);
     assert.equal(C.d.getElementById('revChar').value, 'lycaa');
     C.dom.window.close();
   });
@@ -297,7 +298,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     C.d.getElementById('syncTxt').value = T('atool'); C.click('[data-act="sync-paste"]');
     C.d.getElementById('syncTxt').value = T('aionflex'); C.click('[data-act="sync-paste"]');
     C.click('[data-act="sync-review"]');
-    assert.match(C.view(), /Check what was read from Atool \+ Shugo.GG \+ AionFlex/);
+    assert.match(C.view(), /From Atool \+ Shugo.GG \+ AionFlex: \d+ change/);
     C.click('[data-act="rev-ok"]');
     const ch = C.w.APP.player();
     assert.equal(ch.name, 'lycaa'); assert.deepEqual(Object.keys(ch.sync).sort(), ['aionflex', 'atool', 'shugo']);
@@ -305,6 +306,34 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     C.go('#/profile');
     assert.match(C.view(), /Gear Score/); assert.match(C.view(), /Might 15/); assert.match(C.view(), /Rank \(Atool\)/);
     assert.deepEqual(C.errors, []);
+    C.dom.window.close();
+  });
+
+  await t.test('compare by link: another player\'s page is shown, not saved', async () => {
+    const C = await boot(seeded());
+    const before = C.w.APP.state.characters.length;
+    const sh = fs.readFileSync(path.join(__dirname, 'shugo-sample.txt'), 'utf8').replace(/^lycaa$/m, 'Otherguy');
+    C.w.location.hash = '#/profile/in?u=' + encodeURIComponent('https://shugo.gg/character/global/eu-yustiel/Otherguy') + '&d=' + encodeURIComponent(sh);
+    await C.wait(80);
+    assert.equal(C.w.location.hash, '#/compare');
+    assert.match(C.view(), /lycaa vs Otherguy/); assert.match(C.view(), /Where they are ahead/);
+    assert.equal(C.w.APP.state.characters.length, before, 'nothing saved');
+    assert.ok(!JSON.stringify(C.w.APP.state).includes('Otherguy'), 'not in saved state');
+    C.click('[data-act="cmp-clear"]');
+    assert.doesNotMatch(C.view(), /Otherguy/);
+    C.dom.window.close();
+  });
+
+  await t.test('short menu and short tour by default', async () => {
+    const st = BA.seedState(); st.guide = { welcomed: true, visited: {} };
+    const C = await boot({ aion2_build_v1: JSON.stringify(st) });
+    C.go('#/dashboard');
+    const side = C.d.getElementById('side').textContent;
+    assert.match(side, /Home/); assert.match(side, /Profile/); assert.doesNotMatch(side, /Planner|Research|DPS log/);
+    C.click('[data-act="mode-toggle"]');
+    assert.match(C.d.getElementById('side').textContent, /Planner/);
+    C.click('#side [data-act="mode-toggle"]');
+    assert.doesNotMatch(C.d.getElementById('side').textContent, /Planner/);
     C.dom.window.close();
   });
 

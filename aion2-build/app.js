@@ -178,6 +178,7 @@
   };
 
   /* ------------------------------------------------------------------ routing */
+  APP.SIMPLE = ['dashboard', 'profile', 'compare', 'tiers', 'guide'];
   APP.view = function (id, def) { APP.views[id] = def; if (!def.hidden) APP.order.push(id); };
   function route() { var h = (location.hash || '#/dashboard').replace(/^#\/?/, '').split('/'); return { name: h[0] || 'dashboard', arg: h.slice(1).join('/') }; }
   APP.render = function () {
@@ -192,12 +193,18 @@
   };
   function renderSide(curName) {
     var groups = {};
-    APP.order.forEach(function (id) { var v = APP.views[id]; (groups[v.group] = groups[v.group] || []).push(id); });
-    var html = '';
-    Object.keys(groups).forEach(function (g) {
-      html += '<div class="sec">' + e(g) + '</div>';
-      groups[g].forEach(function (id) { var v = APP.views[id]; html += '<a href="#/' + id + '" class="' + (id === curName ? 'cur' : '') + '">' + APP.icon(v.icon) + e(v.title) + '</a>'; });
-    });
+    var adv = !!(APP.state.settings && APP.state.settings.advanced), html = '';
+    if (!adv) {
+      // the short menu: only what you need to get stronger
+      html += APP.SIMPLE.filter(function (id) { return APP.views[id]; }).map(function (id) { var v = APP.views[id]; return '<a href="#/' + id + '" class="' + (id === curName ? 'cur' : '') + '">' + APP.icon(v.icon) + e(id === 'dashboard' ? 'Home' : v.title) + '</a>'; }).join('');
+    } else {
+      APP.order.forEach(function (id) { var v = APP.views[id]; (groups[v.group] = groups[v.group] || []).push(id); });
+      Object.keys(groups).forEach(function (g) {
+        html += '<div class="sec">' + e(g) + '</div>';
+        groups[g].forEach(function (id) { var v = APP.views[id]; html += '<a href="#/' + id + '" class="' + (id === curName ? 'cur' : '') + '">' + APP.icon(v.icon) + e(v.title) + '</a>'; });
+      });
+    }
+    html += '<a href="' + e(location.hash || '#/dashboard') + '" data-act="mode-toggle" class="mode-toggle" title="' + (adv ? 'Show only the essentials' : 'Show every tool: planner, stat tiers, DPS log, snapshots, research, AI') + '">' + APP.icon('set') + (adv ? 'Fewer tools' : 'More tools') + '</a>';
     document.getElementById('side').innerHTML = html;
   }
   function renderPick() {

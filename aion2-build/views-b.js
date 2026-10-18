@@ -284,6 +284,7 @@
     if (pre && tab === 'aionflex') tab = 'manual';
     var h = '<div class="head"><div><h1>Import</h1><div class="muted">Everything goes through a review step. Nothing is saved until you confirm it, and each confirmation becomes a new snapshot. No AI or API key is needed.</div></div></div>';
     h += '<div class="tabs">' + [['aionflex', 'From AionFlex'], ['manual', 'Type it in'], ['shot', 'Screenshot' + (APP.aiReady() ? '' : ' (optional)')], ['paste', 'Other text'], ['json', 'JSON'], ['csv', 'CSV']].map(function (t) { return '<button data-act="imp-tab" data-t="' + t[0] + '" class="' + (t[0] === tab ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+    if (APP.review && APP.review.r.category === 'aionflex') return '<div class="head"><div><h1>Check and save</h1><div class="muted">Only the changes are shown. Nothing is saved until you press Save.</div></div></div>' + reviewHtml(APP.review);
     if (APP.review) return h + reviewHtml(APP.review);
     if (tab === 'aionflex') {
       var me = APP.player(), url = (me && me.url) || '';
@@ -347,6 +348,8 @@
     if (!o.d) return;
     var u = okUrl(o.u), src = BA.detectSource(o.d, u);
     if (!src) { APP.toast('That page is not an AionFlex, Shugo.GG or Atool character profile.', 6000); return; }
+    var pp = BA.parseSourceText(o.d, u), mine = APP.state.characters.filter(function (c) { return c.role !== 'benchmark'; });
+    if (pp.ok && mine.length && !mine.some(function (c) { return c.name.toLowerCase() === String(pp.profile.name || '').toLowerCase(); }) && APP.setCompare) { APP.setCompare(o.d, u); return; }
     APP.inboxAdd(src, o.d, u);
   };
   APP.inboxAdd = function (src, text, url) {
@@ -475,7 +478,41 @@
     location.hash = '#/import';
     APP.render();
   }
+  // the sync review: changes first, grouped, one button; unchanged values tucked away
+  var RV_GROUPS = [['Overview', /^(profile|level|cp|itemLevel)\b/], ['Gear', /^equipment\./], ['Skills', /^skills\./], ['Stats', /^(divine|coreStats)\./], ['Daevanion', /^daevanion\./], ['Titles, pet and extras', /./]];
+  function rvGroup(path) { for (var i = 0; i < RV_GROUPS.length; i++) if (RV_GROUPS[i][1].test(path)) return RV_GROUPS[i][0]; return 'Other'; }
+  function afReviewHtml(rv) {
+    var r = rv.r, v = rv.v, names = (r.sourceNames || ['AionFlex']).join(' + ');
+    var changed = [], same = [];
+    v.fields.forEach(function (fl, i) { (fl.skip && !fl.conflict ? same : changed).push(i); });
+    var nChanged = changed.filter(function (i) { return !v.fields[i].skip; }).length;
+    function input(fl, i) {
+      var val = e(fl.value == null ? '' : fl.value);
+      return fl.kind === 'lines' || fl.kind === 'info' ? '<textarea name="val_' + i + '" rows="2" style="width:100%;min-height:0">' + val + '</textarea>' : '<input name="val_' + i + '" value="' + val + '" style="width:' + (fl.kind === 'text' ? '220px' : '90px') + '">';
+    }
+    function row(i) {
+      var fl = v.fields[i], cur = fl.current == null ? '-' : fl.current;
+      var flag = fl.conflict ? '<div class="small bad">' + e(fl.conflict) + '</div>' : fl.note ? '<div class="small warn">' + e(fl.note) + '</div>' : '';
+      return '<tr class="' + (fl.conflict ? 'conf-row' : '') + '"><td style="width:28px"><input type="checkbox" name="inc_' + i + '"' + (fl.skip ? '' : ' checked') + ' aria-label="Save ' + e(fl.label) + '"></td><td>' + e(fl.label) + flag + '</td><td class="small muted">' + e(String(cur).slice(0, 80)) + '</td><td>' + input(fl, i) + '</td></tr>';
+    }
+    function table(list) {
+      var h = '', byG = {};
+      list.forEach(function (i) { var g = rvGroup(v.fields[i].path); (byG[g] = byG[g] || []).push(i); });
+      RV_GROUPS.forEach(function (G) { var l = byG[G[0]]; if (!l) return; h += '<tr class="fixed"><td colspan="4"><b>' + e(G[0]) + '</b> <span class="small muted">(' + l.length + ')</span></td></tr>' + l.map(row).join(''); });
+      return '<table data-nosort><thead><tr><th></th><th>What</th><th>Now</th><th>New</th></tr></thead><tbody>' + h + '</tbody></table>';
+    }
+    var h = '<div class="card hl"><div class="row"><h2 style="margin:0;flex:1">From ' + e(names) + ': ' + nChanged + ' change' + (nChanged === 1 ? '' : 's') + '</h2><label class="small" for="revChar" style="margin:0">Save to</label><select id="revChar" data-chg="rev-char">' +
+      APP.state.characters.filter(function (c) { return c.role !== 'benchmark'; }).map(function (c) { return '<option value="' + e(c.id) + '"' + (c.id === r.charId ? ' selected' : '') + '>' + e(c.name) + '</option>'; }).join('') + '<option value="__new"' + (r.charId === '__new' ? ' selected' : '') + '>New character: ' + e(r.p.profile.name || '?') + '</option></select></div>';
+    h += '<div class="row" style="margin:10px 0"><button class="pri" data-act="rev-ok">' + (nChanged ? 'Save ' + nChanged + ' change' + (nChanged === 1 ? '' : 's') : 'Save') + '</button><button data-act="rev-cancel">Discard</button><span class="small muted">' + v.fields.length + ' values read, ' + same.length + ' already up to date. Untick or edit anything that looks wrong.</span></div>';
+    if (r.aiNote) h += '<div class="note">' + e(r.aiNote) + '</div>';
+    h += '<div class="tbl" id="revForm">' + (changed.length ? table(changed) : '<div class="note info">Everything is already up to date.</div>') +
+      (same.length ? '<details style="margin-top:10px"><summary class="small">Show the ' + same.length + ' values that did not change</summary>' + table(same) + '</details>' : '') + '</div>';
+    h += '<details style="margin-top:10px"><summary class="small muted">Options</summary><div class="form" style="margin-top:8px"><div><label>Observed on</label><input type="date" id="revObs" value="' + e(r.obs) + '"></div><div><label>Status</label><select id="revStatus"><option value="verified">Verified in-game</option><option value="confirmed">User-confirmed</option><option value="imported" selected>Imported from external source</option></select></div></div></details>';
+    h += '<div class="small muted" style="margin-top:8px">Pantheon, Arcana and the in-game Combat Stats window are not on these sites. Your Divine Stats, which Pantheon raises, are included.</div></div>';
+    return h;
+  }
   function reviewHtml(rv) {
+    if (rv.r.category === 'aionflex') return afReviewHtml(rv);
     var r = rv.r, v = rv.v, ch = r.charId === '__new' ? null : BA.getChar(APP.state, r.charId), af = r.category === 'aionflex', h;
     if (af) {
       h = '<div class="card hl"><div class="row"><h2 style="margin:0;flex:1">Check what was read from ' + e((r.sourceNames || ['AionFlex']).join(' + ')) + '</h2><label class="small" for="revChar" style="margin:0">Save to</label><select id="revChar" data-chg="rev-char">' + APP.state.characters.map(function (c) { return '<option value="' + e(c.id) + '"' + (c.id === r.charId ? ' selected' : '') + '>' + e(c.name) + '</option>'; }).join('') + '<option value="__new"' + (r.charId === '__new' ? ' selected' : '') + '>New character: ' + e(r.p.profile.name || '?') + '</option></select></div>' +
