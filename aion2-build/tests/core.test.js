@@ -419,7 +419,9 @@ test('next steps are concrete and ordered', () => {
   const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
   const d = BA.blankData('Assassin'); BA.applyFields(d, BA.syncFields(ps, d), BA.meta('imported', 'sync', '2026-10-18'));
   const st = BA.nextSteps(d);
-  assert.equal(st[0].title, 'Enhance Noble Belt +3 to +10'); assert.ok(st[0].il && st[0].cp);
+  assert.ok(!st.some(s => s.title === 'Enhance Noble Belt +3 to +10'), 'belt is not grouped with normal gear');
+  const belt = st.find(s => s.id === 'enh_belt'); assert.match(belt.title, /Noble Belt \+3 to \+4 when you have a scroll/); assert.ok(belt.prio < 50);
+  assert.ok(st.find(s => s.id === 'enh_amulet'));
   assert.ok(st.some(s => /soul engraving on Unyielding Earrings \(37.6%\)/.test(s.title) && !s.il));
   assert.ok(st.some(s => /Shadow Fall 3/.test(s.title)));
   assert.ok(st.some(s => /Daevanion Azphel: 8\/152 nodes/.test(s.title)));
@@ -439,4 +441,33 @@ test('compare another player from their page, pairs aligned', () => {
   assert.ok(c.ahead.some(a => a.label === 'Belt enhancement' && a.them === '+10'));
   assert.ok(!c.ahead.some(a => /Earring/.test(a.label)), 'same earrings in swapped slots are not a difference');
   assert.equal(c.rows.find(r => r.label === 'Combat Power').diff, 90000 - 78814);
+});
+
+test('item database: Item Level is item level + enhancement over 20 slots', () => {
+  assert.ok(BA.items().length > 800);
+  const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
+  const d = BA.blankData('Assassin'); BA.applyFields(d, BA.syncFields(ps, d), BA.meta('imported', 'sync', '2026-10-18'));
+  const gs = BA.gearScoreOf(d, 'Elyos');
+  assert.ok(gs.complete); assert.equal(gs.total, 1230, 'matches the Gear Score on Atool and Shugo.GG');
+  assert.equal(BA.findItem('helmet', 'Vakron Helm', 'Elyos').lv, 70);
+  const ch = BA.newCharacter({ name: 'lycaa', cls: 'Assassin', race: 'Elyos' }); ch.snapshots[0].data = d;
+  const u = BA.upgradeFinder(ch);
+  const helm = u.slots.find(s => s.slot.id === 'helmet');
+  assert.equal(helm.next[0].item.name, 'White Dragon Lord Helm'); assert.equal(helm.next[0].gain, 8); assert.ok(helm.next[0].transfer);
+  assert.ok(u.slots.find(s => s.slot.id === 'main_hand').next.every(c => c.item.type === 'dagger'), 'class weapon only');
+  assert.equal(u.slots.find(s => s.slot.id === 'belt').next.length, 0);
+  assert.ok(!u.slots.find(s => s.slot.id === 'bracelet_2').next.some(c => c.item.name === 'Ascension Bracelet'), 'no second copy of a quest item');
+  const neck = u.slots.find(s => s.slot.id === 'necklace').next[0]; assert.equal(neck.transfer, false, 'Legend accessory: enhancement does not move');
+  assert.ok(u.rate && u.rate.high > u.rate.low);
+  const steps = BA.nextSteps(d, { ch });
+  assert.ok(steps.some(s => /White Dragon Lord armor \(item level 78\): \+8 Item Level per piece/.test(s.title)));
+  assert.ok(steps.find(s => /Abyssal Bracelet/.test(s.title)).detail.includes('hard content'));
+});
+test('Combat Power per Item Level is learned from own upgrades', () => {
+  const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
+  const d = BA.blankData('Assassin'); BA.applyFields(d, BA.syncFields(ps, d), BA.meta('imported', 'sync', '2026-10-18'));
+  const ch = BA.newCharacter({ name: 'lycaa', cls: 'Assassin', race: 'Elyos' }); ch.snapshots[0].data = d;
+  BA.commit(ch, x => { x.equipment.belt.enh = 4; x.cp = { v: 78874, m: x.cp.m }; }, 'belt +4', '2026-10-19');
+  const r = BA.cpPerItemLevel(ch, 'Elyos');
+  assert.equal(r.learned, 1); assert.equal(r.low, 60); assert.equal(r.high, 60);
 });

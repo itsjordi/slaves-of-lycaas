@@ -267,7 +267,7 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     assert.equal(C.w.BA.num(cd.cp), 78814);
     assert.equal(cd.equipment.main_hand.enh, 12);
     C.go('#/dashboard');
-    assert.match(C.view(), /Do this next/); assert.match(C.view(), /Enhance Noble Belt \+3 to \+10/);
+    assert.match(C.view(), /Do this next/); assert.match(C.view(), /White Dragon Lord armor/);
     assert.ok(!/Planner/.test(C.d.getElementById('side').textContent), 'short menu by default');
     C.go('#/import');
     C.d.getElementById('afTxt').value = af;

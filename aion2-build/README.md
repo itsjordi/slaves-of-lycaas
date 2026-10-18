@@ -33,6 +33,8 @@ aion2-build/docs/         architecture, game mechanics, imports, roadmap
 
 ## Getting started
 
+Upgrades (AskMrRobot style): for every slot the next better item and the best in slot, where it comes from and the exact Item Level gain, from the Metaroad item database (`items-data.js`, see docs/items.md).
+
 The default is a short menu: Home (Combat Power, Item Level and "Do this next", concrete steps from `BA.nextSteps`), Profile (whole character plus sync), Compare (another player's page via their link and the bookmark, shown only, never saved; `BA.compareProfiles`), Tier lists and Start here. "More tools" at the bottom of the menu shows everything else (planner, stat analysis, DPS log, snapshots and snapshot compare, research, AI). Item Level and Gear Score are one value.
 
 

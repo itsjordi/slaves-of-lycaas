@@ -828,13 +828,111 @@
     return { profile: pr, coreMax: coreMax };
   }
 
+  /* ------------------------------------------------------------------ item database (Metaroad export) and the upgrade finder */
+  var ITEM_SLOT = { boots: 'boots', cape: 'cape', gloves: 'gloves', helmet: 'helmet', pants: 'pants', shoulder: 'shoulders', torso: 'torso', guarder: 'off_hand', earring: 'earring', ring: 'ring', necklace: 'necklace', bracelet: 'bracelet', amulet: 'amulet', belt: 'belt', rune: 'rune' };
+  var CLASS_WEAPON = { Templar: 'sword', Gladiator: 'greatsword', Assassin: 'dagger', Ranger: 'bow', Sorcerer: 'magicbook', Spiritmaster: 'orb', Cleric: 'mace', Chanter: 'staff' };
+  var WEAPONS = ['sword', 'greatsword', 'dagger', 'bow', 'magicbook', 'orb', 'mace', 'staff'];
+  var GRADES = { c: 'Common', r: 'Rare', l: 'Legend', u: 'Unique', e: 'Unique', s: 'Special' }; // Metaroad lists the 'e' raid items as Unique
+  var FACTIONS = { l: 'Elyos', d: 'Asmodian', a: '' };
+  var TRADE = { n: 'Not tradable', s: 'Tradable until soul bound', y: 'Tradable' };
+  function sourceLabel(src) {
+    var s = String(src || '').replace(/\d+$/, '');
+    return { craftdraconiccombo: 'Draconic crafting (combo)', craftdraconic: 'Draconic crafting', craftcombo: 'Crafting (combo)', craft: 'Crafting', dropboss: 'Boss drop', dropparty: 'Dungeon drop (party)', dropraid: 'Raid drop', dropabyss: 'Abyss drop', drop: 'Field drop', quest: 'Quest', shopcoin: 'Shop (coins)', lobby: 'Starter', tutorial: 'Tutorial', begin: 'Starter' }[s] || 'Unknown';
+  }
+  var _items = null;
+  function parseItems(raw) {
+    var out = [], mode = null;
+    String(raw || '').split('\n').forEach(function (line) {
+      line = line.trim(); if (!line) return;
+      if (line.charAt(0) === '#') { mode = /families/.test(line) ? 'F' : /items/.test(line) ? 'I' : mode; return; }
+      var p = line.split('|');
+      if (mode === 'F' && p.length >= 9) {
+        var slots = p[8] === '*' ? ['boots', 'cape', 'gloves', 'helmet', 'pants', 'shoulder', 'torso'] : p[8].split(',');
+        var noun = { boots: 'Boots', cape: 'Cloak', gloves: 'Gloves', helmet: 'Helm', pants: 'Greaves', shoulder: 'Pauldrons', torso: 'Breastplate' };
+        slots.forEach(function (s) { out.push(item('ar_' + s + '_' + p[2] + '_' + p[3] + '_' + p[4] + '_' + p[5] + '_' + p[6], p[0] + ' ' + noun[s], +p[1], p[7])); });
+      } else if (mode === 'I' && p.length >= 4) out.push(item(p[0], p[1], +p[2], p[3]));
+    });
+    return out.filter(Boolean);
+  }
+  function item(code, name, lv, trade) {
+    var p = code.split('_'); // kind, type, faction, grade, source, num, suffix
+    var type = p[1], slot = WEAPONS.indexOf(type) >= 0 ? 'main_hand' : ITEM_SLOT[type];
+    if (!slot) return null;
+    return { code: code, name: name, lv: lv, type: type, slot: slot, fac: p[2], grade: p[3], src: p[4], trade: trade,
+      url: 'https://metaroad.gg/aion2/database/items/' + type.replace('arcana', 'arcana-') + '/equip_' + code };
+  }
+  function items() { if (!_items) { var raw = (typeof BA_ITEMS_RAW !== 'undefined' && BA_ITEMS_RAW) || (typeof globalThis !== 'undefined' && globalThis.BA_ITEMS_RAW) || ''; if (!raw && typeof require === 'function') { try { raw = require('./items-data.js').RAW; } catch (x) { } } _items = parseItems(raw); } return _items; }
+  function setItems(raw) { _items = parseItems(raw); return _items; }
+  function slotFamily(slotId) { return slotId.replace(/_\d$/, ''); }
+  // the database item behind an equipped item (same name, same slot family; the highest level wins when a name repeats)
+  function findItem(slotId, name, race) {
+    if (!name) return null;
+    var fam = slotFamily(slotId), want = String(name).toLowerCase();
+    var hits = items().filter(function (x) { return x.slot === fam && x.name.toLowerCase() === want && (x.fac === 'a' || !race || FACTIONS[x.fac] === race); });
+    return hits.sort(function (a, b) { return b.lv - a.lv; })[0] || null;
+  }
+  // Item Level (Gear Score) = sum over all 20 slots of (item level + enhancement); checked against Atool and Shugo.GG for lycaa (1,230)
+  function gearScoreOf(d, race) {
+    var total = 0, known = 0, missing = [];
+    SLOTS.forEach(function (s) { var it = d.equipment && d.equipment[s.id]; var db = it && findItem(s.id, it.name, race); if (db && typeof it.enh === 'number') { total += db.lv + it.enh; known++; } else missing.push(s.name); });
+    return { total: total, known: known, missing: missing, complete: known === SLOTS.length };
+  }
+  // what one point of Item Level was worth in Combat Power for this character, learned from saved snapshots
+  function cpPerItemLevel(ch, race) {
+    var snaps = (ch && ch.snapshots) || [], obs = [];
+    for (var i = 1; i < snaps.length; i++) {
+      var a = snaps[i - 1].data, b = snaps[i].data, ca = num(a.cp), cb = num(b.cp);
+      if (ca == null || cb == null || cb === ca) continue;
+      var ga = gearScoreOf(a, race), gb = gearScoreOf(b, race);
+      if (!ga.complete || !gb.complete || gb.total === ga.total) continue;
+      var sk = function (d) { return (d.skills.list || []).reduce(function (t, s) { return t + (typeof s.level === 'number' ? s.level : 0); }, 0); };
+      if (sk(a) !== sk(b) || divineTotal(a) !== divineTotal(b) || (a.titles.unlocked || 0) !== (b.titles.unlocked || 0)) continue; // something else changed too
+      var r = (cb - ca) / (gb.total - ga.total); if (r > 0 && isFinite(r)) obs.push(r);
+    }
+    var d = cur(ch), gs = d ? gearScoreOf(d, race) : null, avg = d && gs && gs.complete && num(d.cp) ? num(d.cp) / gs.total : null;
+    if (obs.length) return { low: Math.min.apply(null, obs), high: Math.max.apply(null, obs), learned: obs.length, avg: avg };
+    return avg ? { low: avg * 0.5, high: avg, learned: 0, avg: avg } : null;
+  }
+  function cpRange(gain, rate) { if (!rate || !(gain > 0)) return null; var lo = Math.round(gain * rate.low / 10) * 10, hi = Math.round(gain * rate.high / 10) * 10; return { low: Math.max(10, lo), high: Math.max(10, hi), learned: rate.learned }; }
+  // per slot: better items than what you wear, with the exact Item Level gain and an estimated Combat Power range
+  function upgradeFinder(ch, opts) {
+    opts = opts || {};
+    var d = cur(ch), race = ch.race || '', weapon = CLASS_WEAPON[ch.cls], rate = cpPerItemLevel(ch, race), out = [];
+    SLOTS.forEach(function (s) {
+      var it = d.equipment && d.equipment[s.id], db = it && findItem(s.id, it.name, race), fam = slotFamily(s.id);
+      var curLv = db ? db.lv : null, enh = it && typeof it.enh === 'number' ? it.enh : 0;
+      var pair = /_(\d)$/.test(s.id) ? s.id.replace(/\d$/, s.id.slice(-1) === '1' ? '2' : '1') : null, other = pair && d.equipment[pair];
+      var canTransfer = !!(db && (db.grade === 'u' || db.grade === 'e')); // Gear Transfer keeps enhancement and soul binding between Unique pieces
+      var cands = items().filter(function (x) {
+        if (x.slot !== fam) return false;
+        if (other && other.name === x.name && x.code.slice(-2) === '_b') return false; // a quest item you already wear in the other slot
+        if (fam === 'main_hand' && x.type !== weapon) return false;
+        if (x.fac !== 'a' && race && FACTIONS[x.fac] !== race) return false;
+        return curLv == null || x.lv > curLv;
+      }).map(function (x) {
+        var now = curLv == null ? null : curLv + enh, g0 = now == null ? null : x.lv - now, gSame = curLv == null ? null : x.lv - curLv;
+        var transfer = canTransfer && (x.grade === 'u' || x.grade === 'e') && enh > 0, gain = transfer ? gSame : g0;
+        return { item: x, gainAt0: g0, gainSameEnh: gSame, transfer: transfer, gain: gain, cp: cpRange(gain, rate), source: sourceLabel(x.src), grade: GRADES[x.grade] || x.grade };
+      }).filter(function (c) { return c.gain == null || c.gain > 0; }).sort(function (a, b) { return a.item.lv - b.item.lv || (a.item.trade === 's' ? -1 : 1); });
+      // closest real step up first: the next tier, then the best available
+      out.push({ slot: s, current: it ? { name: it.name, enh: enh, lv: curLv, known: !!db } : null, next: cands.slice(0, opts.perSlot || 4), best: cands.length ? cands[cands.length - 1] : null, count: cands.length });
+    });
+    return { slots: out, rate: rate, gearScore: gearScoreOf(d, race) };
+  }
+
   /* ------------------------------------------------------------------ next steps: concrete things to do for more Combat Power and Item Level */
   function median(a) { var s = a.slice().sort(function (x, y) { return x - y; }); return s.length ? s[Math.floor((s.length - 1) / 2)] : null; }
-  function nextSteps(d) {
+  function nextSteps(d, opts) {
     var out = [];
     function S(o) { out.push(o); }
     // 1. enhancement, per group: bring stragglers up to what the rest of the group has
-    var groups = [['gear', function (s) { return s.group === 'weapon' || s.group === 'armor'; }, 'weapons and armor'], ['acc', function (s) { return s.group === 'accessory'; }, 'accessories'], ['rune', function (s) { return s.group === 'rune'; }, 'runes']];
+    var SPECIAL = { belt: 1, amulet: 1 }; // Noble Belt and Revelation Amulet: one item each, enhanced with scarce scrolls, never replaced
+    var groups = [['gear', function (s) { return (s.group === 'weapon' || s.group === 'armor') && !SPECIAL[s.id]; }, 'weapons and armor'], ['acc', function (s) { return s.group === 'accessory' && !SPECIAL[s.id]; }, 'accessories'], ['rune', function (s) { return s.group === 'rune'; }, 'runes']];
+    ['belt', 'amulet'].forEach(function (id) {
+      var it = d.equipment && d.equipment[id]; if (!it || typeof it.enh !== 'number' || it.enh >= 10) return;
+      var scroll = id === 'belt' ? 'Belt Enhance Scrolls (Strongholds, 2 each)' : 'Revelation Amulet Enhance Scrolls (Monolith Resonance)';
+      S({ id: 'enh_' + id, area: 'Gear', title: 'Enhance ' + it.name + ' +' + it.enh + ' to +' + (it.enh + 1) + ' when you have a scroll', detail: 'Each step needs ' + scroll + '. At Unique grade +0 to +10 costs about 5 million Kinah and 200,000 Enhance Stones in total, so this is the most expensive Item Level per point. Do it as scrolls come in; it is never replaced by another item.', il: true, cp: true, prio: 38, to: '#/equipment' });
+    });
     groups.forEach(function (g) {
       var items = SLOTS.filter(g[1]).map(function (s) { var it = d.equipment && d.equipment[s.id]; return it && typeof it.enh === 'number' ? { s: s, it: it } : null; }).filter(Boolean);
       if (!items.length) return;
@@ -844,11 +942,30 @@
       });
       if (!behind.length) {
         var low = items.slice().sort(function (a, b) { return a.it.enh - b.it.enh || (a.s.group === 'weapon' ? -1 : 1); })[0];
-        S({ id: 'enh_' + low.s.id + '_' + (low.it.enh + 1), area: 'Gear', title: 'Enhance ' + low.it.name + ' +' + low.it.enh + ' to +' + (low.it.enh + 1), detail: 'All your ' + g[2] + ' are level; this is the next one to push.', il: true, cp: true, prio: 60 + (low.s.group === 'weapon' ? 10 : 0), to: '#/equipment' });
+        var risky = low.it.enh >= 10 ? ' From +10 a Unique item can fail (about ' + ([65, 50, 35, 25, 20][low.it.enh - 10] || 20) + '% for this step, community figure); a failure keeps the item and costs the materials.' : '';
+        S({ id: 'enh_' + low.s.id + '_' + (low.it.enh + 1), area: 'Gear', title: 'Enhance ' + low.it.name + ' +' + low.it.enh + ' to +' + (low.it.enh + 1), detail: 'All your ' + g[2] + ' are level; this is the next one to push.' + risky, il: true, cp: true, prio: 60 + (low.s.group === 'weapon' ? 10 : 0), to: '#/equipment' });
       }
     });
     // 2. item grade, when known
     SLOTS.forEach(function (s) { var it = d.equipment && d.equipment[s.id]; if (it && /^(common|rare|epic)$/i.test(it.rarity || '')) S({ id: 'grade_' + s.id, area: 'Gear', title: 'Replace ' + it.name + ' (' + it.rarity + ') with a higher grade item', detail: 'A higher grade item has a higher Item Level at the same enhancement.', il: true, cp: true, prio: 90, to: '#/equipment' }); });
+    // 2b. better items from the item database (next tier per slot); armor pieces from the same set are one step
+    if (opts && opts.ch) {
+      try {
+        var groupsU = {};
+        upgradeFinder(opts.ch).slots.forEach(function (sl) {
+          var n = sl.next.filter(function (c) { return c.gain >= 4; })[0]; if (!n) return;
+          var fam = sl.slot.group === 'armor' ? n.item.name.split(' ').slice(0, -1).join(' ') + '|' + n.item.lv + '|' + n.gain + '|' + n.transfer : sl.slot.id;
+          (groupsU[fam] = groupsU[fam] || []).push({ sl: sl, n: n });
+        });
+        Object.keys(groupsU).forEach(function (k) {
+          var g = groupsU[k], n = g[0].n, sl = g[0].sl, many = g.length > 1, raid = /raid/.test(n.item.src);
+          var setName = n.item.name.split(' ').slice(0, -1).join(' ');
+          var title = many ? 'Get ' + setName + ' armor (item level ' + n.item.lv + '): +' + n.gain + ' Item Level per piece, ' + g.length + ' pieces' : 'Get ' + n.item.name + ' for ' + sl.slot.name + ': +' + n.gain + ' Item Level';
+          var cp = n.cp ? ' About +' + n.cp.low + ' to +' + n.cp.high + ' Combat Power' + (many ? ' per piece.' : '.') : '';
+          S({ id: 'item_' + g.map(function (x) { return x.sl.slot.id; }).join('-') + '_' + n.item.lv, area: 'Gear', title: title, detail: n.source + (raid ? ' (hard content)' : '') + (n.transfer ? '. Move your enhancement and soul binding over with Gear Transfer (Transfer Stone).' : sl.current ? '. Starts at +0; your +' + sl.current.enh + ' does not carry over.' : '.') + cp, il: true, cp: true, prio: 60 + Math.min(40, n.gain * g.length) - (raid ? 30 : 0), to: '#/upgrades' });
+        });
+      } catch (x) { }
+    }
     // 3. soul engraving not complete
     SLOTS.forEach(function (s) { var it = d.equipment && d.equipment[s.id]; if (it && typeof it.engravingPct === 'number' && it.engravingPct < 100) S({ id: 'eng_' + s.id, area: 'Gear', title: 'Finish soul engraving on ' + it.name + ' (' + it.engravingPct + '%)', detail: 'Engraving lines add stats straight to Combat Power.', il: false, cp: true, prio: 80 + Math.round((100 - it.engravingPct) / 5), to: '#/profile' }); });
     // 4. skills that lag behind
@@ -1387,7 +1504,7 @@
     TIER_ORDER: TIER_ORDER, STAT_TIERS_BOSS: STAT_TIERS_BOSS, MODES: MODES, CORE_STATS: CORE_STATS, DIVINE: DIVINE, DIVINE_PRIORITY: DIVINE_PRIORITY,
     DAEVANION: DAEVANION, SLOTS: SLOTS, SLOT_BY_ID: SLOT_BY_ID, SKILLS: SKILLS, CATEGORY: CATEGORY, RANK_MODES: RANK_MODES,
     meta: meta, fv: fv, val: val, num: num, uid: uid, clone: clone, freeze: freeze, slug: slug, fmt: fmt,
-    seedState: seedState, nextSteps: nextSteps, compareProfiles: compareProfiles, dataFromParse: dataFromParse, SOURCES: SOURCES, SOURCE_ORDER: SOURCE_ORDER, SERVER_IDS: SERVER_IDS, detectSource: detectSource, sourceLinks: sourceLinks, parseShugoText: parseShugoText, parseAtoolText: parseAtoolText, parseSourceText: parseSourceText, sourceFields: sourceFields, syncFields: syncFields, mergedProfile: mergedProfile, parseLinesText: parseLinesText, linesText: linesText, parseAionFlexText: parseAionFlexText, aionflexFields: aionflexFields, GENUS: GENUS, GENUS_SOURCES: GENUS_SOURCES, weakSkills: weakSkills, gainSources: gainSources, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
+    seedState: seedState, parseItems: parseItems, items: items, setItems: setItems, findItem: findItem, gearScoreOf: gearScoreOf, cpPerItemLevel: cpPerItemLevel, upgradeFinder: upgradeFinder, sourceLabel: sourceLabel, GRADES: GRADES, CLASS_WEAPON: CLASS_WEAPON, nextSteps: nextSteps, compareProfiles: compareProfiles, dataFromParse: dataFromParse, SOURCES: SOURCES, SOURCE_ORDER: SOURCE_ORDER, SERVER_IDS: SERVER_IDS, detectSource: detectSource, sourceLinks: sourceLinks, parseShugoText: parseShugoText, parseAtoolText: parseAtoolText, parseSourceText: parseSourceText, sourceFields: sourceFields, syncFields: syncFields, mergedProfile: mergedProfile, parseLinesText: parseLinesText, linesText: linesText, parseAionFlexText: parseAionFlexText, aionflexFields: aionflexFields, GENUS: GENUS, GENUS_SOURCES: GENUS_SOURCES, weakSkills: weakSkills, gainSources: gainSources, emptyState: emptyState, CLASSES: CLASSES, SERVERS: SERVERS, blankData: blankData, newCharacter: newCharacter, parseProfileUrl: parseProfileUrl, selfCheck: selfCheck, weakSlots: weakSlots, tierKey: tierKey, skillsFor: skillsFor, getChar: getChar, latest: latest, cur: cur, commit: commit, snapshot: snapshot,
     statIdFor: statIdFor, slotIdFor: slotIdFor, tiersFor: tiersFor, tierOf: tierOf, itemLine: itemLine,
     cpGap: cpGap, divineTotal: divineTotal, pct: pct, pantheonPct: pantheonPct, daevanionAvg: daevanionAvg, arcanaState: arcanaState, enhTotal: enhTotal,
     snapshotSummary: snapshotSummary, snapshotDiff: snapshotDiff, compare: compare, recommendations: recommendations, divineNeeds: divineNeeds,

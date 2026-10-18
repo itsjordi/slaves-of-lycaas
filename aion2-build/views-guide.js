@@ -231,6 +231,7 @@
   /* ------------------------------------------------------------------ Ari, the Aether Sprite: a small guide that points things out */
   // [title, keywords, route (or "tour" or a page), element to point at, what Ari says]
   var TOPICS = [
+    ['Find better items', 'upgrade upgrades items better gear ilvl item level gear score bis best in slot where drop craft', '#/upgrades', 'h1', 'Per slot: the next better item, where it comes from and how much Item Level it adds.'],
     ['Sync my profile', 'sync profile update refresh shugo atool aion2tool aionflex bookmark gear score gs full', '#/profile', '#syncCard', 'Bring in your AionFlex, Shugo.GG and Atool pages with the bookmark button or by pasting, then Review and save.'],
     ['See my whole profile', 'profile overview everything gear skills stats titles', '#/profile', 'h1', 'Everything about your character on one page, with the source of each value.'],
     ['Import from AionFlex', 'aionflex import link paste profile copy fill update no ai key', '#/import', '#afTxt', 'Open your AionFlex profile, Ctrl+A, Ctrl+C, paste here and press Read. Everything readable is filled in for you to check.'],

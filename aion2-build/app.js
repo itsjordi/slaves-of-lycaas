@@ -178,7 +178,7 @@
   };
 
   /* ------------------------------------------------------------------ routing */
-  APP.SIMPLE = ['dashboard', 'profile', 'compare', 'tiers', 'guide'];
+  APP.SIMPLE = ['dashboard', 'profile', 'upgrades', 'compare', 'tiers', 'guide'];
   APP.view = function (id, def) { APP.views[id] = def; if (!def.hidden) APP.order.push(id); };
   function route() { var h = (location.hash || '#/dashboard').replace(/^#\/?/, '').split('/'); return { name: h[0] || 'dashboard', arg: h.slice(1).join('/') }; }
   APP.render = function () {

@@ -24,7 +24,7 @@
       return h + '<div class="card hl" style="margin-top:14px"><h2>First: bring in your character</h2><ol class="small"><li>Go to <a href="#/profile">Profile</a>.</li><li>Drag the <b>Send to Build Architect</b> button to your bookmarks bar (Edge: favorites bar).</li><li>Open your character on Atool, Shugo.GG or AionFlex and click the bookmark.</li><li>Press <b>Save</b>. Your next steps appear here.</li></ol></div>';
     }
     var flt = APP.state.stepFilter || 'all', dm = doneMap(ch);
-    var steps = BA.nextSteps(d).filter(function (s) { return !dm[s.id + '|' + s.title]; });
+    var steps = BA.nextSteps(d, { ch: ch }).filter(function (s) { return !dm[s.id + '|' + s.title]; });
     var shown = steps.filter(function (s) { return flt === 'all' || (flt === 'il' ? s.il : s.cp); });
     var lim = APP.state.stepsAll ? shown.length : 8;
     h += '<div class="card hl" style="margin-top:14px"><div class="row"><h2 style="margin:0;flex:1">Do this next</h2><div class="tabs" style="margin:0">' + [['all', 'Everything'], ['il', 'Item Level'], ['cp', 'Combat Power']].map(function (t) { return '<button data-act="step-filter" data-f="' + t[0] + '" class="' + (t[0] === flt ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
@@ -47,7 +47,7 @@
   var dash = APP.views.dashboard, advRender = dash.render;
   dash.render = function (arg) {
     if (!APP.advanced()) return home();
-    var d = APP.pd(), steps = BA.nextSteps(d).slice(0, 5);
+    var d = APP.pd(), steps = BA.nextSteps(d, { ch: APP.player() }).slice(0, 5);
     var top = steps.length && Object.keys(d.equipment || {}).length ? '<div class="card hl" style="margin-bottom:14px"><div class="row"><h2 style="margin:0;flex:1">Do this next</h2><a class="small" href="#/dashboard" data-act="mode-toggle">Short view</a></div><ol class="steps">' + steps.map(function (s) { return '<li><a href="' + e(s.to) + '"><b>' + e(s.title) + '</b></a>' + (s.il ? ' <span class="pill confirmed">Item Level</span>' : '') + '<div class="small muted">' + e(s.detail) + '</div></li>'; }).join('') + '</ol></div>' : '';
     var full = advRender(arg);
     var i = full.indexOf('</div></div>'); // after the page head
@@ -107,4 +107,41 @@
   APP.act('cmp-paste', function () { var t = document.getElementById('cmpTxt').value; if (!t.trim()) return APP.toast('Paste their page first.'); if (!BA.detectSource(t, '')) return APP.toast('Not recognised as an AionFlex, Shugo.GG or Atool profile.'); APP.setCompare(t, ''); });
   APP.act('cmp-clear', function () { APP.cmpTemp = null; try { sessionStorage.removeItem(TMP_KEY); } catch (x) { } APP.render(); });
   APP.act('cmp-mine', function () { var t = APP.cmpTemp; if (!t) return; var src = BA.detectSource(t.text, t.url); APP.cmpTemp = null; try { sessionStorage.removeItem(TMP_KEY); } catch (x) { } APP.inboxAdd(src, t.text, t.url); });
+
+  /* ------------------------------------------------------------------ Upgrades: per slot, what to get next and from where (item data: Metaroad) */
+  var SRC_FILTERS = [['all', 'Everything'], ['craft', 'Crafting'], ['drop', 'Drops, no raids'], ['raid', 'Raids']];
+  function srcOk(c, flt) { var s = c.item.src; return flt === 'all' || (flt === 'craft' ? /^craft/.test(s) : flt === 'raid' ? /raid/.test(s) : (/^drop|quest/.test(s) && !/raid/.test(s))); }
+  function gainCell(c) {
+    if (!c) return '<span class="muted">-</span>';
+    return '<b class="good">+' + c.gain + '</b> <span class="small muted">Item Level</span>' + (c.cp ? '<div class="small">~+' + f(c.cp.low) + ' to +' + f(c.cp.high) + ' CP</div>' : '') + (c.transfer ? '<div class="small muted">keeps your + via Transfer</div>' : '');
+  }
+  function itemCell(c) {
+    if (!c) return '<span class="muted">Nothing better in this filter</span>';
+    return '<a href="' + e(c.item.url) + '" target="_blank" rel="noopener"><b>' + e(c.item.name) + '</b></a><div class="small muted">Item level ' + c.item.lv + ' · ' + e(c.grade) + ' · ' + e(c.source) + '</div>';
+  }
+  var SLOT_NOTES = {
+    belt: 'Noble Belt is the only belt. It never gets replaced: you enhance it with Belt Enhance Scrolls from Strongholds (2 per Stronghold), the most expensive Item Level per point.',
+    amulet: 'Revelation Amulet does not get replaced either: enhance it with Revelation Amulet Enhance Scrolls from Monolith Resonance.',
+    rune_1: 'Clash Rune is the only rune in the database (bought with shop coins).', rune_2: 'Clash Rune is the only rune in the database (bought with shop coins).'
+  };
+  APP.view('upgrades', { title: 'Upgrades', icon: 'eq', group: 'Overview', render: function () {
+    var ch = APP.player(), d = APP.pd(), meta = window.BA_ITEMS_META || {};
+    var h = '<div class="head"><div><h1>Upgrades</h1><div class="muted">For every slot: the next better item, where it comes from, and what it adds. Item data from <a href="' + e(meta.url || 'https://metaroad.gg/aion2/database/items') + '" target="_blank" rel="noopener">Metaroad</a> (game client, ' + e(meta.exported || '') + '), used with permission.</div></div></div>';
+    if (!Object.keys(d.equipment || {}).length) return h + '<div class="card hl"><h2>Sync your gear first</h2><div class="small">Go to <a href="#/profile">Profile</a> and bring in your character from Atool, Shugo.GG or AionFlex. Then this page shows an upgrade for every slot.</div></div>';
+    var res = BA.upgradeFinder(ch, { perSlot: 50 }), gs = res.gearScore, flt = APP.state.upgFilter || 'all', rate = res.rate;
+    h += '<div class="grid g2"><div class="card kpi"><div class="l">Item Level (Gear Score)</div><div class="v">' + (gs.complete ? f(gs.total) : f(BA.num(d.itemLevel))) + '</div><div class="d">' + (gs.complete ? 'Sum of all 20 items: item level + enhancement' : 'Not every item was found in the database: ' + e(gs.missing.join(', '))) + '</div></div>' +
+      '<div class="card kpi"><div class="l">Combat Power per Item Level</div><div class="v">' + (rate ? '~' + Math.round(rate.low) + '-' + Math.round(rate.high) : '?') + '</div><div class="d">' + (rate && rate.learned ? 'Learned from ' + rate.learned + ' of your own upgrades' : 'Rough: based on your current CP; gets sharper each time you sync after an upgrade') + '</div></div></div>';
+    h += '<div class="row" style="margin:14px 0 8px"><div class="tabs" style="margin:0">' + SRC_FILTERS.map(function (t) { return '<button data-act="upg-filter" data-f="' + t[0] + '" class="' + (t[0] === flt ? 'cur' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
+    h += '<div class="card"><div class="tbl"><table><thead><tr><th>Slot</th><th>You wear</th><th>Next step up</th><th>Gain</th><th>Best in slot</th><th>Gain</th></tr></thead><tbody>' + res.slots.map(function (sl) {
+      var list = sl.next.filter(function (c) { return srcOk(c, flt); }), all = BA.upgradeFinder(ch, { perSlot: 999 }).slots.filter(function (x) { return x.slot.id === sl.slot.id; })[0];
+      var cands = (all ? all.next : list).filter(function (c) { return srcOk(c, flt); }), next = cands.filter(function (c) { return c.gain >= 4; })[0] || cands[0] || null, best = cands.length ? cands[cands.length - 1] : null;
+      var curC = sl.current ? '<b>' + e(sl.current.name) + '</b> +' + sl.current.enh + '<div class="small muted">' + (sl.current.lv != null ? 'Item level ' + sl.current.lv + ' + ' + sl.current.enh + ' = ' + (sl.current.lv + sl.current.enh) : 'Not in the item database') + '</div>' : '<span class="muted">Empty</span>';
+      var note = SLOT_NOTES[sl.slot.id] && !cands.length ? '<td colspan="4" class="small muted">' + e(SLOT_NOTES[sl.slot.id]) + '</td>' : '<td>' + itemCell(next) + '</td><td data-sort="' + (next ? next.gain : 0) + '">' + gainCell(next) + '</td><td>' + (best && best !== next ? itemCell(best) : '<span class="muted small">' + (best ? 'same' : '-') + '</span>') + '</td><td data-sort="' + (best ? best.gain : 0) + '">' + (best && best !== next ? gainCell(best) : '') + '</td>';
+      return '<tr><td>' + e(sl.slot.name) + '</td><td>' + curC + '</td>' + note + '</tr>';
+    }).join('') + '</tbody></table></div>' +
+      '<div class="small muted" style="margin-top:8px">Gain is exact Item Level. With Gear Transfer (Unique to Unique, Transfer Stone) your enhancement and soul binding move to the new item; manastones and theostones do not. Without it the new item starts at +0. Combat Power is an estimate: nobody publishes the formula.</div></div>';
+    return h;
+  } });
+  APP.act('upg-filter', function (el) { APP.state.upgFilter = el.getAttribute('data-f'); APP.save(); APP.render(); });
+  (function () { var o = APP.order, i = o.indexOf('upgrades'); if (i >= 0) { o.splice(i, 1); o.splice(Math.max(0, o.indexOf('profile') + 1), 0, 'upgrades'); } })();
 })();
