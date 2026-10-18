@@ -11,7 +11,7 @@ try { ({ JSDOM } = require('jsdom')); } catch (e) { JSDOM = null; }
 const ROOT = path.join(__dirname, '..', '..');
 function html() {
   return fs.readFileSync(path.join(ROOT, 'aion2-build.html'), 'utf8')
-    .replace(/<script src="(aion2-build\/[^"]+)"><\/script>/g, (m, p) => '<script>' + fs.readFileSync(path.join(ROOT, p), 'utf8') + '</script>');
+    .replace(/<script src="(aion2-build\/[^"?]+)(?:\?[^"]*)?"><\/script>/g, (m, p) => '<script>' + fs.readFileSync(path.join(ROOT, p), 'utf8') + '</script>');
 }
 const BA = require('../core.js');
 function seeded() { const st = BA.seedState(); st.guide = { welcomed: true, visited: {} }; st.settings.advanced = true; return { aion2_build_v1: JSON.stringify(st) }; }
