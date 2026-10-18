@@ -6,7 +6,7 @@
 
 Format (parsed by `BA.parseItems`): armor sets as one line per set (`name|itemLevel|faction|grade|source|num|suffix|trade|slots`), all other items one line each (`code|name|itemLevel|trade`). The client code carries slot, faction (l Elyos, d Asmodian, a all), grade (r Rare, l Legend, u Unique, e Unique raid item, s Special) and source (craftdraconic, craftdraconiccombo, craftcombo, dropboss, dropparty, dropraid, dropabyss, drop, quest, shopcoin).
 
-Shugo.GG item levels come from NCSOFT's Korea/Taiwan dictionary and differ from the Global client (Spiritforged Dagger 57 there, 45 on Metaroad; the Metaroad stats match what Atool shows for a Global character), so Metaroad is used.
+Item icons load from Metaroad's public image storage (same permission). The in-game tooltip shows item level including enhancement (Spiritforged Dagger 45 + 12 = 57), which is why Shugo.GG lists 57.
 
 ## Refresh
 

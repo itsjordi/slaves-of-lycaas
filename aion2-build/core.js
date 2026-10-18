@@ -849,16 +849,18 @@
       if (mode === 'F' && p.length >= 9) {
         var slots = p[8] === '*' ? ['boots', 'cape', 'gloves', 'helmet', 'pants', 'shoulder', 'torso'] : p[8].split(',');
         var noun = { boots: 'Boots', cape: 'Cloak', gloves: 'Gloves', helmet: 'Helm', pants: 'Greaves', shoulder: 'Pauldrons', torso: 'Breastplate' };
-        slots.forEach(function (s) { out.push(item('ar_' + s + '_' + p[2] + '_' + p[3] + '_' + p[4] + '_' + p[5] + '_' + p[6], p[0] + ' ' + noun[s], +p[1], p[7])); });
-      } else if (mode === 'I' && p.length >= 4) out.push(item(p[0], p[1], +p[2], p[3]));
+        var iconWord = { boots: 'Boots', cape: 'Cape', gloves: 'Gloves', helmet: 'Helmet', pants: 'Pants', shoulder: 'Shoulder', torso: 'Torso' };
+        slots.forEach(function (s) { out.push(item('ar_' + s + '_' + p[2] + '_' + p[3] + '_' + p[4] + '_' + p[5] + '_' + p[6], p[0] + ' ' + noun[s], +p[1], p[7], p[9] ? p[9] + '_' + iconWord[s] : '')); });
+      } else if (mode === 'I' && p.length >= 4) out.push(item(p[0], p[1], +p[2], p[3], p[4] || ''));
     });
     return out.filter(Boolean);
   }
-  function item(code, name, lv, trade) {
+  var ICON_BASE = 'https://guosmhnujsowkrkvuoyn.supabase.co/storage/v1/object/public/aion2-assets/item-icons/Icon_';
+  function item(code, name, lv, trade, icon) {
     var p = code.split('_'); // kind, type, faction, grade, source, num, suffix
     var type = p[1], slot = WEAPONS.indexOf(type) >= 0 ? 'main_hand' : ITEM_SLOT[type];
     if (!slot) return null;
-    return { code: code, name: name, lv: lv, type: type, slot: slot, fac: p[2], grade: p[3], src: p[4], trade: trade,
+    return { code: code, name: name, lv: lv, type: type, slot: slot, fac: p[2], grade: p[3], src: p[4], trade: trade, icon: icon ? ICON_BASE + icon + '.webp' : '',
       url: 'https://metaroad.gg/aion2/database/items/' + type.replace('arcana', 'arcana-') + '/equip_' + code };
   }
   function items() { if (!_items) { var raw = (typeof BA_ITEMS_RAW !== 'undefined' && BA_ITEMS_RAW) || (typeof globalThis !== 'undefined' && globalThis.BA_ITEMS_RAW) || ''; if (!raw && typeof require === 'function') { try { raw = require('./items-data.js').RAW; } catch (x) { } } _items = parseItems(raw); } return _items; }
