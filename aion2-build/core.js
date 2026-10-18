@@ -587,8 +587,8 @@
   /* ------------------------------------------------------------------ profile sync: Shugo.GG and Atool page text, merged with AionFlex.
      Nothing is fetched (all three sites block cross-site requests); the user copies the page or uses the bookmark button. */
   var SOURCES = {
-    atool: { id: 'atool', name: 'Atool', host: 'aion2tool.com', search: 'https://aion2tool.com/', gives: 'Gear Score, ranks, item soul engraving and manastones, skills, titles with effects, Divine and Core Stats, Daevanion nodes' },
-    shugo: { id: 'shugo', name: 'Shugo.GG', host: 'shugo.gg', search: 'https://shugo.gg/character', gives: 'Gear Score, gear, equipped stigmas, Daevanion nodes and bonuses, pet and wings' },
+    atool: { id: 'atool', name: 'Atool', host: 'aion2tool.com', search: 'https://aion2tool.com/', gives: 'Item Level (Gear Score), ranks, item soul engraving and manastones, skills, titles with effects, Divine and Core Stats, Daevanion nodes' },
+    shugo: { id: 'shugo', name: 'Shugo.GG', host: 'shugo.gg', search: 'https://shugo.gg/character', gives: 'Item Level (Gear Score), gear, equipped stigmas, Daevanion nodes and bonuses, pet and wings' },
     aionflex: { id: 'aionflex', name: 'AionFlex', host: 'aionflex.gg', search: 'https://aionflex.gg/search', gives: 'Item Level, gear, skills, Divine and Core Stats with cap, Daevanion %, titles, pet and wings' }
   };
   var SOURCE_ORDER = ['atool', 'shugo', 'aionflex']; // when sources disagree, the first one wins (Atool and Shugo show when they last refreshed)
@@ -635,7 +635,7 @@
       for (j = up + 1; j < Math.min(L.length, up + 14); j++) {
         if (CLASSES.indexOf(L[j]) >= 0 && !out.profile.cls) out.profile.cls = L[j];
         if (/^(Elyos|Asmodian)$/.test(L[j])) out.profile.race = L[j];
-        if (/^iLvl$/i.test(L[j])) out.gearScore = intOf(L[j + 1]);
+        if (/^iLvl$/i.test(L[j])) out.itemLevel = out.gearScore = intOf(L[j + 1]);
         if (/^CP$/.test(L[j])) out.cp = intOf(L[j + 1]);
       }
       if (L[up + 1] && CLASSES.indexOf(L[up + 1]) < 0) out.profile.title = L[up + 1];
@@ -682,7 +682,7 @@
     out.profile.race = after('Race', rI); if (!out.profile.server) out.profile.server = after('Server', rI);
     var c = after('Class', rI); if (CLASSES.indexOf(c) >= 0) out.profile.cls = c;
     var g = after('Legion', rI); if (g && !/^Server #/.test(g)) out.profile.guild = g;
-    out.gearScore = intOf(after('Gear Score'));
+    out.itemLevel = out.gearScore = intOf(after('Gear Score')); // Gear Score is the same stat as Item Level
     var cpI = L.indexOf('Combat Power'); if (cpI >= 0) for (j = cpI + 1; j < cpI + 8; j++) if (intOf(L[j]) != null) { out.cp = intOf(L[j]); break; }
     var rk = {}; ['Overall Rank', 'Class Rank', 'Server Rank'].forEach(function (k) { var a = L.indexOf(k); if (a >= 0) rk[k.split(' ')[0].toLowerCase()] = { top: L[a + 1], pos: L[a + 2] }; });
     if (Object.keys(rk).length) out.ranks = rk;
@@ -775,7 +775,7 @@
     function F(path, lab, value, kind, extra) { if (value == null || value === '') return; var o = { path: path, label: lab, value: value, uncertain: false, error: null, kind: kind || 'number', source: p.source }; if (extra) for (var k in extra) o[k] = extra[k]; f.push(o); }
     var pr = p.profile || {};
     ['name', 'cls', 'race', 'server', 'region', 'guild', 'title'].forEach(function (k) { if (pr[k]) F('profile.' + k, { name: 'Name', cls: 'Class', race: 'Race', server: 'Server', region: 'Region', guild: 'Guild', title: 'Title' }[k], String(pr[k]).slice(0, 40), 'text'); });
-    F('level', 'Level', pr.level); F('cp', 'Combat Power', p.cp); F('itemLevel', 'Item Level', p.itemLevel); F('gearScore', 'Gear Score', p.gearScore);
+    F('level', 'Level', pr.level); F('cp', 'Combat Power', p.cp); F('itemLevel', 'Item Level (Gear Score)', p.itemLevel != null ? p.itemLevel : p.gearScore);
     assignSlots(p.equipment || [], d, hints).forEach(function (it) {
       var sn = SLOT_BY_ID[it.slot].name;
       F('equipment.' + it.slot + '.name', sn + ' item', it.name, 'text', { slot: it.slot }); F('equipment.' + it.slot + '.enh', sn + ' enhancement', it.enh, 'number', { slot: it.slot });

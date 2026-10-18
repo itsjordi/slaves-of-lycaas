@@ -394,10 +394,10 @@ test('Atool page text, with item details', () => {
 test('three sources merge into one review, pair slots follow AionFlex', () => {
   const ps = [AT, SH, AF].map(t => BA.parseSourceText(t, ''));
   const d = BA.blankData('Assassin'), f = BA.syncFields(ps, d);
-  assert.ok(!f.some(x => x.note), 'the samples agree');
+  assert.deepEqual(f.filter(x => x.note).map(x => x.path), ['itemLevel'], 'only Item Level differs (AionFlex 1701 vs 1230)');
   assert.equal(f.filter(x => x.path === 'equipment.earring_2.name')[0].value, 'Pilgrim Earrings');
   BA.applyFields(d, f, BA.meta('imported', 'sync', '2026-10-19'));
-  assert.equal(BA.num(d.gearScore), 1230); assert.equal(d.equipment.torso.engravingPct, 93.1);
+  assert.equal(BA.num(d.itemLevel), 1230, 'Atool wins over AionFlex for Item Level / Gear Score'); assert.equal(d.equipment.torso.engravingPct, 93.1);
   assert.equal(d.equipment.main_hand.soulBinding[0].grade, 'S');
   assert.ok(d.external.atool.hexagon.length === 6);
   const again = BA.syncFields(ps, d);

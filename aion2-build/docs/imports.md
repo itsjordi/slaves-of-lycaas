@@ -15,9 +15,11 @@ What each parser reads:
 
 | Site | Parser | Reads |
 | --- | --- | --- |
-| Atool | `BA.parseAtoolText` | name, server, race, class, legion, last-updated date (used as observation date), Gear Score, Combat Power, overall/class/server rank, DPS hexagon (without Daevanion), skills by type, every item with base stats, soul engraving lines with grade and %, sub-skills, manastones and theostone, Daevanion nodes, title count and equipped titles with effects, Divine Stats, common (core) stats, pet and wings names |
-| Shugo.GG | `BA.parseShugoText` | name, level, server, class, race, title, Gear Score ("iLvl"), Combat Power, gear by slot, active and passive skills, equipped stigmas (not-acquired ones are skipped), Daevanion nodes and the board stat bonuses, pet and level, wings |
+| Atool | `BA.parseAtoolText` | name, server, race, class, legion, last-updated date (used as observation date), Gear Score (stored as Item Level), Combat Power, overall/class/server rank, DPS hexagon (without Daevanion), skills by type, every item with base stats, soul engraving lines with grade and %, sub-skills, manastones and theostone, Daevanion nodes, title count and equipped titles with effects, Divine Stats, common (core) stats, pet and wings names |
+| Shugo.GG | `BA.parseShugoText` | name, level, server, class, race, title, Item Level / Gear Score ("iLvl"), Combat Power, gear by slot, active and passive skills, equipped stigmas (not-acquired ones are skipped), Daevanion nodes and the board stat bonuses, pet and level, wings |
 | AionFlex | `BA.parseAionFlexText` | see below |
+
+Item Level and Gear Score are the same stat and are stored as one value. For lycaa on 2026-10-18 AionFlex showed 1,701 while Atool and Shugo.GG showed 1,230; the review flags this and Atool wins by default.
 
 Not read on purpose: Shugo.GG Divine Stats (showed 0 for every stat on 2026-10-18) and its "Base stats" (lower than the totals on the other sites). Atool's own score and stat simulations are their estimates, not game values.
 
