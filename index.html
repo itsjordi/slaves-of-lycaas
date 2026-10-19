@@ -102,6 +102,9 @@
   .opt[hidden]{display:none}
   .opt.tools{color:#7fd0c0}.opt.tools b{color:#9fffe6}.opt.tools.sel{background:#08261f;border-color:#5dffc8;color:#9fffe6}
   .opt.back{color:#8a90a8;padding-top:5px;padding-bottom:5px}.opt.back b{font-size:14px;color:#c0c6dc}.opt.back.sel{background:#141a2e;border-color:#9aa2c0;color:#e0e6f6}
+  .opt.games{color:#e8b07a}.opt.games b{color:#ffcf8a}.opt.games.sel{background:#2a1608;border-color:#ff9a2a;color:#ffcf8a}
+  .opt.brick{color:#e88aa8}.opt.brick b{color:#ff8ab8}.opt.brick.sel{background:#2a0818;border-color:#ff4fb8;color:#ffd0e4}
+  .opt.secret{color:#e8d07a}.opt.secret b{color:#ffe08a}.opt.secret.sel{background:#2a2208;border-color:#ffd24f;color:#fff0b0}
   .opt.portfolio{color:#b9a8e8}.opt.portfolio b{color:#e0d0ff}.opt.portfolio.sel{background:#1e1442;border-color:#c9a8ff;color:#e6d8ff}
   .opt.soon{color:#5a6078;border-style:dashed}.opt.soon b{color:#7a809a}.opt.soon.sel{border-color:#9aa2c0;color:#cfd6ee;background:#12162a}
   .opt .last{display:inline-block;margin-left:10px;font-size:11px;letter-spacing:.15em;color:#ffd24f;border:1px solid #ffd24f;padding:0 6px;vertical-align:3px}
@@ -183,6 +186,16 @@
   #soon p{margin:26px 0 0;color:var(--neon-gold);letter-spacing:.3em;font-size:13px;animation:press 1s steps(1) infinite}
   @keyframes crton{0%{transform:scaleY(.02);opacity:0}60%{transform:scaleY(1);opacity:.6}100%{opacity:1}}
 
+  #exploreBtn{position:fixed;right:18px;bottom:18px;z-index:4;font:inherit;font-size:12px;letter-spacing:.25em;color:#ffd24f;background:rgba(8,5,18,.6);border:2px solid #8a6a1a;padding:7px 14px;cursor:pointer}
+  #exploreBtn:hover{border-color:#ffd24f;color:#fff}
+  body.walking #exploreBtn,body.arrived #exploreBtn,body.exploring #exploreBtn,body.exploring #walkBtn,body.exploring #skipArcade,body.exploring #hud{display:none!important}
+  #exploreHelp{display:none;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:20;font-size:12px;letter-spacing:.12em;color:#e8e2ff;background:rgba(8,5,18,.75);border:1px solid #4a4478;padding:8px 14px;white-space:nowrap}
+  body.exploring #exploreHelp{display:block}
+  #pickTip{display:none;position:fixed;z-index:30;pointer-events:none;font-size:12px;letter-spacing:.1em;color:#fff;background:rgba(8,5,18,.85);border:1px solid #4fe6ff;padding:5px 9px}
+  #sndBtn{min-width:76px}
+  body.gaming #back,body.gaming #lang{opacity:0;pointer-events:none}
+  .gamecv{position:absolute;inset:0;width:100%;height:100%;z-index:5;cursor:none;image-rendering:auto}
+  .secretToast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:80;font-size:13px;letter-spacing:.12em;color:#1a1000;background:#ffd24f;padding:10px 16px;box-shadow:0 0 24px #ffd24f}
   #lang{position:fixed;right:14px;top:14px;z-index:70;display:flex;gap:6px}
   #lang button{font:inherit;font-size:12px;letter-spacing:.15em;color:#a99ac9;background:rgba(8,5,18,.7);border:2px solid #4a4478;padding:6px 10px;cursor:pointer}
   #lang button[aria-pressed="true"]{color:#fff;border-color:var(--neon-cyan)}
@@ -258,6 +271,10 @@
           <h2 data-i="select">SELECT YOUR GAME</h2>
           <a class="opt portfolio" href="portfolio.html" data-page="main" data-game="portfolio" data-file="portfolio.html"><b>JORDI'S PORTFOLIO</b><small data-i="s_port">Projects, about me, career</small><span class="st" data-i="start">PRESS START</span></a>
           <button type="button" class="opt tools" data-page="main" data-sub="tools"><b data-i="tools">TOOLS &rsaquo;</b><small data-i="s_tools">Retainer's Ledger · AION 2 Board</small><span class="st" data-i="open2">OPEN</span></button>
+          <button type="button" class="opt games" data-page="main" data-sub="games"><b data-i="games">GAMES &rsaquo;</b><small data-i="s_games">Play a real arcade game</small><span class="st" data-i="open2">OPEN</span></button>
+          <button type="button" class="opt brick" data-page="games" data-play="brick" hidden><b>BRICK BUST</b><small data-i="s_brick">Break every brick. Arrows or mouse.</small><span class="st" data-i="start">PRESS START</span></button>
+          <button type="button" class="opt secret" data-page="games" data-play="secret" data-locked="1" hidden><b>&#9733; LYCAA'S LAIR</b><small data-i="s_secret">You found the secret machine</small><span class="st" data-i="start">PRESS START</span></button>
+          <button type="button" class="opt back" data-page="games" data-sub="main" hidden><b data-i="back2">&lsaquo; BACK</b><small data-i="s_back">To the main menu</small><span class="st" data-i="open2">OPEN</span></button>
           <a class="opt ffxiv" href="ffxiv.html" data-page="tools" data-game="ffxiv" data-file="ffxiv.html" hidden><b>RETAINER'S LEDGER</b><small data-i="s_ffxiv">FFXIV: craft costs, profit, gil per hour</small><span class="st" data-i="start">PRESS START</span></a>
           <a class="opt aion" href="aion2.html" data-page="tools" data-game="aion2" data-file="aion2.html" hidden><b>AION 2 BOARD</b><small data-i="s_aion">Dailies, timers and alts</small><span class="st" data-i="start">PRESS START</span></a>
           <button type="button" class="opt back" data-page="tools" data-sub="main" hidden><b data-i="back2">&lsaquo; BACK</b><small data-i="s_back">To the main menu</small><span class="st" data-i="open2">OPEN</span></button>
@@ -307,12 +324,12 @@
   var I18N = {
     en: { tag:"Two game tools · my portfolio", open:"OPEN", walk:"WALK IN", walking:"WALKING TO A MACHINE...", skip:"SKIP TO PORTFOLIO", back:"WALK BACK",
       coin:"INSERT COIN", moment:"ONE MOMENT...", loading:"LOADING...", select:"SELECT YOUR GAME",
-      s_ffxiv:"FFXIV: craft costs, profit, gil per hour", s_aion:"Dailies, timers and alts", s_club:"A team app for my football team", s_port:"Projects, about me, career", tools:"TOOLS &rsaquo;", s_tools:"Retainer's Ledger · AION 2 Board", back2:"&lsaquo; BACK", s_back:"To the main menu", open2:"OPEN", select_tools:"TOOLS",
+      s_ffxiv:"FFXIV: craft costs, profit, gil per hour", s_aion:"Dailies, timers and alts", s_club:"A team app for my football team", s_port:"Projects, about me, career", tools:"TOOLS &rsaquo;", s_tools:"Retainer's Ledger · AION 2 Board", games:"GAMES &rsaquo;", s_games:"Play a real arcade game", s_brick:"Break every brick. Arrows or mouse.", s_secret:"You found the secret machine", select_games:"GAMES", back2:"&lsaquo; BACK", s_back:"To the main menu", open2:"OPEN", select_tools:"TOOLS",
       start:"PRESS START", f1:"UP / DOWN: MOVE", f2:"ENTER: START", f3:"CREDIT 01", soon:"Coming soon<br>to your local<br>arcade hall", anykey:"PRESS ANY KEY",
       boot:["JORDI'S ARCADE BIOS v1.0","CHECKING MEMORY ........ OK","LOADING CABINET ......... OK","CREDIT 01","","READY."] },
     nl: { tag:"Twee gametools · mijn portfolio", open:"OPEN", walk:"LOOP BINNEN", walking:"LOOP NAAR EEN MACHINE...", skip:"SLA OVER, NAAR PORTFOLIO", back:"LOOP TERUG",
       coin:"MUNT IN", moment:"EEN MOMENT...", loading:"LADEN...", select:"KIES JE SPEL",
-      s_ffxiv:"FFXIV: craftkosten, winst, gil per uur", s_aion:"Dailies, timers en alts", s_club:"Een team-app voor mijn voetbalteam", s_port:"Projecten, over mij, loopbaan", tools:"TOOLS &rsaquo;", s_tools:"Retainer's Ledger · AION 2 Board", back2:"&lsaquo; TERUG", s_back:"Terug naar het hoofdmenu", open2:"OPEN", select_tools:"TOOLS",
+      s_ffxiv:"FFXIV: craftkosten, winst, gil per uur", s_aion:"Dailies, timers en alts", s_club:"Een team-app voor mijn voetbalteam", s_port:"Projecten, over mij, loopbaan", tools:"TOOLS &rsaquo;", s_tools:"Retainer's Ledger · AION 2 Board", games:"GAMES &rsaquo;", s_games:"Speel een echt arcadespel", s_brick:"Breek alle stenen. Pijltjes of muis.", s_secret:"Je vond de geheime kast", select_games:"GAMES", back2:"&lsaquo; TERUG", s_back:"Terug naar het hoofdmenu", open2:"OPEN", select_tools:"TOOLS",
       start:"DRUK OP START", f1:"OP / NEER: KIES", f2:"ENTER: START", f3:"CREDIT 01", soon:"Binnenkort<br>in je eigen<br>speelhal", anykey:"DRUK OP EEN TOETS",
       boot:["JORDI'S ARCADE BIOS v1.0","GEHEUGEN CONTROLEREN ... OK","KAST LADEN ............. OK","CREDIT 01","","KLAAR."] }
   };
@@ -622,6 +639,11 @@
         g.fillStyle = NEON.gold; g.fillRect(12, 16, 8, 6);
         g.fillStyle = '#20103a'; for (var x = 0; x < 32; x++){ var h = 30 - Math.abs((x % 16) - 8)*1.6; g.fillRect(x, h, 1, 44 - h); }
         g.fillStyle = '#0c0820'; for (var x3 = 0; x3 < 32; x3++){ var h2 = 36 - Math.abs(((x3 + 6) % 12) - 6)*1.4; g.fillRect(x3, h2, 1, 44 - h2); }
+      } else if (kind === 'daeva'){
+        var gr = g.createLinearGradient(0, 0, 0, 44); gr.addColorStop(0, '#0a1a3a'); gr.addColorStop(1, '#2a0a3a'); g.fillStyle = gr; g.fillRect(0, 0, 32, 44);
+        g.fillStyle = '#8fd8ff'; for (var wi = 0; wi < 6; wi++){ g.fillRect(15 - 3 - wi*2, 12 + wi, 2 + wi, 1); g.fillRect(17 + wi*2 - wi, 12 + wi, 2 + wi, 1); }
+        g.fillStyle = '#fff'; g.fillRect(15, 11, 2, 9); g.fillStyle = NEON.gold; g.fillRect(15, 9, 2, 2);
+        ctext(g, 'AION 2', 16, 30, 1, '#8fd8ff'); ctext(g, 'DAEVA', 16, 37, 1, NEON.gold);
       } else if (kind === 'hero'){
         g.fillStyle = '#0f1640'; g.fillRect(0, 0, 32, 44);
         g.fillStyle = '#2a3a8a'; g.fillRect(0, 30, 32, 14);
@@ -642,8 +664,16 @@
       mats[key] = new T3.MeshBasicMaterial({ map: ctex(c), fog: true, color: 0xbfbfd8 }); mats[key].userData.glow = true;
       return key;
     }
+    var scoreCanvas = null;
+    function drawScores(rows){
+      var c = scoreCanvas, g = c.getContext('2d');
+      g.clearRect(0, 0, 400, 220); g.fillStyle = '#05040f'; g.fillRect(0, 0, 400, 220); g.strokeStyle = '#a85cff'; g.lineWidth = 3; g.strokeRect(6, 6, 388, 208);
+      neonText(g, 'HIGH SCORES', 200, 34, 30, NEON.pink);
+      rows.slice(0, 4).forEach(function(r, i){ var y = 82 + i*36; neonText(g, String(i + 1), 40, y, 24, NEON.gold, { core: '#fff3c8' }); neonText(g, r[0], 70, y, 24, '#c9c0ff', { align: 'left', core: '#f4f0ff' }); neonText(g, String(r[1]), 360, y, 24, NEON.cyan, { align: 'right', font: 'ui-monospace, Menlo, Consolas, monospace', weight: '700' }); });
+      if (mats.score) mats.score.map.needsUpdate = true;
+    }
     function scoreboard(){
-      var c = canvas(400, 220), g = c.getContext('2d');
+      var c = canvas(400, 220), g = c.getContext('2d'); scoreCanvas = c;
       g.fillStyle = '#05040f'; g.fillRect(0, 0, 400, 220); g.strokeStyle = '#a85cff'; g.lineWidth = 3; g.strokeRect(6, 6, 388, 208);
       neonText(g, 'HIGH SCORES', 200, 34, 30, NEON.pink);
       var rows = [['1', 'JORDI', '999990'], ['2', 'LEDGER', '812300'], ['3', 'AION 2', '640180'], ['4', 'LYCAA', '525060']];
@@ -805,6 +835,7 @@
       part(root, G.plane(1.0, 1.3), poster('hero'), 3.4, 3.1, ZF + .02);
       part(root, G.plane(1.0, 1.3), poster('ship'), -6.4, 3.1, ZF + .02);
       part(root, G.plane(1.0, 1.3), poster('gameon'), 6.4, 3.1, ZF + .02);
+      part(root, G.plane(.8, 1.05), poster('daeva'), HALF - .02, 3.15, 12.2, 0, -Math.PI/2);
     })();
 
     // light shafts: soft cones from the ceiling lamps, as if there is a bit of smoke in the air
@@ -935,6 +966,14 @@
     cabinet(-1.25, ZF + .5, 0, { trim: 'pink', screen: S.fight, marquee: marquee('PIXEL FIGHT', NEON.pink), seed: 2 });
     cabinet(1.25, ZF + .5, 0, { trim: 'cyan', screen: S.racer, marquee: marquee('TURBO RUN', NEON.cyan), seed: 3 });
     cabinet(-2.5, ZF + .5, 0, { trim: 'gold', screen: S.maze, marquee: marquee('MAZE MUNCH', NEON.gold), seed: 4 });
+    // the secret machine in the back corner: static until somebody enters the Konami code
+    var secretOn = false;
+    S.secret = screen(function(g, t){
+      if (!secretOn){ for (var y = 0; y < 48; y += 2) for (var x = 0; x < 64; x += 2){ var v = Math.floor(Math.random()*90); g.fillStyle = 'rgb(' + v + ',' + v + ',' + (v + 20) + ')'; g.fillRect(x, y, 2, 2); } return; }
+      clr(g, '#0a0418'); for (var i = 0; i < 18; i++){ g.fillStyle = [NEON.gold, NEON.pink, NEON.cyan][i % 3]; g.fillRect((i*13 + t*30) % 64, (i*7 + t*20*(1 + i % 3)) % 48, 2, 2); }
+      ctext(g, 'YOU FOUND', 32, 12, 1, NEON.gold); ctext(g, 'THE SECRET', 32, 20, 1, NEON.pink); ctext(g, 'LYCAA WAS HERE', 32, 32, 1, NEON.cyan);
+    });
+    cabinet(-HALF + .48, ZF + 1.6, Math.PI/2, { trim: 'purple', screen: S.secret, marquee: marquee('???', NEON.purple), seed: 6 });
     cabinet(2.5, ZF + .5, 0, { trim: 'purple', screen: S.bricks, marquee: marquee('BRICK BUST', NEON.purple), seed: 5 });
     person(-2.5, ZF + 1.45, 0, 7);
     // front area: air hockey and pinball by the door, the counter on the right
@@ -945,7 +984,7 @@
     // lamps with light shafts over the islands and the aisles
     [[0, 9], [0, 4.5], [0, 0], [0, -4.5], [0, -9.6], [-5.5, 6], [-5.5, -1], [5.5, 2.5], [5.5, -4], [-4.6, -6], [4.6, -6]].forEach(function(l, i){ shaft(l[0], l[1], [0xffe0b0, 0xc8a0ff, 0xa0f0ff][i % 3], 1.0); });
 
-    var night = {};
+    var night = {}, api_pickAt = null;
     // ---------- outside: street, facade, neon sign, doors ----------
     var FZ = ZN + .15, DOOR = 1.1, DH = 2.7;
     (function(){
@@ -1123,13 +1162,16 @@
       // the sky: deep blue to violet, a moon, stars
       var sk = canvas(4, 128), kg = sk.getContext('2d'), skg = kg.createLinearGradient(0, 0, 0, 128);
       skg.addColorStop(0, '#05041a'); skg.addColorStop(.55, '#1a1046'); skg.addColorStop(.85, '#4a2060'); skg.addColorStop(1, '#7a3a5a'); kg.fillStyle = skg; kg.fillRect(0, 0, 4, 128);
-      var sky = new T3.Mesh(new T3.PlaneGeometry(320, 90), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(sk), fog: false, depthWrite: false }));
+      var skyTex = new T3.CanvasTexture(sk);
+      var sky = new T3.Mesh(new T3.PlaneGeometry(320, 90), new T3.MeshBasicMaterial({ map: skyTex, fog: false, depthWrite: false }));
+      night.skyCanvas = sk; night.skyTex = skyTex;
       sky.position.set(0, 40, -90); scene.add(sky);
       var moonC = canvas(128, 128), mg = moonC.getContext('2d'), mgr = mg.createRadialGradient(64, 64, 10, 64, 64, 64);
       mgr.addColorStop(0, 'rgba(255,248,224,1)'); mgr.addColorStop(.42, 'rgba(255,240,200,1)'); mgr.addColorStop(.46, 'rgba(255,230,190,.35)'); mgr.addColorStop(1, 'rgba(255,220,180,0)'); mg.fillStyle = mgr; mg.fillRect(0, 0, 128, 128);
-      var moon = new T3.Mesh(new T3.PlaneGeometry(14, 14), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(moonC), transparent: true, fog: false, depthWrite: false })); moon.position.set(-30, 44, -88); scene.add(moon);
+      var moon = new T3.Mesh(new T3.PlaneGeometry(14, 14), new T3.MeshBasicMaterial({ map: new T3.CanvasTexture(moonC), transparent: true, fog: false, depthWrite: false })); moon.position.set(-30, 44, -88); scene.add(moon); night.moon = moon;
       var starsM = new T3.MeshBasicMaterial({ color: 0xcfd6ff, fog: false });
       for (var s2 = 0; s2 < 70; s2++){ var st2 = new T3.Mesh(new T3.PlaneGeometry(.35, .35), starsM); st2.position.set(-140 + rnd()*280, 30 + rnd()*40, -89); scene.add(st2); }
+      night.starsM = starsM;
     })();
     // the two sliding doors (moved every frame, so not merged)
     var doors = [];
@@ -1143,6 +1185,12 @@
     });
     var lampLight = new T3.PointLight(0xffc070, 1.1, 11, 1.4); lampLight.position.set(-4.2, 3.4, ZN + 4.4); scene.add(lampLight);
     [[-HALF - 4.3, 2.6, FZ + 3, 0xff9a4a], [HALF + 4.3, 2.6, FZ + 3, 0x7a4aff], [-HALF - 12.3, 2.6, FZ + 3, 0xffc070], [HALF + 12.3, 2.6, FZ + 3, 0xff8a2a]].forEach(function(l){ var p = new T3.PointLight(l[3], 1.0, 9, 1.5); p.position.set(l[0], l[1], l[2]); scene.add(p); });
+    // rain: streaks falling around you outside, switched on when it really rains in Prague
+    var RAIN_N = 1400, rainPos = new Float32Array(RAIN_N*6), rainGeo = new T3.BufferGeometry();
+    for (var ri = 0; ri < RAIN_N; ri++){ var rx = -22 + Math.random()*44, ry = Math.random()*12, rz = ZN - 2 + Math.random()*22; rainPos.set([rx, ry, rz, rx + .02, ry - .45, rz], ri*6); }
+    rainGeo.setAttribute('position', new T3.BufferAttribute(rainPos, 3));
+    var rain = new T3.LineSegments(rainGeo, new T3.LineBasicMaterial({ color: 0x9ab8ff, transparent: true, opacity: .45, fog: true }));
+    rain.visible = false; rain.frustumCulled = false; scene.add(rain); night.rain = rain;
     // the tram: rolls past now and then while you stand on the other side of the street
     var tram = new T3.Group(), mRed = new T3.MeshLambertMaterial({ color: 0xb8202a }), mCream = new T3.MeshLambertMaterial({ color: 0xe8dcc0 }), mTwin = new T3.MeshBasicMaterial({ color: 0xffe2a8, fog: true }), mDark = new T3.MeshLambertMaterial({ color: 0x1a1820 });
     [-4.2, 0, 4.2].forEach(function(sx){
@@ -1155,6 +1203,28 @@
     var pant = new T3.Mesh(new T3.BoxGeometry(1.2, .05, .05), mDark); pant.position.set(0, 3.5, 0); pant.rotation.z = .3; tram.add(pant);
     tram.position.set(-80, 0, ZN + 8.4); scene.add(tram); night.tram = tram;
     var signLight = new T3.PointLight(0xff4fb8, .9, 8, 1.6); signLight.position.set(0, 3.2, ZN + 1.6); scene.add(signLight);
+
+    // ---------- things you can click ----------
+    var picks = [], pickMat = new T3.MeshBasicMaterial({ visible: false });
+    function pick(x, y, z, w, h, d, data){ var m = new T3.Mesh(new T3.BoxGeometry(w, h, d), pickMat); m.position.set(x, y, z); m.userData = data; scene.add(m); picks.push(m); }
+    var HX = HALF + .3;
+    pick(-HX - 3.1, 1.6, FZ + .4, 4.4, 3.2, .6, { label: 'Bar Nova · cocktails', href: 'nightlife.html', out: true });
+    pick(-HX - 9.0, 1.6, FZ + .4, 3.6, 3.2, .6, { label: 'Nonstop', href: 'nightlife.html#nonstop', out: true });
+    pick(-HX - 14.6, 1.6, FZ + .4, 3.2, 3.2, .6, { label: 'Pivo · beer', href: 'nightlife.html#pivo', out: true });
+    pick(HX + 3.4, 1.6, FZ + .4, 3.4, 3.4, .6, { label: 'Club · tonight', href: 'nightlife.html#club', out: true });
+    pick(HX + 9.6, 1.6, FZ + .4, 3.4, 3.2, .6, { label: 'Jazz bar · about me', href: 'about.html', out: true });
+    pick(HX + 15.2, 1.6, FZ + .4, 3.2, 3.2, .6, { label: 'Karaoke · my portfolio', href: 'portfolio.html', out: true });
+    pick(2.35, 1.2, 5.4, .9, 2.3, .9, { label: "Retainer's Ledger", href: 'ffxiv.html' });
+    pick(2.35, 1.2, 1.4, .9, 2.3, .9, { label: 'AION 2 Board', href: 'aion2.html' });
+    pick(-2.35, 1.2, 2.4, .9, 2.3, .9, { label: "Jordi's Portfolio", href: 'portfolio.html' });
+    pick(0, 1.2, ZF + .5, .9, 2.3, .9, { label: "Jordi's Arcade: play here", machine: true });
+    pick(-HALF + .48, 1.2, ZF + 1.6, .9, 2.3, .9, { label: '???', secret: true });
+    var ray = new T3.Raycaster(), ndc = new T3.Vector2();
+    api_pickAt = function(cx, cy){
+      ndc.set(cx/innerWidth*2 - 1, -(cy/innerHeight)*2 + 1); ray.setFromCamera(ndc, camera);
+      var hit = ray.intersectObjects(picks, false)[0];
+      return hit && hit.distance < 30 ? hit.object.userData : null;
+    };
 
     // ---------- bake ----------
     var mirror = new T3.Group(); mirror.scale.set(1, -1, 1); scene.add(mirror);
@@ -1322,6 +1392,37 @@
     }
 
     var api = { END: END, three: true, onScreen: null };
+    var expl = { on: false, x: 0, z: ZN - 1.2, yaw: 0, pitch: -.05, k: {} };
+    // simple walls for explore mode: the island blocks, the wall machines, the counter and the back row
+    var BLOCKS = [[-3.75, -1.5, -2.3, 6.9], [1.5, 3.75, -2.3, 6.9], [-HALF, -HALF + 1.15, -14, 14], [HALF - 1.15, HALF, -14, 14], [3.9, HALF, 9.9, 14], [-6.2, -4.1, -7.4, -4.2], [3.9, 6.4, -7.2, -4.4], [-3.4, -1.8, -9.4, -7.8], [1.8, 3.4, -9.4, -7.8], [-6.3, -2.6, 9.4, 11.4], [2.8, 5.1, 8.0, 9.8], [-HALF, HALF, -14, ZF + 1.15]];
+    function blocked(x, z){ if (z > ZN - .4 || z < ZF + .3) return true; for (var i = 0; i < BLOCKS.length; i++){ var b = BLOCKS[i]; if (x > b[0] - .3 && x < b[1] + .3 && z > b[2] - .3 && z < b[3] + .3) return true; } return false; }
+    api.explore = function(on){ expl.on = !!on; expl.k = {}; if (on){ expl.x = 0; expl.z = ZN - 1.2; expl.yaw = 0; expl.pitch = -.05; expl.last = 0; } };
+    api.exploreKey = function(k, down){ expl.k[k] = down; };
+    api.exploreLook = function(dx, dy){ expl.yaw += dx*.005; expl.pitch = Math.max(-1.1, Math.min(.9, expl.pitch - dy*.004)); };
+    api.pickAt = function(x, y){ return api_pickAt ? api_pickAt(x, y) : null; };
+    api.camZ = function(){ return camera.position.z; };
+    api.ZN = ZN;
+    api.setScores = function(rows){ if (scoreCanvas) drawScores(rows); };
+    api.unlockSecret = function(){
+      secretOn = true;
+      var m = mats['mq_???_' + NEON.purple]; if (!m) return;
+      var c = m.map.image, g = c.getContext('2d'); g.fillStyle = '#120a20'; g.fillRect(0, 0, c.width, c.height);
+      neonText(g, "LYCAA'S LAIR", c.width/2, c.height/2 + 1, 30, NEON.gold, { max: c.width - 24 }); m.map.needsUpdate = true;
+    };
+    api.flickerSign = function(ms){ night.flicker = performance.now() + (ms || 2500); };
+    api.setRain = function(on){ if (night.rain) night.rain.visible = !!on; };
+    // Prague time: dusk, night, dawn and day change the sky, the moon and the street lights
+    api.setTimeOfDay = function(mode){
+      var g = night.skyCanvas && night.skyCanvas.getContext('2d'); if (!g) return;
+      var stops = { night: ['#05041a', '#1a1046', '#4a2060', '#7a3a5a'], dusk: ['#140a3a', '#4a2a7a', '#c0507a', '#ff9a6a'], dawn: ['#1a1a4a', '#5a5a9a', '#d08aa0', '#ffc88a'], day: ['#3a6ab0', '#6a9ad0', '#a8c8e8', '#e0e8f0'] }[mode] || [];
+      var gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, stops[0]); gr.addColorStop(.55, stops[1]); gr.addColorStop(.85, stops[2]); gr.addColorStop(1, stops[3]);
+      g.fillStyle = gr; g.fillRect(0, 0, 4, 128); night.skyTex.needsUpdate = true;
+      if (night.moon){ night.moon.visible = mode !== 'day'; night.moon.material.opacity = mode === 'night' ? 1 : .55; }
+      if (night.starsM){ night.starsM.transparent = true; night.starsM.opacity = mode === 'night' ? 1 : (mode === 'day' ? 0 : .35); }
+      var on = mode === 'day' ? .35 : 1; ['bulbW', 'bulbP', 'bulbC'].forEach(function(k){ if (mats[k]){ mats[k].userData.base = mats[k].userData.base || mats[k].color.clone(); mats[k].color.copy(mats[k].userData.base).multiplyScalar(on); } });
+      if (mats.lanternGlass){ mats.lanternGlass.userData.base = mats.lanternGlass.userData.base || mats.lanternGlass.color.clone(); mats.lanternGlass.color.copy(mats.lanternGlass.userData.base).multiplyScalar(mode === 'day' ? .4 : 1); }
+      api.timeOfDay = mode;
+    };
     function projectScreen(){
       if (!api.onScreen) return;
       var vw = innerWidth, vh = innerHeight, x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
@@ -1347,7 +1448,17 @@
       var chase = Math.floor(t*4) % 2; mats.bulbA.color.setHex(chase ? 0xffe08a : 0x5a4220); mats.bulbB.color.setHex(chase ? 0x5a4220 : 0xffe08a);
       mats.open.color.setHex((Math.floor(t*1.3) % 5) === 4 ? 0x404050 : 0xffffff);
       if (slotFlash){ var fl = Math.min(1, (now - slotFlash)/450); mats.coin.color.setHex(fl < 1 ? (fl < .5 ? 0xffffff : 0xffd08a) : 0xff9a2a); if (fl >= 1) slotFlash = 0; }
-      if (seq){
+      if (expl.on && !seq){
+        var dt = Math.min(.1, (now - (expl.last || now))/1000); expl.last = now;
+        var fw = (expl.k.f ? 1 : 0) - (expl.k.b ? 1 : 0), sd2 = (expl.k.r ? 1 : 0) - (expl.k.l ? 1 : 0);
+        expl.yaw += ((expl.k.tr ? 1 : 0) - (expl.k.tl ? 1 : 0))*dt*1.8;
+        var sp = 3.2*dt, nx = expl.x + (Math.sin(expl.yaw)*fw + Math.cos(expl.yaw)*sd2)*sp, nz = expl.z + (-Math.cos(expl.yaw)*fw + Math.sin(expl.yaw)*sd2)*sp;
+        if (!blocked(nx, expl.z)) expl.x = nx; if (!blocked(expl.x, nz)) expl.z = nz;
+        var bobE = (fw || sd2) ? Math.sin(now/140)*.025 : 0;
+        POS.set(expl.x, 1.62 + bobE, expl.z);
+        LOOK.set(expl.x + Math.sin(expl.yaw)*Math.cos(expl.pitch), 1.62 + Math.sin(expl.pitch), expl.z - Math.cos(expl.yaw)*Math.cos(expl.pitch));
+        if (camera.fov !== baseFov){ camera.fov = baseFov; camera.updateProjectionMatrix(); }
+      } else if (seq){
         var st = api.freeze != null ? api.freeze : (now - seq.t0)/1000, fin = seq.run(st);
         if (fin && api.freeze == null){ var cb = seq.done; seq = null; if (cb) cb(); }
       } else {
@@ -1360,6 +1471,12 @@
       var open = sm((ZN + 4.6 - camera.position.z)/2.6) * (1 - sm((ZN - 1.5 - camera.position.z)/3));
       // nightlife: the club sign pulses with the beat, the tram comes by every half minute
       if (night.club){ var beat = .55 + .45*Math.pow(Math.abs(Math.sin(t*Math.PI*2.1)), 3); night.club.color.setRGB(beat, beat, beat); }
+      if (night.rain && night.rain.visible){
+        var rp = night.rain.geometry.attributes.position.array, dy = (t - (night.rainT || t))*14; night.rainT = t;
+        for (var r2 = 0; r2 < rp.length; r2 += 6){ rp[r2 + 1] -= dy; rp[r2 + 4] -= dy; if (rp[r2 + 4] < 0){ rp[r2 + 1] += 12; rp[r2 + 4] += 12; } }
+        night.rain.geometry.attributes.position.needsUpdate = true;
+      }
+      if (night.flicker && now < night.flicker){ mats.sign.color.setScalar(Math.random() < .35 ? .2 : 1); } else if (night.flicker){ mats.sign.color.setScalar(1); night.flicker = 0; }
       if (night.tram){ var ph = (t % 32)/32, tx = -48 + ph*32*7.5; night.tram.visible = camera.position.z > ZN + 10.5 && tx < 48; night.tram.position.x = tx; }
       doors.forEach(function(d){ d.position.x = d.userData.sd*(DOOR/2 + open*(DOOR - .08)); });
       renderer.render(scene, camera);
@@ -1424,7 +1541,8 @@
     }
     function walkIn(){
       if (state !== 'hall') return;
-      state = 'walking'; body.classList.add('walking');
+      state = 'walking'; body.classList.add('walking'); fx('walk');
+      window.__walkIns = (window.__walkIns || 0) + 1; if (window.__walkIns % 3 === 0 && Hall.flickerSign) Hall.flickerSign(3000);
       walk(TARGET, Hall.three ? 15000 : 12500, function(){
         state = 'arrived'; body.classList.remove('walking'); body.classList.add('arrived'); paint(0); resetMachine(); setTimeout(function(){ if (state === 'arrived') insertCoin(); }, Hall.three ? 500 : 1400);
       });
@@ -1438,6 +1556,17 @@
     }
     document.getElementById('walkBtn').addEventListener('click', walkIn);
     document.getElementById('back').addEventListener('click', walkBack);
+    // for the extras (explore mode, sound): read the state, jump straight to the machine
+    window.__arcade = {
+      state: function(){ return state; },
+      walkIn: walkIn,
+      arrive: function(){
+        cancelAnimationFrame(raf); cam = TARGET; state = 'arrived';
+        body.classList.remove('walking'); body.classList.add('arrived'); fit(); paint(0); resetMachine();
+        setTimeout(function(){ if (state === 'arrived') insertCoin(); }, 500);
+      },
+      unlock: function(){ document.querySelectorAll('.opt[data-locked]').forEach(function(o){ o.dataset.locked = '0'; }); }
+    };
 
     // size the close-up picture like the hall (cover), and place the menu on its screen
     function fit(){
@@ -1466,9 +1595,9 @@
     var menuH = document.querySelector('.menu h2');
     function showPage(pg, at){
       page = pg;
-      allOpts.forEach(function(o){ o.hidden = o.dataset.page !== pg; });
+      allOpts.forEach(function(o){ o.hidden = o.dataset.page !== pg || o.dataset.locked === '1'; });
       opts = allOpts.filter(function(o){ return !o.hidden; });
-      menuH.setAttribute('data-i', pg === 'tools' ? 'select_tools' : 'select'); menuH.innerHTML = I18N[LANG][menuH.getAttribute('data-i')];
+      menuH.setAttribute('data-i', pg === 'tools' ? 'select_tools' : (pg === 'games' ? 'select_games' : 'select')); menuH.innerHTML = I18N[LANG][menuH.getAttribute('data-i')];
       select(at || 0);
     }
     opts = allOpts.filter(function(o){ return !o.hidden; });
@@ -1480,7 +1609,7 @@
     }
     function insertCoin(){
       if (powered || inserting) return;
-      inserting = true; coinBtn.classList.remove('ready'); coinBtn.classList.add('used');
+      inserting = true; coinBtn.classList.remove('ready'); coinBtn.classList.add('used'); setTimeout(function(){ fx('coin'); }, Hall.coin ? 4500 : 1600);
       // 3D: look down, take the coin from your pocket, flip it, put it in; then the machine boots
       if (Hall.coin){ Hall.coin(function(){ if (state === 'arrived' && inserting) bootUp(); }); return; }
       var tossMs = still ? 0 : 1750;
@@ -1489,7 +1618,7 @@
       setTimeout(bootUp, tossMs + 700);
     }
     function bootUp(){
-      scr.classList.add('boot');
+      scr.classList.add('boot'); fx('boot');
       var lines = I18N[LANG].boot, i = 0;
       (function nextLine(){
         if (i < lines.length){ boot.textContent += (i ? '\n' : '') + lines[i++]; setTimeout(nextLine, 170); }
@@ -1508,14 +1637,18 @@
       }catch(e){}
       return 0;
     }
+    function fx(n){ try{ if (window.arcadeFX) window.arcadeFX(n); }catch(x){} }
     function select(i){
+      if (opts.length && (i + opts.length) % opts.length !== sel) fx('blip');
       sel = (i + opts.length) % opts.length;
       allOpts.forEach(function(o){ o.classList.toggle('sel', o === opts[sel]); });
     }
     function tilt(dir){ stick.style.transform = 'rotate(' + (dir*14) + 'deg)'; setTimeout(function(){ stick.style.transform = ''; }, 140); }
     function activate(){
       var o = opts[sel];
-      if (o.dataset.sub){ showPage(o.dataset.sub, o.dataset.sub === 'main' ? 1 : 0); return; }
+      if (o.dataset.sub){ fx('open'); var from = page; showPage(o.dataset.sub, o.dataset.sub === 'main' ? (from === 'games' ? 2 : 1) : 0); return; }
+      if (o.dataset.play){ if (window.arcadeGame){ fx('start'); window.arcadeGame.start(o.dataset.play, scr, function(){ showPage('games', o.dataset.play === 'secret' ? 1 : 0); }); } return; }
+      fx('start');
       if (o.dataset.soon){ document.getElementById('soon').classList.add('on'); return; }
       try{ localStorage.setItem('lycaas_lastgame', o.dataset.game); }catch(x){}
       try{ sessionStorage.setItem('arcade_in', '1'); sessionStorage.setItem('arcade_at', '1'); }catch(x){}
@@ -1532,6 +1665,8 @@
     var soon = document.getElementById('soon');
     soon.addEventListener('click', function(){ soon.classList.remove('on'); });
     document.addEventListener('keydown', function(e){
+      if (window.arcadeGame && window.arcadeGame.running) return;
+      if (window.__exploring) return;
       if (soon.classList.contains('on')){ soon.classList.remove('on'); return; }
       if (state === 'hall' && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); walkIn(); return; }
       if (state !== 'arrived') return;
@@ -1539,8 +1674,8 @@
       if (e.key === 'ArrowUp'){ e.preventDefault(); select(sel - 1); tilt(-1); }
       else if (e.key === 'ArrowDown'){ e.preventDefault(); select(sel + 1); tilt(1); }
       else if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
-      else if (e.key === 'Escape'){ if (page !== 'main') showPage('main', 1); else walkBack(); }
-      else if (e.key === 'ArrowLeft' && page !== 'main'){ e.preventDefault(); showPage('main', 1); }
+      else if (e.key === 'Escape'){ if (page !== 'main') showPage('main', page === 'games' ? 2 : 1); else walkBack(); }
+      else if (e.key === 'ArrowLeft' && page !== 'main'){ e.preventDefault(); showPage('main', page === 'games' ? 2 : 1); }
     });
 
     // Coming back from a game or the portfolio: stand at the machine again with the menu on, no walk and no coin.
@@ -1578,5 +1713,257 @@
     });
   })();
 </script>
+<script>
+/* Arcade extras: sound, a playable Brick Bust, high scores, explore mode, clickable venues, the Konami secret,
+   Prague time of day and real Prague rain. Everything degrades quietly when something is missing. */
+(function(){
+  var NL = document.documentElement.lang === 'nl';
+  var H = window.Hall || {};
+  function T(en, nl){ return document.documentElement.lang === 'nl' ? nl : en; }
+
+  /* ---------------- sound: synthwave loop + effects, all made with WebAudio (no files) ---------------- */
+  var ac = null, master = null, musicGain = null, sfxGain = null, crowdGain = null, playing = false, nextBeat = 0, step = 0, timer = 0;
+  var soundOn = false; try{ soundOn = localStorage.getItem('arcade_sound') === '1'; }catch(e){}
+  function ensure(){
+    if (ac) return true;
+    var C = window.AudioContext || window.webkitAudioContext; if (!C) return false;
+    ac = new C(); master = ac.createGain(); master.gain.value = .7; master.connect(ac.destination);
+    musicGain = ac.createGain(); musicGain.gain.value = .22; musicGain.connect(master);
+    sfxGain = ac.createGain(); sfxGain.gain.value = .5; sfxGain.connect(master);
+    // the street: filtered noise for the crowd, louder outside
+    var len = ac.sampleRate*2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random()*2 - 1)*.5;
+    var src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+    var bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 600; bp.Q.value = .6;
+    crowdGain = ac.createGain(); crowdGain.gain.value = 0; src.connect(bp); bp.connect(crowdGain); crowdGain.connect(master); src.start();
+    return true;
+  }
+  function tone(f, t, dur, type, g, dest, slide){
+    var o = ac.createOscillator(), a = ac.createGain(); o.type = type || 'square'; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    a.gain.setValueAtTime(0, t); a.gain.linearRampToValueAtTime(g || .2, t + .01); a.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(a); a.connect(dest || sfxGain); o.start(t); o.stop(t + dur + .05);
+  }
+  function noise(t, dur, g, freq){
+    var len = Math.floor(ac.sampleRate*dur), b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random()*2 - 1;
+    var s = ac.createBufferSource(); s.buffer = b; var f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = freq || 7000;
+    var a = ac.createGain(); a.gain.setValueAtTime(g || .1, t); a.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f); f.connect(a); a.connect(musicGain); s.start(t);
+  }
+  // a little synthwave: Am - F - C - G, bass in eighths, an arpeggio, hats and a soft kick
+  var CH = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]];
+  function mtof(m){ return 440*Math.pow(2, (m - 69)/12); }
+  function schedule(){
+    var spb = 60/100/2; // eighth notes at 100 bpm
+    while (nextBeat < ac.currentTime + .25){
+      var bar = Math.floor(step/16) % 4, ch = CH[bar], s8 = step % 16;
+      tone(mtof(ch[0] - 24), nextBeat, spb*.9, 'sawtooth', .18, musicGain);
+      tone(mtof(ch[s8 % 3] + 12), nextBeat, spb*.8, 'square', .05, musicGain);
+      if (s8 % 4 === 0) tone(110, nextBeat, .25, 'sine', .5, musicGain, 40);
+      if (s8 % 2 === 1) noise(nextBeat, .04, .06);
+      if (s8 === 0) ch.forEach(function(n){ tone(mtof(n), nextBeat, spb*15, 'triangle', .035, musicGain); });
+      nextBeat += spb; step++;
+    }
+  }
+  function startMusic(){ if (playing || !ensure()) return; ac.resume(); playing = true; nextBeat = ac.currentTime + .1; timer = setInterval(schedule, 60); }
+  function stopMusic(){ playing = false; clearInterval(timer); }
+  var FX = {
+    blip: function(t){ tone(880, t, .06, 'square', .12); },
+    open: function(t){ tone(660, t, .07, 'square', .12); tone(990, t + .06, .08, 'square', .12); },
+    coin: function(t){ tone(988, t, .08, 'square', .2); tone(1319, t + .08, .32, 'square', .2); },
+    boot: function(t){ [523, 659, 784, 1047].forEach(function(f, i){ tone(f, t + i*.09, .14, 'square', .12); }); },
+    start: function(t){ [784, 988, 1175, 1568].forEach(function(f, i){ tone(f, t + i*.07, .16, 'triangle', .2); }); },
+    walk: function(t){ noise(t, .5, .05, 1500); },
+    bounce: function(t){ tone(440, t, .05, 'square', .12); },
+    brick: function(t){ tone(660 + Math.random()*400, t, .07, 'square', .14); },
+    lose: function(t){ tone(330, t, .5, 'sawtooth', .18, null, 80); },
+    win: function(t){ [523, 659, 784, 1047, 1319].forEach(function(f, i){ tone(f, t + i*.08, .2, 'square', .16); }); },
+    tram: function(t){ tone(1568, t, .25, 'sine', .12); tone(1568, t + .32, .3, 'sine', .12); },
+    secret: function(t){ [392, 523, 659, 784, 1047, 1319, 1568].forEach(function(f, i){ tone(f, t + i*.06, .22, 'square', .14); }); }
+  };
+  window.arcadeFX = function(name){ if (!soundOn || !ac || !FX[name]) return; FX[name](ac.currentTime + .01); };
+  function setSound(on){
+    soundOn = on; try{ localStorage.setItem('arcade_sound', on ? '1' : '0'); }catch(e){}
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.innerHTML = on ? '&#9835; ON' : '&#9835; OFF';
+    if (on){ startMusic(); } else { stopMusic(); if (crowdGain) crowdGain.gain.value = 0; }
+  }
+  var btn = document.createElement('button'); btn.type = 'button'; btn.id = 'sndBtn'; btn.title = T('Music and sound', 'Muziek en geluid');
+  document.getElementById('lang').appendChild(btn); btn.addEventListener('click', function(){ setSound(!soundOn); });
+  setSound(false); var wanted = soundOn;
+  // browsers only allow sound after a click or a key: start then if it was on last time
+  function firstGesture(){ if (wanted){ setSound(true); } removeEventListener('pointerdown', firstGesture); removeEventListener('keydown', firstGesture); }
+  addEventListener('pointerdown', firstGesture); addEventListener('keydown', firstGesture);
+  setInterval(function(){
+    if (!soundOn || !crowdGain || !H.camZ) return;
+    var out = H.camZ() > (H.ZN || 14); crowdGain.gain.setTargetAtTime(out ? .05 : .008, ac.currentTime, .4);
+  }, 400);
+
+  /* ---------------- high scores (this browser) ---------------- */
+  var DEF = [['JORDI', 999990], ['LEDGER', 812300], ['AION 2', 640180], ['LYCAA', 525060]];
+  function scores(){ var s = []; try{ s = JSON.parse(localStorage.getItem('arcade_scores') || '[]'); }catch(e){} return s; }
+  function board(){ return scores().concat(DEF).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 4); }
+  function saveScore(name, sc){ var s = scores(); s.push([name, sc]); s.sort(function(a, b){ return b[1] - a[1]; }); try{ localStorage.setItem('arcade_scores', JSON.stringify(s.slice(0, 10))); }catch(e){} if (H.setScores) H.setScores(board()); }
+  if (H.setScores) H.setScores(board());
+
+  /* ---------------- Brick Bust, played on the machine's screen ---------------- */
+  var game = { running: false };
+  window.arcadeGame = game;
+  game.start = function(kind, scr, done){
+    var menu = scr.querySelector('.menu'), cv = document.createElement('canvas'), W = 560, Hh = scr.clientHeight || 424;
+    cv.width = W; cv.height = Hh; cv.className = 'gamecv'; scr.appendChild(cv); menu.style.visibility = 'hidden';
+    var g = cv.getContext('2d'); game.running = true; document.body.classList.add('gaming');
+    var keys = {}, raf = 0, over = false, entering = false, initials = ['A', 'A', 'A'], ip = 0;
+    function end(){ cancelAnimationFrame(raf); game.running = false; document.body.classList.remove('gaming'); removeEventListener('keydown', kd); removeEventListener('keyup', ku); cv.remove(); menu.style.visibility = ''; done && done(); }
+    if (kind === 'secret'){
+      // the secret screen: confetti and a thank-you
+      window.arcadeFX('secret');
+      var bits = []; for (var i = 0; i < 140; i++) bits.push([Math.random()*W, -Math.random()*Hh, 1 + Math.random()*2.5, ['#ffd24f', '#ff4fb8', '#4fe6ff', '#5dff8a'][i % 4]]);
+      (function loop(){
+        g.fillStyle = '#0a0418'; g.fillRect(0, 0, W, Hh);
+        bits.forEach(function(b){ b[1] += b[2]; if (b[1] > Hh) b[1] = -10; g.fillStyle = b[3]; g.fillRect(b[0], b[1], 6, 6); });
+        g.textAlign = 'center'; g.fillStyle = '#ffd24f'; g.font = 'bold 30px ui-monospace, Menlo, monospace'; g.fillText(T("LYCAA'S LAIR", "LYCAA'S LAIR"), W/2, Hh*.36);
+        g.fillStyle = '#e8e2ff'; g.font = '16px ui-monospace, Menlo, monospace';
+        g.fillText(T('You entered the code. Respect.', 'Je kende de code. Respect.'), W/2, Hh*.5); g.fillText(T('Up up down down left right left right B A', 'Op op neer neer links rechts links rechts B A'), W/2, Hh*.58);
+        g.fillStyle = '#4fe6ff'; g.fillText(T('PRESS ESC TO GO BACK', 'DRUK OP ESC OM TERUG TE GAAN'), W/2, Hh*.8);
+        raf = requestAnimationFrame(loop);
+      })();
+      var kd = function(e){ if (e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); end(); } }, ku = function(){};
+      addEventListener('keydown', kd); addEventListener('keyup', ku); cv.addEventListener('click', end);
+      return;
+    }
+    var COLS = 10, ROWS = 6, BW = (W - 40)/COLS, BH = 20, bricks = [], colors = ['#ff4a4a', '#ff8a2a', '#ffd24f', '#5dff8a', '#4fe6ff', '#a85cff'];
+    for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) bricks.push({ x: 20 + c*BW, y: 60 + r*(BH + 4), alive: true, col: colors[r], pts: (ROWS - r)*10 });
+    var pad = { x: W/2, w: 90 }, ball = { x: W/2, y: Hh - 60, vx: 3.2, vy: -4.2, stuck: true }, score = 0, lives = 3, level = 1;
+    function reset(){ ball.x = pad.x; ball.y = Hh - 48; ball.vx = (Math.random() < .5 ? -1 : 1)*3.2*(1 + (level - 1)*.15); ball.vy = -4.2*(1 + (level - 1)*.15); ball.stuck = true; }
+    var kd = function(e){
+      if (entering){
+        if (/^[a-z]$/i.test(e.key)){ initials[ip] = e.key.toUpperCase(); ip = Math.min(2, ip + 1); }
+        else if (e.key === 'ArrowUp' || e.key === 'ArrowDown'){ var code = initials[ip].charCodeAt(0) + (e.key === 'ArrowUp' ? 1 : -1); if (code > 90) code = 65; if (code < 65) code = 90; initials[ip] = String.fromCharCode(code); }
+        else if (e.key === 'ArrowRight') ip = Math.min(2, ip + 1); else if (e.key === 'ArrowLeft' || e.key === 'Backspace') ip = Math.max(0, ip - 1);
+        else if (e.key === 'Enter'){ saveScore(initials.join(''), score); entering = false; over = 'saved'; }
+        else if (e.key === 'Escape'){ end(); }
+        e.preventDefault(); return;
+      }
+      if (e.key === 'Escape'){ e.preventDefault(); end(); return; }
+      if (over && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); end(); return; }
+      keys[e.key] = true; if (e.key === ' ' || e.key === 'ArrowUp'){ ball.stuck = false; e.preventDefault(); }
+      if (/^Arrow/.test(e.key)) e.preventDefault();
+    };
+    var ku = function(e){ keys[e.key] = false; };
+    addEventListener('keydown', kd); addEventListener('keyup', ku);
+    function toLocal(e){ var r = cv.getBoundingClientRect(); return (e.clientX - r.left)/r.width*W; }
+    cv.addEventListener('pointermove', function(e){ pad.x = Math.max(pad.w/2, Math.min(W - pad.w/2, toLocal(e))); });
+    cv.addEventListener('pointerdown', function(e){ pad.x = Math.max(pad.w/2, Math.min(W - pad.w/2, toLocal(e))); if (over) end(); else ball.stuck = false; });
+    function draw(){
+      g.fillStyle = '#04050e'; g.fillRect(0, 0, W, Hh);
+      g.fillStyle = '#c9d2ff'; g.font = 'bold 16px ui-monospace, Menlo, monospace'; g.textAlign = 'left'; g.fillText('SCORE ' + score, 16, 28);
+      g.textAlign = 'right'; g.fillText('HI ' + board()[0][1] + '   ' + '♥'.repeat(Math.max(0, lives)), W - 16, 28);
+      bricks.forEach(function(b){ if (!b.alive) return; g.fillStyle = b.col; g.fillRect(b.x + 1, b.y, BW - 3, BH); g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(b.x + 1, b.y, BW - 3, 4); });
+      g.fillStyle = '#4fe6ff'; g.fillRect(pad.x - pad.w/2, Hh - 30, pad.w, 10);
+      g.fillStyle = '#fff'; g.fillRect(ball.x - 5, ball.y - 5, 10, 10);
+      g.textAlign = 'center';
+      if (ball.stuck && !over){ g.fillStyle = '#ffd24f'; g.fillText(T('SPACE OR CLICK TO LAUNCH', 'SPATIE OF KLIK OM TE SCHIETEN'), W/2, Hh*.62); }
+      if (over){
+        g.fillStyle = 'rgba(4,5,14,.8)'; g.fillRect(0, 0, W, Hh);
+        g.fillStyle = over === 'win' ? '#5dff8a' : '#ff4fb8'; g.font = 'bold 34px ui-monospace, Menlo, monospace'; g.fillText(over === 'win' ? T('YOU WIN!', 'GEWONNEN!') : 'GAME OVER', W/2, Hh*.32);
+        g.fillStyle = '#c9d2ff'; g.font = 'bold 18px ui-monospace, Menlo, monospace'; g.fillText('SCORE ' + score, W/2, Hh*.43);
+        if (entering){ g.fillStyle = '#ffd24f'; g.fillText(T('NEW HIGH SCORE! YOUR INITIALS', 'NIEUWE HIGH SCORE! JE INITIALEN'), W/2, Hh*.56);
+          g.font = 'bold 40px ui-monospace, Menlo, monospace'; initials.forEach(function(ch, i){ g.fillStyle = i === ip ? '#fff' : '#8a90c0'; g.fillText(ch, W/2 - 40 + i*40, Hh*.7); });
+          g.font = '14px ui-monospace, Menlo, monospace'; g.fillStyle = '#8a90c0'; g.fillText(T('TYPE OR UP/DOWN · ENTER TO SAVE', 'TYP OF OP/NEER · ENTER OM OP TE SLAAN'), W/2, Hh*.82); }
+        else { g.fillStyle = '#4fe6ff'; g.fillText(T('ENTER: BACK TO THE MENU', 'ENTER: TERUG NAAR HET MENU'), W/2, Hh*.66); }
+      }
+    }
+    function stepG(){
+      if (!over){
+        if (keys.ArrowLeft || keys.a) pad.x -= 8; if (keys.ArrowRight || keys.d) pad.x += 8;
+        pad.x = Math.max(pad.w/2, Math.min(W - pad.w/2, pad.x));
+        if (ball.stuck){ ball.x = pad.x; ball.y = Hh - 40; }
+        else {
+          ball.x += ball.vx; ball.y += ball.vy;
+          if (ball.x < 5 || ball.x > W - 5){ ball.vx *= -1; ball.x = Math.max(5, Math.min(W - 5, ball.x)); window.arcadeFX('bounce'); }
+          if (ball.y < 45){ ball.vy = Math.abs(ball.vy); window.arcadeFX('bounce'); }
+          if (ball.y > Hh - 35 && ball.y < Hh - 18 && Math.abs(ball.x - pad.x) < pad.w/2 + 5 && ball.vy > 0){ var hitp = (ball.x - pad.x)/(pad.w/2); ball.vx = hitp*5.2; ball.vy = -Math.abs(ball.vy); window.arcadeFX('bounce'); }
+          for (var i = 0; i < bricks.length; i++){ var b = bricks[i]; if (b.alive && ball.x > b.x && ball.x < b.x + BW && ball.y > b.y && ball.y < b.y + BH){ b.alive = false; ball.vy *= -1; score += b.pts*level; window.arcadeFX('brick'); break; } }
+          if (ball.y > Hh + 10){ lives--; window.arcadeFX('lose'); if (lives <= 0) finish(false); else reset(); }
+          if (bricks.every(function(b){ return !b.alive; })){ if (level < 3){ level++; bricks.forEach(function(b){ b.alive = true; }); reset(); window.arcadeFX('win'); } else finish(true); }
+        }
+      }
+      draw(); raf = requestAnimationFrame(stepG);
+    }
+    function finish(won){ over = won ? 'win' : 'lose'; if (won) window.arcadeFX('win'); var b = board(); if (score > 0 && (b.length < 4 || score > b[b.length - 1][1])) entering = true; }
+    stepG();
+  };
+
+  /* ---------------- explore mode and clicking things ---------------- */
+  var tip = document.createElement('div'); tip.id = 'pickTip'; document.body.appendChild(tip);
+  var ex = document.createElement('button'); ex.type = 'button'; ex.id = 'exploreBtn'; ex.textContent = T('EXPLORE THE HALL', 'VERKEN DE HAL');
+  document.body.appendChild(ex);
+  var exHelp = document.createElement('div'); exHelp.id = 'exploreHelp'; document.body.appendChild(exHelp);
+  function helpText(){ exHelp.innerHTML = T('WASD / arrows: walk &middot; drag: look &middot; click a machine &middot; ESC: back to the street', 'WASD / pijltjes: lopen &middot; slepen: kijken &middot; klik op een machine &middot; ESC: terug naar de straat'); }
+  function setExplore(on){
+    if (!H.explore) return;
+    window.__exploring = on; document.body.classList.toggle('exploring', on); H.explore(on); helpText();
+    if (on) window.arcadeFX('open');
+  }
+  ex.addEventListener('click', function(){ if (window.__arcade && window.__arcade.state() === 'hall') setExplore(true); });
+  var KEYMAP = { w: 'f', ArrowUp: 'f', s: 'b', ArrowDown: 'b', a: 'l', d: 'r', ArrowLeft: 'tl', ArrowRight: 'tr', q: 'tl', e: 'tr' };
+  addEventListener('keydown', function(e){
+    if (!window.__exploring) return;
+    if (e.key === 'Escape'){ setExplore(false); return; }
+    var k = KEYMAP[e.key] || KEYMAP[e.key.toLowerCase()]; if (k){ H.exploreKey(k, true); e.preventDefault(); }
+  });
+  addEventListener('keyup', function(e){ if (!window.__exploring) return; var k = KEYMAP[e.key] || KEYMAP[e.key.toLowerCase && e.key.toLowerCase()]; if (k) H.exploreKey(k, false); });
+  var drag = null;
+  addEventListener('pointerdown', function(e){ if (window.__exploring && e.target.tagName === 'CANVAS') drag = { x: e.clientX, y: e.clientY, moved: 0 }; });
+  addEventListener('pointermove', function(e){
+    if (drag){ var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.moved += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY; H.exploreLook(dx, dy); }
+    // hover labels: machines while exploring, bars and the club from the street
+    var st = window.__arcade && window.__arcade.state();
+    if (!H.pickAt || !(window.__exploring || st === 'hall') || e.target.tagName !== 'CANVAS'){ tip.style.display = 'none'; document.body.style.cursor = ''; return; }
+    var d = H.pickAt(e.clientX, e.clientY);
+    if (d && (window.__exploring ? !d.out : d.out)){ tip.textContent = d.label; tip.style.display = 'block'; tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; document.body.style.cursor = 'pointer'; }
+    else { tip.style.display = 'none'; document.body.style.cursor = ''; }
+  });
+  addEventListener('pointerup', function(e){
+    var wasDrag = drag && drag.moved > 6; drag = null;
+    if (wasDrag || e.target.tagName !== 'CANVAS' || !H.pickAt) return;
+    var st = window.__arcade && window.__arcade.state(), d = H.pickAt(e.clientX, e.clientY);
+    if (!d) return;
+    if (window.__exploring && !d.out){
+      if (d.machine){ setExplore(false); window.__arcade.arrive(); return; }
+      if (d.secret){ if (unlocked) { setExplore(false); window.__arcade.arrive(); } else { tip.textContent = T('This one needs a code...', 'Deze heeft een code nodig...'); } return; }
+      if (d.href){ window.arcadeFX('start'); location.href = d.href; }
+    } else if (st === 'hall' && d.out && d.href){ window.arcadeFX('start'); location.href = d.href; }
+  });
+
+  /* ---------------- the Konami code ---------------- */
+  var KON = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'], kp = 0, unlocked = false;
+  try{ unlocked = localStorage.getItem('arcade_secret') === '1'; }catch(e){}
+  function unlock(first){
+    unlocked = true; try{ localStorage.setItem('arcade_secret', '1'); }catch(e){}
+    if (H.unlockSecret) H.unlockSecret(); if (window.__arcade) window.__arcade.unlock();
+    if (first){ window.arcadeFX('secret'); var t2 = document.createElement('div'); t2.className = 'secretToast'; t2.textContent = T('SECRET UNLOCKED: look for the machine in the back corner, or open GAMES', 'GEHEIM ONTGRENDELD: zoek de kast achterin de hoek, of open GAMES'); document.body.appendChild(t2); setTimeout(function(){ t2.remove(); }, 5200); }
+  }
+  if (unlocked) unlock(false);
+  addEventListener('keydown', function(e){ var k = e.key.length === 1 ? e.key.toLowerCase() : e.key; if (k === KON[kp]){ kp++; if (kp === KON.length){ kp = 0; if (!unlocked) unlock(true); } } else kp = k === KON[0] ? 1 : 0; }, true);
+
+  /* ---------------- Prague time of day and Prague weather ---------------- */
+  function pragueHour(){ try{ return +new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hour12: false, timeZone: 'Europe/Prague' }).format(new Date()) % 24; }catch(e){ return new Date().getHours(); } }
+  function modeFor(h){ return h >= 21 || h < 5 ? 'night' : (h < 8 ? 'dawn' : (h < 18 ? 'day' : 'dusk')); }
+  var forced = (location.search.match(/[?&]time=(night|dusk|dawn|day)/) || [])[1];
+  function applyTime(){ if (H.setTimeOfDay) H.setTimeOfDay(forced || modeFor(pragueHour())); }
+  applyTime(); setInterval(applyTime, 5*60*1000);
+  var rainQ = (location.search.match(/[?&]rain=(1|0)/) || [])[1];
+  if (rainQ) { if (H.setRain) H.setRain(rainQ === '1'); }
+  else try{
+    // open-meteo is a free public weather API that allows calls from websites; nothing personal is sent
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=50.08&longitude=14.43&current=precipitation,rain').then(function(r){ return r.json(); }).then(function(j){
+      var c = j && j.current; if (c && ((c.rain || 0) > 0 || (c.precipitation || 0) > 0.1) && H.setRain) H.setRain(true);
+    }).catch(function(){});
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
