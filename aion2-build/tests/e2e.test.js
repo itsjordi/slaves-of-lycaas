@@ -324,6 +324,29 @@ test('end-to-end flows', { skip: !JSDOM && 'jsdom not installed' }, async (t) =>
     C.dom.window.close();
   });
 
+  await t.test('route, legion, progress and share', async () => {
+    const T = n => fs.readFileSync(path.join(__dirname, n + '-sample.txt'), 'utf8');
+    const C = await boot();
+    C.w.APP.syncStart([{ text: T('atool'), url: '' }, { text: T('shugo'), url: '' }]);
+    C.click('[data-act="rev-ok"]');
+    C.go('#/dashboard');
+    assert.match(C.view(), /Your progress/); assert.ok(C.d.querySelector('[data-act="share-card"]'));
+    C.go('#/route');
+    assert.match(C.view(), /Upgrade route/); assert.match(C.view(), /Guaranteed|Swap/);
+    assert.match(C.view(), /Noble Belt \+3 to \+10/);
+    C.go('#/legion');
+    assert.match(C.view(), /lycaa/);
+    const other = T('shugo').replace(/^lycaa$/m, 'Friendo');
+    C.w.APP.setCompare(other, '');
+    C.go('#/compare');
+    C.click('[data-act="cmp-legion"]');
+    C.go('#/legion');
+    assert.match(C.view(), /Friendo/);
+    assert.ok(C.d.getElementById('side').textContent.includes('Legion'));
+    assert.deepEqual(C.errors, []);
+    C.dom.window.close();
+  });
+
   await t.test('short menu and short tour by default', async () => {
     const st = BA.seedState(); st.guide = { welcomed: true, visited: {} };
     const C = await boot({ aion2_build_v1: JSON.stringify(st) });

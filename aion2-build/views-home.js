@@ -17,7 +17,7 @@
   function home() {
     var ch = APP.player(), d = APP.pd(), ls = lastSync(ch), hasGear = Object.keys(d.equipment || {}).length > 0;
     var h = '<div class="head"><div><h1>' + e(ch.name) + '</h1><div class="muted">' + e(ch.cls) + (ch.server ? ' · ' + e(ch.server) : '') + (ls ? ' · synced ' + e(ago(ls)) : '') + '</div></div><span class="sp"></span><a class="btn pri" href="#/profile">' + (ls ? 'Update from the sites' : 'Sync my character') + '</a></div>';
-    h += '<div class="grid g2">' + [['Combat Power', BA.num(d.cp)], ['Item Level (Gear Score)', BA.num(d.itemLevel) != null ? BA.num(d.itemLevel) : BA.num(d.gearScore)]].map(function (x) {
+    h += '<div class="grid g2">' + [['Combat Power', BA.num(d.cp)], ['Item Level (Gear Score)', (function(){ var g = BA.gearScoreOf(d, ch.race || ''); return g.complete ? g.total : (BA.num(d.itemLevel) != null ? BA.num(d.itemLevel) : BA.num(d.gearScore)); })()]].map(function (x) {
       return '<div class="card kpi"><div class="l">' + x[0] + '</div><div class="v">' + (x[1] == null ? '<span class="muted">?</span>' : f(x[1])) + '</div></div>';
     }).join('') + '</div>';
     if (!hasGear) {
