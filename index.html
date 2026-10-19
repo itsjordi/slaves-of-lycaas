@@ -332,7 +332,7 @@
     host.appendChild(cv); host.appendChild(bloom);
 
     var scene = new T3.Scene();
-    scene.fog = new T3.Fog(0x06040e, 9, 40);
+    scene.fog = new T3.Fog(0x0a0618, 10, 44);
     var camera = new T3.PerspectiveCamera(58, 1, 0.05, 130);
 
     // ---------- tiny pixel font (3x5) ----------
@@ -711,77 +711,202 @@
       part(frame, G.plane(w, d), key, x, .012, z, -Math.PI/2);
     }
 
-    // ---------- the room ----------
-    var HALF = 4.7, ZN = 14, ZF = -13.6, H = 4.0;
+    // ---------- the room: a wide hall with islands of machines, not a corridor ----------
+    var HALF = 8.6, ZN = 14, ZF = -13.6, H = 4.6;
+    // classic arcade carpet: dark blue with neon squiggles, stars and rings
     (function(){
-      var c = canvas(16, 16), g = c.getContext('2d');
-      g.fillStyle = '#0d1030'; g.fillRect(0, 0, 16, 16);
-      g.fillStyle = '#141a48'; g.fillRect(1, 1, 14, 14);
-      g.fillStyle = '#1b2360'; g.fillRect(2, 2, 6, 1);
-      g.fillStyle = '#070818'; g.fillRect(0, 15, 16, 1); g.fillRect(15, 0, 1, 16);
-      var floor = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ map: ctex(c, [HALF*2/1.1, (ZN - ZF)/1.1]), transparent: true, opacity: .8 }));
+      var c = canvas(96, 96), g = c.getContext('2d');
+      g.fillStyle = '#0a0b26'; g.fillRect(0, 0, 96, 96);
+      var cols = ['#ff4fb8', '#4fe6ff', '#ffd24f', '#a85cff', '#5dff8a'];
+      for (var i = 0; i < 26; i++){
+        var x = Math.floor(rnd()*96), y = Math.floor(rnd()*96), col = cols[i % 5], kind = i % 4;
+        g.fillStyle = col; g.globalAlpha = .55 + rnd()*.3;
+        if (kind === 0){ for (var s = 0; s < 10; s++) g.fillRect((x + s) % 96, (y + Math.round(Math.sin(s*.9)*2)) % 96, 1, 1); }
+        else if (kind === 1){ g.fillRect(x, y, 1, 3); g.fillRect(x - 1, y + 1, 3, 1); }
+        else if (kind === 2){ for (var a = 0; a < 12; a++){ g.fillRect((x + Math.round(Math.cos(a*.52)*3) + 96) % 96, (y + Math.round(Math.sin(a*.52)*3) + 96) % 96, 1, 1); } }
+        else { for (var t2 = 0; t2 < 4; t2++){ g.fillRect((x + t2) % 96, (y + t2) % 96, 1, 1); g.fillRect((x + 7 - t2) % 96, (y + t2) % 96, 1, 1); } g.fillRect(x, (y + 4) % 96, 8, 1); }
+      }
+      g.globalAlpha = .12; g.fillStyle = '#4fe6ff'; for (var d = 0; d < 300; d++) g.fillRect(Math.floor(rnd()*96), Math.floor(rnd()*96), 1, 1);
+      g.globalAlpha = 1;
+      var floor = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ map: ctex(c, [HALF*2/2.6, (ZN - ZF)/2.6]), transparent: true, opacity: .93 }));
       floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, (ZN + ZF)/2); floor.renderOrder = 1;
       scene.add(floor);
 
-      var w = canvas(16, 16), wg = w.getContext('2d');
-      wg.fillStyle = '#100c26'; wg.fillRect(0, 0, 16, 16); wg.fillStyle = '#16113a'; wg.fillRect(0, 0, 8, 16); wg.fillStyle = '#0a0818'; wg.fillRect(0, 0, 1, 16);
-      var wallMat = new T3.MeshLambertMaterial({ map: ctex(w, [12, 3]) });
+      var w = canvas(32, 32), wg = w.getContext('2d');
+      wg.fillStyle = '#120c2a'; wg.fillRect(0, 0, 32, 32); wg.fillStyle = '#18113a'; wg.fillRect(0, 0, 16, 32);
+      wg.fillStyle = '#0a0818'; wg.fillRect(0, 0, 1, 32); wg.fillStyle = '#1e1446'; wg.fillRect(0, 22, 32, 2);
+      var wallMat = new T3.MeshLambertMaterial({ map: ctex(w, [14, 2]) });
       var wl = new T3.Mesh(new T3.PlaneGeometry(ZN - ZF, H), wallMat); wl.rotation.y = Math.PI/2; wl.position.set(-HALF, H/2, (ZN + ZF)/2); scene.add(wl);
       var wr = new T3.Mesh(new T3.PlaneGeometry(ZN - ZF, H), wallMat); wr.rotation.y = -Math.PI/2; wr.position.set(HALF, H/2, (ZN + ZF)/2); scene.add(wr);
-      var we = new T3.Mesh(new T3.PlaneGeometry(HALF*2, H), new T3.MeshLambertMaterial({ map: ctex(w, [4, 3]) })); we.position.set(0, H/2, ZF); scene.add(we);
-      var ceil = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ color: 0x07061a })); ceil.rotation.x = Math.PI/2; ceil.position.set(0, H, (ZN + ZF)/2); scene.add(ceil);
+      var we = new T3.Mesh(new T3.PlaneGeometry(HALF*2, H), new T3.MeshLambertMaterial({ map: ctex(w, [8, 2]) })); we.position.set(0, H/2, ZF); scene.add(we);
+      var ceil = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ color: 0x050412 })); ceil.rotation.x = Math.PI/2; ceil.position.set(0, H, (ZN + ZF)/2); scene.add(ceil);
 
       var root = frameAt(0, 0, 0, 0);
-      // ceiling light panels and wall neon
-      for (var z = 10; z > ZF + 1; z -= 3.2){
-        part(root, G.box(1.3, .04, .5), (Math.round(z) % 3) ? 'ceil' : 'ceilDim', -1.6, H - .03, z);
-        part(root, G.box(1.3, .04, .5), 'ceil', 1.6, H - .03, z - 1.6);
-      }
-      part(root, G.box(.04, .05, ZN - ZF), 'n_pink', -HALF + .03, 2.75, (ZN + ZF)/2);
-      part(root, G.box(.04, .03, ZN - ZF), 'n_purple', -HALF + .03, 3.25, (ZN + ZF)/2);
-      part(root, G.box(.04, .05, ZN - ZF), 'n_cyan', HALF - .03, 2.75, (ZN + ZF)/2);
-      part(root, G.box(.04, .03, ZN - ZF), 'n_purple', HALF - .03, 3.25, (ZN + ZF)/2);
-      part(root, G.box(HALF*2, .05, .04), 'n_purple', 0, 2.75, ZF + .03);
-      part(root, G.box(HALF*2, .03, .04), 'n_pink', 0, 3.6, ZF + .03);
-      // posters on the side walls, above the cabinets
+      lambert('truss', 0x1a1830);
+      // ceiling: black, a truss grid, and long neon tubes hanging over the aisles
+      for (var zt = ZN - 1; zt > ZF; zt -= 3) part(root, G.box(HALF*2, .14, .14), 'truss', 0, H - .25, zt);
+      [-5.2, -1.4, 1.4, 5.2].forEach(function(xt){ part(root, G.box(.14, .14, ZN - ZF), 'truss', xt, H - .25, (ZN + ZF)/2); });
+      var tubes = ['n_pink', 'n_cyan', 'n_cyan', 'n_pink'];
+      [-6.8, -4.6, 4.6, 6.8].forEach(function(xt, i){
+        for (var zz = 10.5; zz > ZF + 2; zz -= 4.4) part(root, G.box(.05, .05, 2.6), tubes[i], xt, H - .55, zz);
+      });
+      // wall neon: a double stripe and a skyline zig along the top
+      [-1, 1].forEach(function(sd){
+        part(root, G.box(.04, .05, ZN - ZF), sd < 0 ? 'n_pink' : 'n_cyan', sd*(HALF - .03), 2.85, (ZN + ZF)/2);
+        part(root, G.box(.04, .03, ZN - ZF), 'n_purple', sd*(HALF - .03), 3.35, (ZN + ZF)/2);
+      });
+      part(root, G.box(HALF*2, .05, .04), 'n_purple', 0, 2.85, ZF + .03);
+      part(root, G.box(HALF*2, .03, .04), 'n_pink', 0, 3.9, ZF + .03);
+      // posters above the wall machines
       var kinds = ['peaks', 'hero', 'ship', 'gameon'];
-      for (var i = 0; i < 7; i++){
-        var pz = 9 - i*3.3;
-        part(root, G.plane(.75, 1.0), poster(kinds[i % 4]), -HALF + .02, 3.0 - (i % 2)*.05, pz, 0, Math.PI/2);
-        part(root, G.plane(.75, 1.0), poster(kinds[(i + 2) % 4]), HALF - .02, 3.0, pz - 1.4, 0, -Math.PI/2);
+      for (var i = 0; i < 8; i++){
+        var pz = 10 - i*3.1;
+        part(root, G.plane(.8, 1.05), poster(kinds[i % 4]), -HALF + .02, 3.15, pz, 0, Math.PI/2);
+        part(root, G.plane(.8, 1.05), poster(kinds[(i + 2) % 4]), HALF - .02, 3.15, pz - 1.4, 0, -Math.PI/2);
       }
-      part(root, G.plane(1.6, .88), scoreboard(), 0, 3.05, ZF + .07);
-      part(root, G.plane(1.0, 1.3), poster('peaks'), -2.9, 2.9, ZF + .02);
-      part(root, G.plane(1.0, 1.3), poster('hero'), 2.9, 2.9, ZF + .02);
+      part(root, G.plane(2.0, 1.1), scoreboard(), 0, 3.25, ZF + .07);
+      part(root, G.plane(1.0, 1.3), poster('peaks'), -3.4, 3.1, ZF + .02);
+      part(root, G.plane(1.0, 1.3), poster('hero'), 3.4, 3.1, ZF + .02);
+      part(root, G.plane(1.0, 1.3), poster('ship'), -6.4, 3.1, ZF + .02);
+      part(root, G.plane(1.0, 1.3), poster('gameon'), 6.4, 3.1, ZF + .02);
     })();
+
+    // light shafts: soft cones from the ceiling lamps, as if there is a bit of smoke in the air
+    var shaftTex = (function(){
+      var c = canvas(4, 64), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 64);
+      gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 4, 64);
+      return new T3.CanvasTexture(c);
+    })();
+    function shaft(x, z, col, r){
+      var key = 'shaft_' + col;
+      if (!mats[key]) mats[key] = new T3.MeshBasicMaterial({ map: shaftTex, color: col, transparent: true, opacity: .11, blending: T3.AdditiveBlending, depthWrite: false, side: T3.DoubleSide, fog: true });
+      var root = frameAt(0, 0, 0, 0);
+      part(root, new T3.CylinderGeometry(.12, r || 1.1, H - .3, 14, 1, true), key, x, (H - .3)/2, z);
+      part(root, G.cyl(.18, .14, .1, 10), 'dark', x, H - .3, z);
+      part(root, G.cyl(.13, .13, .02, 10), 'lampW', x, H - .36, z);
+    }
+    basic('lampW', 0xfff0d0);
+
+    // ---------- more kinds of machines ----------
+    function cocktail(x, z, ry){
+      var f = frameAt(x, 0, z, ry);
+      part(f, G.box(.7, .7, .55), 'body', 0, .35, 0);
+      part(f, G.box(.74, .04, .6), 'black', 0, .72, 0);
+      part(f, G.plane(.44, .34), attract[(Math.abs(Math.round(x*3 + z)) % attract.length)], 0, .741, 0, -Math.PI/2);
+      part(f, G.box(.74, .02, .6), 'n_cyan', 0, .745, 0);
+      [-1, 1].forEach(function(s){ part(f, G.box(.5, .06, .16), 'panel', 0, .68, s*.36); part(f, G.sph(.03), 'ball', -.1, .74, s*.38); stool(x + Math.sin(ry)*s*.75, z + Math.cos(ry)*s*.75); });
+    }
+    function racer(x, z, ry, trim, scr){
+      var f = frameAt(x, 0, z, ry);
+      part(f, G.box(1.1, 1.0, .6), 'body', 0, .5, -.6);
+      part(f, G.box(1.1, .9, .5), 'body', 0, 1.45, -.68);
+      part(f, G.plane(.9, .62), scr, 0, 1.47, -.42, -.12);
+      part(f, G.box(1.14, .26, .55), 'body', 0, 2.05, -.62);
+      part(f, G.plane(1.0, .2), marquee('TURBO RUN', NEON[trim]), 0, 2.05, -.34);
+      var dash = sub(f, 0, .92, -.2, -.5); part(dash, G.box(1.0, .12, .4), 'panel', 0, 0, 0);
+      var wh = new T3.TorusGeometry(.15, .025, 6, 14); part(f, wh, 'metal', 0, 1.02, -.08, -.9);
+      part(f, G.box(.7, .45, .7), 'dark', 0, .22, .55); part(f, G.box(.62, .12, .55), 'stoolSeat', 0, .5, .58); part(f, G.box(.62, .55, .12), 'stoolSeat', 0, .8, .88, -.15);
+      part(f, G.box(1.16, .03, .03), 'n_' + trim, 0, 2.19, -.34); part(f, G.box(.03, 2.18, .03), 'n_' + trim, -.56, 1.1, -.34); part(f, G.box(.03, 2.18, .03), 'n_' + trim, .56, 1.1, -.34);
+      glowPool(f, trim, 0, .2, 1.6, 2);
+    }
+    function dancer(x, z, ry){
+      var f = frameAt(x, 0, z, ry);
+      part(f, G.box(1.6, .12, 1.6), 'body', 0, .06, .6);
+      var pads = [['n_pink', -.45, .6], ['n_cyan', .45, .6], ['n_gold', 0, .15], ['n_green', 0, 1.05]];
+      pads.forEach(function(p){ part(f, G.box(.38, .02, .38), p[0], p[1], .13, p[2]); });
+      part(f, G.box(.3, .02, .3), 'panel', 0, .13, .6);
+      part(f, G.box(1.6, 1.0, .1), 'metal', 0, .62, 1.38);
+      part(f, G.box(1.4, 2.0, .6), 'body', 0, 1.0, -.45);
+      part(f, G.plane(.9, .66), attract[4], 0, 1.65, -.14);
+      part(f, G.box(.32, .6, .3), 'dark', -.66, 1.0, -.1); part(f, G.box(.32, .6, .3), 'dark', .66, 1.0, -.1);
+      part(f, G.cyl(.1, .1, .02, 10), 'n_purple', -.66, 1.05, .06, Math.PI/2); part(f, G.cyl(.1, .1, .02, 10), 'n_purple', .66, 1.05, .06, Math.PI/2);
+      part(f, G.box(1.44, .3, .64), 'body', 0, 2.15, -.45); part(f, G.plane(1.3, .24), marquee('DANCE BEAT', NEON.purple), 0, 2.15, -.12);
+      glowPool(f, 'purple', 0, .6, 2.4, 2.4);
+    }
+    function counter(){
+      // prize and token counter at the front right: a glass display, plushies on shelves, a ticket eater
+      var f = frameAt(HALF - 2.4, 0, 10.6, 0);
+      lambert('wood', 0x3a2140); mats.glassTop = mats.glassTop || new T3.MeshBasicMaterial({ color: 0x9fefff, transparent: true, opacity: .14, depthWrite: false, fog: true });
+      part(f, G.box(4.2, .95, .8), 'wood', 0, .475, 0); part(f, G.box(4.2, .3, .8), 'glassTop', 0, 1.1, 0);
+      part(f, G.box(4.24, .03, .84), 'n_gold', 0, .96, 0); part(f, G.box(4.24, .03, .84), 'n_gold', 0, 1.26, 0);
+      for (var s = 0; s < 3; s++){
+        part(f, G.box(4.0, .05, .5), 'wood', 0, 1.5 + s*.55, 1.6);
+        for (var p = 0; p < 9; p++) part(f, p % 3 ? G.sph(.12) : G.box(.2, .22, .2), ['n_pink', 'n_cyan', 'n_gold', 'n_green', 'n_purple', 'n_orange'][(p + s*2) % 6], -1.7 + p*.43, 1.66 + s*.55, 1.6);
+      }
+      part(f, G.box(4.0, 2.1, .1), 'dark', 0, 2.1, 1.9);
+      part(f, G.plane(2.2, .5), marquee('PRIZES', NEON.gold), 0, 3.5, 1.84, 0, Math.PI);
+      for (var t3 = 0; t3 < 6; t3++) part(f, G.box(.2, .12, .2), 'n_gold', -1.5 + t3*.6, 1.32, 0);
+      // token changer by the door
+      var tk = frameAt(-HALF + 1.0, 0, 11.6, Math.PI/2);
+      part(tk, G.box(.8, 1.9, .6), 'metal', 0, .95, 0); part(tk, G.plane(.6, .3), marquee('TOKENS', NEON.green), 0, 1.6, .31);
+      part(tk, G.box(.3, .2, .05), 'n_green', 0, 1.15, .31); part(tk, G.box(.4, .1, .1), 'dark', 0, .5, .32);
+      glowPool(f, 'gold', 0, .2, 4.6, 2);
+    }
+    // people playing: blocky figures standing at some machines (static, merged)
+    lambert('ppl1', 0x2a3a6a); lambert('ppl2', 0x6a2a4a); lambert('ppl3', 0x2a5a3a); lambert('skin', 0xc89070); lambert('skin2', 0x8a5a3a); lambert('hair', 0x1a1018); lambert('hair2', 0x6a4020); lambert('jeans', 0x24345e);
+    function person(x, z, ry, s){
+      var f = frameAt(x, 0, z, ry), top = ['ppl1', 'ppl2', 'ppl3'][s % 3], sk = s % 4 === 3 ? 'skin2' : 'skin', hr = s % 2 ? 'hair' : 'hair2', hh = 1 + (s % 3)*.04;
+      part(f, G.box(.14, .82*hh, .16), 'jeans', -.09, .41*hh, 0); part(f, G.box(.14, .82*hh, .16), 'jeans', .09, .41*hh, 0);
+      part(f, G.box(.4, .56, .24), top, 0, (.82 + .28)*hh, 0);
+      part(f, G.box(.24, .26, .24), sk, 0, 1.52*hh, -.02); part(f, G.box(.26, .1, .26), hr, 0, 1.66*hh, .01); part(f, G.box(.26, .2, .06), hr, 0, 1.56*hh, .12);
+      // arms forward to the controls
+      part(f, G.box(.1, .1, .42), top, -.22, 1.1*hh, -.18, -.35); part(f, G.box(.1, .1, .42), top, .22, 1.1*hh, -.18, -.35);
+    }
 
     // ---------- the machines ----------
     var trims = ['orange', 'cyan', 'pink', 'purple', 'gold', 'green'];
-    var names = ['STAR RAID', 'MAZE MUNCH', 'TURBO RUN', 'BRICK BUST', 'PIXEL FIGHT', 'SKY ACE', 'GHOST HUNT', 'NEON DRIFT', 'GALAXY', 'ROBO RUMBLE'];
-    var special = { '1:12': ['RETAINERS LEDGER', S.ledger, 'gold'], '1:14': ['AION 2', S.aion, 'cyan'], '-1:13': ['CLUBBIE', S.club, 'green'] };
+    var names = ['STAR RAID', 'MAZE MUNCH', 'TURBO RUN', 'BRICK BUST', 'PIXEL FIGHT', 'SKY ACE', 'GHOST HUNT', 'NEON DRIFT', 'GALAXY', 'ROBO RUMBLE', 'DRAGON GATE', 'MOON PATROL'];
     var n = 0;
+    function cab(x, z, ry, spec){
+      var tr = spec ? spec[2] : trims[(n*5 + 1) % trims.length];
+      cabinet(x, z, ry, { trim: tr, screen: spec ? spec[1] : attract[n % attract.length], marquee: spec ? marquee(spec[0], NEON[tr]) : marquee(names[n % names.length], NEON[tr]), seed: n });
+      n++;
+    }
+    // along both walls, facing in
     for (var side = -1; side <= 1; side += 2){
-      for (var k = 0; k < 17; k++){
-        var z = 9.6 - k*1.18;
-        if (z < -11.4) break;
+      for (var k = 0; k < 18; k++){
+        var z = 8.6 - k*1.0;
+        if (z < -11.6) break;
+        if (side > 0 && z > 7.4) continue; // the prize counter is there
         var x = side*(HALF - .48), ry = side < 0 ? Math.PI/2 : -Math.PI/2;
-        if (side < 0 && k === 5){ claw(x + .08, z - .55, ry); k++; continue; }
-        if (side > 0 && k === 8){ claw(x - .08, z - .55, ry); k++; continue; }
-        if ((side < 0 && k === 10) || (side > 0 && k === 3)){ plant(x - .15*side, z); continue; }
-        var spec = special[side + ':' + k] || null;
-        var tr = spec ? spec[2] : trims[(n*5 + 1) % trims.length];
-        cabinet(x, z, ry, { trim: tr, screen: spec ? spec[1] : attract[n % attract.length], marquee: spec ? marquee(spec[0], NEON[tr]) : marquee(names[n % names.length], NEON[tr]), seed: n });
-        if (k % 3 === 1) stool(x - side*.95, z + .1);
-        n++;
+        if (side < 0 && k === 6){ claw(x + .08, z - .5, ry); k++; continue; }
+        if (side > 0 && k === 12){ claw(x - .08, z - .5, ry); k++; continue; }
+        if ((side < 0 && k === 13) || (side > 0 && k === 3)){ plant(x - .15*side, z); continue; }
+        cab(x, z, ry);
+        if (k % 4 === 1) person(x - side*.95, z, ry, n);
       }
     }
-    // the end wall: our machine in the middle, two neighbours
+    // two islands of back-to-back machines on each side of the centre aisle
+    var special = { '1:1': ['RETAINERS LEDGER', S.ledger, 'gold'], '1:5': ['AION 2', S.aion, 'cyan'], '-1:4': ['CLUBBIE', S.club, 'green'] };
+    [-1, 1].forEach(function(sd){
+      for (var j = 0; j < 9; j++){
+        var z2 = 6.4 - j*1.0;
+        if (j === 2 || j === 6) continue; // gaps, so you see through to the side aisles
+        cab(sd*2.35, z2, sd < 0 ? Math.PI/2 : -Math.PI/2, special[sd + ':' + j] || null);
+        cab(sd*3.25, z2, sd < 0 ? -Math.PI/2 : Math.PI/2, null);
+        if ((j === 1 && sd < 0) || (j === 7 && sd > 0)) person(sd*4.2, z2, sd < 0 ? -Math.PI/2 : Math.PI/2, j + 3);
+        if ((j === 4 && sd > 0) || (j === 8 && sd < 0)) person(sd*1.4, z2, sd < 0 ? Math.PI/2 : -Math.PI/2, j + 1);
+      }
+      part(frameAt(0, 0, 0, 0), G.box(.08, .06, 9.2), 'n_' + (sd < 0 ? 'pink' : 'cyan'), sd*2.8, 2.24, 2.4);
+    });
+    // further back: racers on the left, a dance machine on the right, cocktail tables in between
+    racer(-5.2, -5.0, Math.PI/2, 'orange', S.racer); racer(-5.2, -6.4, Math.PI/2, 'red', S.racer);
+    dancer(5.0, -5.8, -Math.PI/2);
+    cocktail(-2.6, -8.6, 0); cocktail(2.6, -8.6, 0);
+    // the end wall: our machine in the middle, neighbours on both sides
     cabinet(0, ZF + .5, 0, { trim: 'orange', screen: S.target, marquee: marquee("JORDI'S ARCADE", NEON.orange, 'zig'), seed: 1 });
     cabinet(-1.25, ZF + .5, 0, { trim: 'pink', screen: S.fight, marquee: marquee('PIXEL FIGHT', NEON.pink), seed: 2 });
     cabinet(1.25, ZF + .5, 0, { trim: 'cyan', screen: S.racer, marquee: marquee('TURBO RUN', NEON.cyan), seed: 3 });
-    pinball(-1.75, -3.6, .25); pinball(-1.75, -6.2, .25);
-    hockey(1.9, 1.8, 0);
-    plant(-HALF + .45, ZF + .5); plant(HALF - .45, ZF + .5); bin(2.6, -10.8); bin(-2.7, 6.5);
+    cabinet(-2.5, ZF + .5, 0, { trim: 'gold', screen: S.maze, marquee: marquee('MAZE MUNCH', NEON.gold), seed: 4 });
+    cabinet(2.5, ZF + .5, 0, { trim: 'purple', screen: S.bricks, marquee: marquee('BRICK BUST', NEON.purple), seed: 5 });
+    person(-2.5, ZF + 1.45, 0, 7);
+    // front area: air hockey and pinball by the door, the counter on the right
+    hockey(-3.2, 10.4, 0); hockey(-5.6, 10.4, 0);
+    pinball(3.4, 8.9, -.2); pinball(4.4, 8.9, -.2);
+    counter();
+    plant(-HALF + .45, ZF + .5); plant(HALF - .45, ZF + .5); bin(-1.2, 8.6); bin(1.2, -9.6);
+    // lamps with light shafts over the islands and the aisles
+    [[0, 9], [0, 4.5], [0, 0], [0, -4.5], [0, -9.6], [-5.5, 6], [-5.5, -1], [5.5, 2.5], [5.5, -4], [-4.6, -6], [4.6, -6]].forEach(function(l, i){ shaft(l[0], l[1], [0xffe0b0, 0xc8a0ff, 0xa0f0ff][i % 3], 1.0); });
 
     // ---------- outside: street, facade, neon sign, doors ----------
     var FZ = ZN + .15, DOOR = 1.1, DH = 2.7;
@@ -830,7 +955,7 @@
       var sw = canvas(16, 16), sg = sw.getContext('2d'); sg.fillStyle = '#26243a'; sg.fillRect(0, 0, 16, 16); sg.fillStyle = '#1a1828'; sg.fillRect(0, 15, 16, 1); sg.fillRect(15, 0, 1, 16);
       var side = new T3.Mesh(new T3.PlaneGeometry(30, 4.5), new T3.MeshLambertMaterial({ map: ctex(sw, [30/1.2, 4.5/1.2]), transparent: true, opacity: .86 }));
       side.rotation.x = -Math.PI/2; side.position.set(0, .001, ZN + .3 + 2.25); side.renderOrder = 1; scene.add(side);
-      var st = new T3.Mesh(new T3.PlaneGeometry(40, 16), new T3.MeshLambertMaterial({ color: 0x0e0d18, transparent: true, opacity: .72 }));
+      var st = new T3.Mesh(new T3.PlaneGeometry(40, 16), new T3.MeshLambertMaterial({ color: 0x0e0d18, transparent: true, opacity: .84 }));
       st.rotation.x = -Math.PI/2; st.position.set(0, -.12, ZN + 4.8 + 8); st.renderOrder = 1; scene.add(st);
       part(root, G.box(30, .14, .2), 'curb', 0, -.05, ZN + 4.8);
       lambert('roadLine', 0x7a7a90);
@@ -850,7 +975,7 @@
       var wc = canvas(16, 32), wg = wc.getContext('2d'); wg.fillStyle = '#0d0b1c'; wg.fillRect(0, 0, 16, 32);
       for (var yy = 1; yy < 32; yy += 3) for (var xx = 1; xx < 16; xx += 3) if (rnd() < .38){ wg.fillStyle = rnd() < .7 ? '#c9a46a' : '#6a7ac8'; wg.fillRect(xx, yy, 1, 1); }
       mats.tower = new T3.MeshBasicMaterial({ map: ctex(wc), fog: true, color: 0x9a9ab0 }); mats.tower.userData.glow = true;
-      [[-10.5, 10, 3, 9], [-15, 13, -3, 7], [-8.5, 8, -7, 6], [10.5, 12, 4, 8], [15, 9, -2, 6], [8.5, 15, -9, 7]].forEach(function(b){
+      [[-14.5, 10, 3, 9], [-19, 13, -3, 7], [-13.5, 8, -7, 6], [14.5, 12, 4, 8], [19, 9, -2, 6], [13.5, 15, -9, 7]].forEach(function(b){
         part(root, G.box(b[3], b[1], 5), 'tower', b[0], b[1]/2, b[2]);
       });
       // a sky that fog does not touch, with a few stars
@@ -887,8 +1012,9 @@
     // ---------- lights ----------
     scene.add(new T3.AmbientLight(0x3a3070, .9));
     scene.add(new T3.HemisphereLight(0x5a60c0, 0x120a28, .5));
-    [[-2.6, 3.2, 7, 0xff4fb8], [2.6, 3.2, 2, 0x4fe6ff], [-2.6, 3.2, -3, 0xa85cff], [2.6, 3.2, -7.5, 0xff4fb8], [0, 2.4, -11.2, 0xff8a2a]].forEach(function(l){
-      var p = new T3.PointLight(l[3], 1.2, 9, 1.6); p.position.set(l[0], l[1], l[2]); scene.add(p);
+    [[0, 3.4, 8, 0xff4fb8], [0, 3.4, 2.5, 0x4fe6ff], [0, 3.4, -3.5, 0xa85cff], [0, 2.6, -11.2, 0xff8a2a],
+     [-5.6, 3.4, 5, 0x4fe6ff], [5.6, 3.4, 4, 0xff4fb8], [-5.6, 3.4, -4, 0xff8a2a], [5.6, 3.4, -5, 0xa85cff], [5.8, 3.2, 10.6, 0xffd24f], [-4.4, 3.2, 10.4, 0x4fe6ff]].forEach(function(l){
+      var p = new T3.PointLight(l[3], 1.15, 9.5, 1.6); p.position.set(l[0], l[1], l[2]); scene.add(p);
     });
 
     // ---------- you: legs, a hand and a coin, only seen when you look down or reach out ----------
@@ -928,7 +1054,7 @@
     // ---------- size, camera, loop ----------
     var W = 0, Hh = 0, baseFov = 58, CLOSE = new T3.Vector3();
     function size(){
-      var vw = innerWidth, vh = innerHeight, k = Math.max(2, Math.round(Math.max(vw, vh)/460));
+      var vw = innerWidth, vh = innerHeight, k = Math.max(1, Math.round(Math.max(vw, vh)/900));
       W = Math.max(1, Math.round(vw/k)); Hh = Math.max(1, Math.round(vh/k));
       renderer.setSize(W, Hh, false);
       bloom.width = Math.max(1, W >> 1); bloom.height = Math.max(1, Hh >> 1);
@@ -952,9 +1078,9 @@
       var x = (Math.sin(pose.cam*4.2)*.03*moving + Math.sin(t*.37)*.02*(1 - p))*(1 - end);
       var y = lerp(1.62, CLOSE.y, end) + pose.bob*.011*(1 - end) + Math.sin(t*1.1)*.006*(1 - p);
       POS.set(x, y, z);
-      var glance = (Math.sin(p*Math.PI*2.6)*.9 + Math.sin(t*.25)*.25)*inside*(1 - end);
+      var glance = (Math.sin(p*Math.PI*2.6)*1.6 + Math.sin(t*.25)*.3)*inside*(1 - end);
       var outLook = V.set(0, lerp(2.35, 1.7, sm((Z0 - z)/6)), z - 8);
-      LOOK.set(lerp(outLook.x, x*.3 + glance, inside), lerp(outLook.y, 1.55, inside), lerp(outLook.z, ZF + .7, inside));
+      LOOK.set(lerp(outLook.x, x*.3 + glance, inside), lerp(outLook.y, 1.55, inside), lerp(outLook.z, Math.max(ZF + .7, z - 7), inside));
       LOOK.lerp(SCR.position, end);
     }
     // look in a direction: pitch/yaw offsets from "straight at the screen"
