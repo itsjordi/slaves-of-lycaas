@@ -83,6 +83,9 @@
   .opt.ffxiv{color:#cdb57a}.opt.ffxiv b{color:#ffd24f}.opt.ffxiv.sel{background:#2a2208;border-color:#ffd24f;color:#ffd24f}
   .opt.aion{color:#6f8fb0}.opt.aion b{color:#8fd8ff}.opt.aion.sel{background:#0e1c3a;border-color:#8fd8ff;color:#8fd8ff}
   .opt.club{color:#7d9fe8}.opt.club b{color:#8fb0ff}.opt.club.sel{background:#0d1a44;border-color:#4f7bff;color:#bcd0ff}
+  .opt[hidden]{display:none}
+  .opt.tools{color:#7fd0c0}.opt.tools b{color:#9fffe6}.opt.tools.sel{background:#08261f;border-color:#5dffc8;color:#9fffe6}
+  .opt.back{color:#8a90a8;padding-top:5px;padding-bottom:5px}.opt.back b{font-size:14px;color:#c0c6dc}.opt.back.sel{background:#141a2e;border-color:#9aa2c0;color:#e0e6f6}
   .opt.portfolio{color:#b9a8e8}.opt.portfolio b{color:#e0d0ff}.opt.portfolio.sel{background:#1e1442;border-color:#c9a8ff;color:#e6d8ff}
   .opt.soon{color:#5a6078;border-style:dashed}.opt.soon b{color:#7a809a}.opt.soon.sel{border-color:#9aa2c0;color:#cfd6ee;background:#12162a}
   .opt .last{display:inline-block;margin-left:10px;font-size:11px;letter-spacing:.15em;color:#ffd24f;border:1px solid #ffd24f;padding:0 6px;vertical-align:3px}
@@ -224,10 +227,11 @@
         <div class="loading" data-i="loading">LOADING...</div>
         <div class="menu">
           <h2 data-i="select">SELECT YOUR GAME</h2>
-          <a class="opt ffxiv" href="ffxiv.html" data-game="ffxiv" data-file="ffxiv.html"><b>RETAINER'S LEDGER</b><small data-i="s_ffxiv">FFXIV: craft costs, profit, gil per hour</small><span class="st" data-i="start">PRESS START</span></a>
-          <a class="opt aion" href="aion2.html" data-game="aion2" data-file="aion2.html"><b>AION 2 BOARD</b><small data-i="s_aion">Dailies, timers and alts</small><span class="st" data-i="start">PRESS START</span></a>
-          <a class="opt club" href="case-clubbie.html" data-game="clubbie" data-file="case-clubbie.html"><b>CLUBBIE</b><small data-i="s_club">A team app for my football team</small><span class="st" data-i="start">PRESS START</span></a>
-          <a class="opt portfolio" href="portfolio.html" data-game="portfolio" data-file="portfolio.html"><b>JORDI'S PORTFOLIO</b><small data-i="s_port">Projects, about me, career</small><span class="st" data-i="start">PRESS START</span></a>
+          <a class="opt portfolio" href="portfolio.html" data-page="main" data-game="portfolio" data-file="portfolio.html"><b>JORDI'S PORTFOLIO</b><small data-i="s_port">Projects, about me, career</small><span class="st" data-i="start">PRESS START</span></a>
+          <button type="button" class="opt tools" data-page="main" data-sub="tools"><b data-i="tools">TOOLS &rsaquo;</b><small data-i="s_tools">Retainer's Ledger · AION 2 Board</small><span class="st" data-i="open2">OPEN</span></button>
+          <a class="opt ffxiv" href="ffxiv.html" data-page="tools" data-game="ffxiv" data-file="ffxiv.html" hidden><b>RETAINER'S LEDGER</b><small data-i="s_ffxiv">FFXIV: craft costs, profit, gil per hour</small><span class="st" data-i="start">PRESS START</span></a>
+          <a class="opt aion" href="aion2.html" data-page="tools" data-game="aion2" data-file="aion2.html" hidden><b>AION 2 BOARD</b><small data-i="s_aion">Dailies, timers and alts</small><span class="st" data-i="start">PRESS START</span></a>
+          <button type="button" class="opt back" data-page="tools" data-sub="main" hidden><b data-i="back2">&lsaquo; BACK</b><small data-i="s_back">To the main menu</small><span class="st" data-i="open2">OPEN</span></button>
           <div class="foot"><span data-i="f1">UP / DOWN: MOVE</span><span data-i="f2">ENTER: START</span><span data-i="f3">CREDIT 01</span></div>
         </div>
       </div>
@@ -254,12 +258,12 @@
   var I18N = {
     en: { tag:"Two game tools · a team app · my portfolio", open:"OPEN", walk:"WALK IN", walking:"WALKING TO A MACHINE...", skip:"SKIP TO PORTFOLIO", back:"WALK BACK",
       coin:"INSERT COIN", moment:"ONE MOMENT...", loading:"LOADING...", select:"SELECT YOUR GAME",
-      s_ffxiv:"FFXIV: craft costs, profit, gil per hour", s_aion:"Dailies, timers and alts", s_club:"A team app for my football team", s_port:"Projects, about me, career",
+      s_ffxiv:"FFXIV: craft costs, profit, gil per hour", s_aion:"Dailies, timers and alts", s_club:"A team app for my football team", s_port:"Projects, about me, career", tools:"TOOLS &rsaquo;", s_tools:"Retainer's Ledger · AION 2 Board", back2:"&lsaquo; BACK", s_back:"To the main menu", open2:"OPEN", select_tools:"TOOLS",
       start:"PRESS START", f1:"UP / DOWN: MOVE", f2:"ENTER: START", f3:"CREDIT 01", soon:"Coming soon<br>to your local<br>arcade hall", anykey:"PRESS ANY KEY",
       boot:["JORDI'S ARCADE BIOS v1.0","CHECKING MEMORY ........ OK","LOADING CABINET ......... OK","CREDIT 01","","READY."] },
     nl: { tag:"Twee gametools · een team-app · mijn portfolio", open:"OPEN", walk:"LOOP BINNEN", walking:"LOOP NAAR EEN MACHINE...", skip:"SLA OVER, NAAR PORTFOLIO", back:"LOOP TERUG",
       coin:"MUNT IN", moment:"EEN MOMENT...", loading:"LADEN...", select:"KIES JE SPEL",
-      s_ffxiv:"FFXIV: craftkosten, winst, gil per uur", s_aion:"Dailies, timers en alts", s_club:"Een team-app voor mijn voetbalteam", s_port:"Projecten, over mij, loopbaan",
+      s_ffxiv:"FFXIV: craftkosten, winst, gil per uur", s_aion:"Dailies, timers en alts", s_club:"Een team-app voor mijn voetbalteam", s_port:"Projecten, over mij, loopbaan", tools:"TOOLS &rsaquo;", s_tools:"Retainer's Ledger · AION 2 Board", back2:"&lsaquo; TERUG", s_back:"Terug naar het hoofdmenu", open2:"OPEN", select_tools:"TOOLS",
       start:"DRUK OP START", f1:"OP / NEER: KIES", f2:"ENTER: START", f3:"CREDIT 01", soon:"Binnenkort<br>in je eigen<br>speelhal", anykey:"DRUK OP EEN TOETS",
       boot:["JORDI'S ARCADE BIOS v1.0","GEHEUGEN CONTROLEREN ... OK","KAST LADEN ............. OK","CREDIT 01","","KLAAR."] }
   };
@@ -272,6 +276,7 @@
     document.querySelectorAll('[data-ia]').forEach(function(e){ e.setAttribute('aria-label', d[e.getAttribute('data-ia')] || ''); });
     document.querySelectorAll('#lang button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-l') === LANG ? 'true' : 'false'); });
     if (save){ try{ localStorage.setItem('clubbie_lang', LANG); }catch(e){} }
+    var mh = document.querySelector('.menu h2'); if (mh) mh.innerHTML = d[mh.getAttribute('data-i')] || mh.innerHTML;
   }
   document.querySelectorAll('#lang button').forEach(function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-l'), true); }); });
   setLang(LANG, false);
@@ -359,6 +364,17 @@
       if (shadow) text(g, s, x + k, y + k, k, shadow);
       text(g, s, x, y, k, col);
     }
+    function ctexS(c){ var t = new T3.CanvasTexture(c); t.minFilter = T3.LinearMipmapLinearFilter; t.magFilter = T3.LinearFilter; t.anisotropy = 4; return t; }
+    var NEONFONT = '"Arial Black", "Helvetica Neue", Arial, sans-serif';
+    function neonText(g, s, cx, cy, size, col, opts){
+      opts = opts || {};
+      g.save(); g.textAlign = opts.align || 'center'; g.textBaseline = 'middle';
+      g.font = (opts.weight || '900') + ' ' + size + 'px ' + (opts.font || NEONFONT);
+      var w = g.measureText(s).width, max = opts.max || 1e9; if (w > max){ g.font = (opts.weight || '900') + ' ' + Math.floor(size*max/w) + 'px ' + (opts.font || NEONFONT); }
+      g.shadowColor = col; g.shadowBlur = size*.55; g.fillStyle = col; g.fillText(s, cx, cy);
+      g.shadowBlur = size*.18; g.fillStyle = opts.core || '#ffffff'; g.globalAlpha = .92; g.fillText(s, cx, cy);
+      g.restore();
+    }
     function canvas(w, h){ var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
     function ctex(c, rep){
       var t = new T3.CanvasTexture(c);
@@ -394,12 +410,13 @@
     function sideKey(n){
       var key = 'side_' + n;
       if (!mats[key]){
-        var c = canvas(16, 32), g = c.getContext('2d');
-        g.fillStyle = '#17142c'; g.fillRect(0, 0, 16, 32);
-        g.fillStyle = NEON[n]; g.globalAlpha = .55;
-        for (var i = -32; i < 32; i += 6) for (var y = 0; y < 32; y++){ var x = i + y; if (x >= 0 && x < 16 && y > 18) g.fillRect(x, y, 2, 1); }
-        g.globalAlpha = .9; g.fillRect(0, 31, 16, 1);
-        mats[key] = new T3.MeshLambertMaterial({ map: ctex(c) });
+        var c = canvas(128, 256), g = c.getContext('2d');
+        var gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#1b1734'); gr.addColorStop(1, '#120f26'); g.fillStyle = gr; g.fillRect(0, 0, 128, 256);
+        g.save(); g.beginPath(); g.rect(0, 140, 128, 116); g.clip();
+        g.strokeStyle = NEON[n]; g.globalAlpha = .6; g.lineWidth = 9;
+        for (var i = -256; i < 256; i += 40){ g.beginPath(); g.moveTo(i, 256); g.lineTo(i + 140, 116); g.stroke(); }
+        g.restore(); g.globalAlpha = .95; g.fillStyle = NEON[n]; g.fillRect(0, 250, 128, 6);
+        mats[key] = new T3.MeshLambertMaterial({ map: ctexS(c) });
       }
       return key;
     }
@@ -428,8 +445,8 @@
     var G = {
       box: function(w, h, d){ return new T3.BoxGeometry(w, h, d); },
       plane: function(w, h){ return new T3.PlaneGeometry(w, h); },
-      cyl: function(rt, rb, h, s){ return new T3.CylinderGeometry(rt, rb, h, s || 8); },
-      sph: function(r){ return new T3.SphereGeometry(r, 8, 6); }
+      cyl: function(rt, rb, h, s){ return new T3.CylinderGeometry(rt, rb, h, Math.max(16, s || 16)); },
+      sph: function(r){ return new T3.SphereGeometry(r, 16, 12); }
     };
     var tmp = new T3.Object3D();
     function part(frame, geo, key, x, y, z, rx, ry, rz){
@@ -566,18 +583,20 @@
 
     // ---------- marquees and posters (static canvases) ----------
     function marquee(name, col, style){
-      var c = canvas(128, 24), g = c.getContext('2d');
-      g.fillStyle = '#120a20'; g.fillRect(0, 0, 128, 24);
-      if (style === 'zig'){
-        for (var x = 0; x < 128; x++){ var y = Math.abs((x % 12) - 6); g.fillStyle = '#ff6a1a'; g.fillRect(x, 4 + y, 1, 2); g.fillStyle = '#ffb04a'; g.fillRect(x, 13 - y, 1, 2); g.fillStyle = '#a03010'; g.fillRect(x, 18 + (y >> 1), 1, 1); }
-      } else {
-        g.fillStyle = col; g.globalAlpha = .35; g.fillRect(0, 0, 128, 3); g.fillRect(0, 21, 128, 3); g.globalAlpha = .18;
-        for (var x2 = 0; x2 < 128; x2 += 8) g.fillRect(x2, 3, 4, 18); g.globalAlpha = 1;
-      }
-      var k = textW(name, 2) <= 122 ? 2 : 1;
-      ctext(g, name, 64, k === 2 ? 7 : 9, k, '#fff', style === 'zig' ? '#5a1a00' : col);
       var key = 'mq_' + name + '_' + col;
-      if (!mats[key]){ mats[key] = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats[key].userData.glow = true; }
+      if (mats[key]) return key;
+      var c = canvas(320, 64), g = c.getContext('2d');
+      var gr = g.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, '#1c1030'); gr.addColorStop(1, '#0a0614'); g.fillStyle = gr; g.fillRect(0, 0, 320, 64);
+      if (style === 'zig'){
+        g.lineWidth = 3; g.strokeStyle = '#ff6a1a'; g.shadowColor = '#ff6a1a'; g.shadowBlur = 8; g.beginPath();
+        for (var x = 0; x <= 320; x += 16) g.lineTo(x, (x/16) % 2 ? 10 : 22); g.stroke();
+        g.beginPath(); for (var x3 = 0; x3 <= 320; x3 += 16) g.lineTo(x3, (x3/16) % 2 ? 54 : 42); g.stroke(); g.shadowBlur = 0;
+      } else {
+        g.fillStyle = col; g.globalAlpha = .55; g.fillRect(0, 2, 320, 3); g.fillRect(0, 59, 320, 3);
+        g.globalAlpha = .08; for (var x2 = 0; x2 < 320; x2 += 20) g.fillRect(x2, 5, 10, 54); g.globalAlpha = 1;
+      }
+      neonText(g, name, 160, 33, 34, style === 'zig' ? '#ffb04a' : col, { max: 296 });
+      mats[key] = new T3.MeshBasicMaterial({ map: ctexS(c), fog: true }); mats[key].userData.glow = true;
       return key;
     }
     function poster(kind){
@@ -610,12 +629,12 @@
       return key;
     }
     function scoreboard(){
-      var c = canvas(80, 44), g = c.getContext('2d');
-      g.fillStyle = '#05040f'; g.fillRect(0, 0, 80, 44);
-      ctext(g, 'HIGH SCORES', 40, 3, 1, NEON.pink);
-      var rows = [['1', 'JORDI', '999990'], ['2', 'LEDGER', '812300'], ['3', 'CLUBBIE', '640180'], ['4', 'AION 2', '525060']];
-      rows.forEach(function(r, i){ text(g, r[0], 5, 13 + i*7, 1, NEON.gold); text(g, r[1], 13, 13 + i*7, 1, '#e8e2ff'); text(g, r[2], 51, 13 + i*7, 1, NEON.cyan); });
-      mats.score = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats.score.userData.glow = true;
+      var c = canvas(400, 220), g = c.getContext('2d');
+      g.fillStyle = '#05040f'; g.fillRect(0, 0, 400, 220); g.strokeStyle = '#a85cff'; g.lineWidth = 3; g.strokeRect(6, 6, 388, 208);
+      neonText(g, 'HIGH SCORES', 200, 34, 30, NEON.pink);
+      var rows = [['1', 'JORDI', '999990'], ['2', 'LEDGER', '812300'], ['3', 'AION 2', '640180'], ['4', 'LYCAA', '525060']];
+      rows.forEach(function(r, i){ var y = 82 + i*36; neonText(g, r[0], 40, y, 24, NEON.gold, { core: '#fff3c8' }); neonText(g, r[1], 70, y, 24, '#c9c0ff', { align: 'left', core: '#f4f0ff' }); neonText(g, r[2], 360, y, 24, NEON.cyan, { align: 'right', font: 'ui-monospace, Menlo, Consolas, monospace', weight: '700' }); });
+      mats.score = new T3.MeshBasicMaterial({ map: ctexS(c), fog: true }); mats.score.userData.glow = true;
       return 'score';
     }
 
@@ -715,20 +734,23 @@
     var HALF = 8.6, ZN = 14, ZF = -13.6, H = 4.6;
     // classic arcade carpet: dark blue with neon squiggles, stars and rings
     (function(){
-      var c = canvas(96, 96), g = c.getContext('2d');
-      g.fillStyle = '#0a0b26'; g.fillRect(0, 0, 96, 96);
+      var c2 = canvas(384, 384), g = c2.getContext('2d');
+      g.fillStyle = '#0a0b26'; g.fillRect(0, 0, 384, 384);
       var cols = ['#ff4fb8', '#4fe6ff', '#ffd24f', '#a85cff', '#5dff8a'];
-      for (var i = 0; i < 26; i++){
-        var x = Math.floor(rnd()*96), y = Math.floor(rnd()*96), col = cols[i % 5], kind = i % 4;
-        g.fillStyle = col; g.globalAlpha = .55 + rnd()*.3;
-        if (kind === 0){ for (var s = 0; s < 10; s++) g.fillRect((x + s) % 96, (y + Math.round(Math.sin(s*.9)*2)) % 96, 1, 1); }
-        else if (kind === 1){ g.fillRect(x, y, 1, 3); g.fillRect(x - 1, y + 1, 3, 1); }
-        else if (kind === 2){ for (var a = 0; a < 12; a++){ g.fillRect((x + Math.round(Math.cos(a*.52)*3) + 96) % 96, (y + Math.round(Math.sin(a*.52)*3) + 96) % 96, 1, 1); } }
-        else { for (var t2 = 0; t2 < 4; t2++){ g.fillRect((x + t2) % 96, (y + t2) % 96, 1, 1); g.fillRect((x + 7 - t2) % 96, (y + t2) % 96, 1, 1); } g.fillRect(x, (y + 4) % 96, 8, 1); }
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      for (var i = 0; i < 46; i++){
+        var x = rnd()*384, y = rnd()*384, col = cols[i % 5], kind = i % 4, r = 7 + rnd()*9;
+        g.strokeStyle = col; g.fillStyle = col; g.globalAlpha = .5 + rnd()*.35; g.lineWidth = 2.2;
+        g.beginPath();
+        if (kind === 0){ for (var sx = 0; sx <= 40; sx += 2) g.lineTo(x + sx, y + Math.sin(sx*.25)*6); g.stroke(); }
+        else if (kind === 1){ g.moveTo(x - r*.7, y); g.lineTo(x + r*.7, y); g.moveTo(x, y - r*.7); g.lineTo(x, y + r*.7); g.stroke(); }
+        else if (kind === 2){ g.arc(x, y, r, 0, Math.PI*2); g.stroke(); }
+        else { g.moveTo(x, y - r); g.lineTo(x + r, y + r*.8); g.lineTo(x - r, y + r*.8); g.closePath(); g.stroke(); }
       }
-      g.globalAlpha = .12; g.fillStyle = '#4fe6ff'; for (var d = 0; d < 300; d++) g.fillRect(Math.floor(rnd()*96), Math.floor(rnd()*96), 1, 1);
+      g.globalAlpha = .14; g.fillStyle = '#4fe6ff'; for (var d = 0; d < 1600; d++) g.fillRect(rnd()*384, rnd()*384, 1.2, 1.2);
       g.globalAlpha = 1;
-      var floor = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ map: ctex(c, [HALF*2/2.6, (ZN - ZF)/2.6]), transparent: true, opacity: .93 }));
+      var ft = new T3.CanvasTexture(c2); ft.wrapS = ft.wrapT = T3.RepeatWrapping; ft.repeat.set(HALF*2/2.6, (ZN - ZF)/2.6); ft.magFilter = T3.LinearFilter; ft.minFilter = T3.LinearMipmapLinearFilter; ft.anisotropy = 8;
+      var floor = new T3.Mesh(new T3.PlaneGeometry(HALF*2, ZN - ZF), new T3.MeshLambertMaterial({ map: ft, transparent: true, opacity: .93 }));
       floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, (ZN + ZF)/2); floor.renderOrder = 1;
       scene.add(floor);
 
@@ -846,11 +868,12 @@
     lambert('ppl1', 0x2a3a6a); lambert('ppl2', 0x6a2a4a); lambert('ppl3', 0x2a5a3a); lambert('skin', 0xc89070); lambert('skin2', 0x8a5a3a); lambert('hair', 0x1a1018); lambert('hair2', 0x6a4020); lambert('jeans', 0x24345e);
     function person(x, z, ry, s){
       var f = frameAt(x, 0, z, ry), top = ['ppl1', 'ppl2', 'ppl3'][s % 3], sk = s % 4 === 3 ? 'skin2' : 'skin', hr = s % 2 ? 'hair' : 'hair2', hh = 1 + (s % 3)*.04;
-      part(f, G.box(.14, .82*hh, .16), 'jeans', -.09, .41*hh, 0); part(f, G.box(.14, .82*hh, .16), 'jeans', .09, .41*hh, 0);
-      part(f, G.box(.4, .56, .24), top, 0, (.82 + .28)*hh, 0);
-      part(f, G.box(.24, .26, .24), sk, 0, 1.52*hh, -.02); part(f, G.box(.26, .1, .26), hr, 0, 1.66*hh, .01); part(f, G.box(.26, .2, .06), hr, 0, 1.56*hh, .12);
+      part(f, G.cyl(.07, .065, .82*hh), 'jeans', -.09, .41*hh, 0); part(f, G.cyl(.07, .065, .82*hh), 'jeans', .09, .41*hh, 0);
+      part(f, G.cyl(.19, .16, .56), top, 0, (.82 + .28)*hh, 0); part(f, G.sph(.19), top, 0, (.82 + .5)*hh, 0);
+      part(f, G.sph(.13), sk, 0, 1.55*hh, -.02); part(f, new T3.SphereGeometry(.14, 16, 10, 0, Math.PI*2, 0, Math.PI*.55), hr, 0, 1.57*hh, .01);
+      part(f, G.cyl(.05, .06, .1), sk, 0, 1.41*hh, 0);
       // arms forward to the controls
-      part(f, G.box(.1, .1, .42), top, -.22, 1.1*hh, -.18, -.35); part(f, G.box(.1, .1, .42), top, .22, 1.1*hh, -.18, -.35);
+      part(f, G.cyl(.045, .045, .44), top, -.22, 1.12*hh, -.16, -1.2); part(f, G.cyl(.045, .045, .44), top, .22, 1.12*hh, -.16, -1.2);
     }
 
     // ---------- the machines ----------
@@ -877,7 +900,7 @@
       }
     }
     // two islands of back-to-back machines on each side of the centre aisle
-    var special = { '1:1': ['RETAINERS LEDGER', S.ledger, 'gold'], '1:5': ['AION 2', S.aion, 'cyan'], '-1:4': ['CLUBBIE', S.club, 'green'] };
+    var special = { '1:1': ['RETAINERS LEDGER', S.ledger, 'gold'], '1:5': ['AION 2', S.aion, 'cyan'], '-1:4': ['PORTFOLIO', S.title, 'purple'] };
     [-1, 1].forEach(function(sd){
       for (var j = 0; j < 9; j++){
         var z2 = 6.4 - j*1.0;
@@ -932,13 +955,17 @@
       part(root, G.box(DOOR*2 + .1, .05, .06), 'n_pink', 0, DH, FZ + .17);
       part(root, G.box(.05, DH, .06), 'n_pink', -DOOR - .02, DH/2, FZ + .17); part(root, G.box(.05, DH, .06), 'n_pink', DOOR + .02, DH/2, FZ + .17);
       // the big sign, framed by chasing bulbs
-      var c = canvas(128, 32), g = c.getContext('2d');
-      g.fillStyle = '#0c0718'; g.fillRect(0, 0, 128, 32);
-      var a = "JORDI'S", b = 'ARCADE', k = 2, wA = textW(a, k), wB = textW(b, k), x0 = Math.round((128 - wA - wB - 10)/2);
-      text(g, a, x0 + 1, 10, k, '#6a1048'); text(g, a, x0, 9, k, '#ffb3e3');
-      text(g, b, x0 + wA + 11, 10, k, '#0a4a5a'); text(g, b, x0 + wA + 10, 9, k, '#c8fbff');
-      g.fillStyle = NEON.pink; g.fillRect(2, 2, 124, 1); g.fillRect(2, 29, 124, 1); g.fillStyle = NEON.cyan; g.fillRect(2, 2, 1, 28); g.fillRect(125, 2, 1, 28);
-      mats.sign = new T3.MeshBasicMaterial({ map: ctex(c), fog: true }); mats.sign.userData.glow = true;
+      var c = canvas(640, 160), g = c.getContext('2d');
+      g.fillStyle = '#0c0718'; g.fillRect(0, 0, 640, 160);
+      g.lineWidth = 5; g.shadowBlur = 14; g.strokeStyle = NEON.pink; g.shadowColor = NEON.pink; g.strokeRect(12, 12, 616, 136);
+      g.strokeStyle = NEON.cyan; g.shadowColor = NEON.cyan; g.lineWidth = 3; g.strokeRect(24, 24, 592, 112); g.shadowBlur = 0;
+      var fs = 72; g.font = '900 ' + fs + 'px ' + NEONFONT;
+      var wa = g.measureText("JORDI'S").width, wb = g.measureText('ARCADE').width, gap = 28, tot = wa + wb + gap;
+      if (tot > 560){ fs = Math.floor(fs*560/tot); g.font = '900 ' + fs + 'px ' + NEONFONT; wa = g.measureText("JORDI'S").width; wb = g.measureText('ARCADE').width; gap = 22; tot = wa + wb + gap; }
+      var xs = 320 - tot/2;
+      neonText(g, "JORDI'S", xs, 84, fs, NEON.pink, { core: '#ffe0f4', align: 'left' });
+      neonText(g, 'ARCADE', xs + wa + gap, 84, fs, NEON.cyan, { core: '#e6feff', align: 'left' });
+      mats.sign = new T3.MeshBasicMaterial({ map: ctexS(c), fog: true }); mats.sign.userData.glow = true;
       part(root, G.plane(4.4, 1.1), 'sign', 0, 3.75, FZ + .17);
       part(root, G.box(4.6, 1.3, .1), 'facadeDark', 0, 3.75, FZ + .1);
       for (var i = 0; i < 22; i++){
@@ -947,9 +974,10 @@
         part(root, G.box(.07, .07, .05), i % 2 ? 'bulbB' : 'bulbA', bx, 3.05, FZ + .19);
       }
       // a small OPEN sign in the window
-      var o = canvas(32, 12), og = o.getContext('2d'); og.fillStyle = '#05040c'; og.fillRect(0, 0, 32, 12);
-      ctext(og, 'OPEN', 16, 3, 1, NEON.cyan); og.fillStyle = NEON.pink; og.fillRect(1, 1, 30, 1); og.fillRect(1, 10, 30, 1);
-      mats.open = new T3.MeshBasicMaterial({ map: ctex(o), fog: true }); mats.open.userData.glow = true;
+      var o = canvas(200, 76), og = o.getContext('2d'); og.fillStyle = '#05040c'; og.fillRect(0, 0, 200, 76);
+      og.strokeStyle = NEON.pink; og.shadowColor = NEON.pink; og.shadowBlur = 10; og.lineWidth = 4; og.beginPath(); og.roundRect ? og.roundRect(8, 8, 184, 60, 26) : og.rect(8, 8, 184, 60); og.stroke(); og.shadowBlur = 0;
+      neonText(og, 'OPEN', 100, 40, 40, NEON.cyan, { core: '#e6feff' });
+      mats.open = new T3.MeshBasicMaterial({ map: ctexS(o), fog: true }); mats.open.userData.glow = true;
       part(root, G.plane(.7, .26), 'open', 2.8, 2.1, FZ + .04);
       // sidewalk, curb, wet street
       var sw = canvas(16, 16), sg = sw.getContext('2d'); sg.fillStyle = '#26243a'; sg.fillRect(0, 0, 16, 16); sg.fillStyle = '#1a1828'; sg.fillRect(0, 15, 16, 1); sg.fillRect(15, 0, 1, 16);
@@ -1054,7 +1082,7 @@
     // ---------- size, camera, loop ----------
     var W = 0, Hh = 0, baseFov = 58, CLOSE = new T3.Vector3();
     function size(){
-      var vw = innerWidth, vh = innerHeight, k = Math.max(1, Math.round(Math.max(vw, vh)/900));
+      var vw = innerWidth, vh = innerHeight, k = Math.max(1, Math.max(vw, vh)/1400);
       W = Math.max(1, Math.round(vw/k)); Hh = Math.max(1, Math.round(vh/k));
       renderer.setSize(W, Hh, false);
       bloom.width = Math.max(1, W >> 1); bloom.height = Math.max(1, Hh >> 1);
@@ -1300,7 +1328,16 @@
     }
 
     // menu
-    var opts = Array.prototype.slice.call(document.querySelectorAll('.opt')), sel = 0, stick = { style: {} };
+    var allOpts = Array.prototype.slice.call(document.querySelectorAll('.opt')), opts = [], sel = 0, stick = { style: {} }, page = 'main';
+    var menuH = document.querySelector('.menu h2');
+    function showPage(pg, at){
+      page = pg;
+      allOpts.forEach(function(o){ o.hidden = o.dataset.page !== pg; });
+      opts = allOpts.filter(function(o){ return !o.hidden; });
+      menuH.setAttribute('data-i', pg === 'tools' ? 'select_tools' : 'select'); menuH.innerHTML = I18N[LANG][menuH.getAttribute('data-i')];
+      select(at || 0);
+    }
+    opts = allOpts.filter(function(o){ return !o.hidden; });
     var powered = false, inserting = false, scr = document.getElementById('scr'), mEl = document.getElementById('m'), coinBtn = document.getElementById('coinBtn'), boot = document.getElementById('bootlog');
     var lastTagged = false;
     function resetMachine(){
@@ -1329,27 +1366,33 @@
     }
     coinBtn.addEventListener('click', insertCoin);
     function startIndex(){
-      try{ if (lastTagged) return 0; var last = localStorage.getItem('lycaas_lastgame'); var i = opts.findIndex(function(o){ return o.dataset.game === last; }); if (i >= 0){ opts[i].querySelector('b').insertAdjacentHTML('beforeend', '<span class="last">LAST</span>'); lastTagged = true; return i; } }catch(e){}
+      try{
+        showPage('main');
+        var last = localStorage.getItem('lycaas_lastgame'), o = allOpts.filter(function(x){ return x.dataset.game === last; })[0];
+        if (o && o.dataset.page === 'tools'){ showPage('tools'); }
+        if (o){ if (!lastTagged){ o.querySelector('b').insertAdjacentHTML('beforeend', '<span class="last">LAST</span>'); lastTagged = true; } return Math.max(0, opts.indexOf(o)); }
+      }catch(e){}
       return 0;
     }
     function select(i){
       sel = (i + opts.length) % opts.length;
-      opts.forEach(function(o, n){ o.classList.toggle('sel', n === sel); });
+      allOpts.forEach(function(o){ o.classList.toggle('sel', o === opts[sel]); });
     }
     function tilt(dir){ stick.style.transform = 'rotate(' + (dir*14) + 'deg)'; setTimeout(function(){ stick.style.transform = ''; }, 140); }
     function activate(){
       var o = opts[sel];
+      if (o.dataset.sub){ showPage(o.dataset.sub, o.dataset.sub === 'main' ? 1 : 0); return; }
       if (o.dataset.soon){ document.getElementById('soon').classList.add('on'); return; }
       try{ localStorage.setItem('lycaas_lastgame', o.dataset.game); }catch(x){}
       try{ sessionStorage.setItem('arcade_in', '1'); sessionStorage.setItem('arcade_at', '1'); }catch(x){}
       body.classList.add('leaving'); mEl.classList.add('go'); if (Hall.dive) Hall.dive();
       setTimeout(function(){ location.href = o.href; }, 1500);
     }
-    opts.forEach(function(o, n){
-      o.addEventListener('mouseenter', function(){ if (state === 'arrived' && powered) select(n); });
+    allOpts.forEach(function(o){
+      o.addEventListener('mouseenter', function(){ if (state === 'arrived' && powered && !o.hidden) select(opts.indexOf(o)); });
       o.addEventListener('click', function(e){
         if (o.tagName === 'A'){ if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; e.preventDefault(); }
-        if (!powered) return; select(n); activate();
+        if (!powered) return; select(opts.indexOf(o)); activate();
       });
     });
     var soon = document.getElementById('soon');
@@ -1362,7 +1405,8 @@
       if (e.key === 'ArrowUp'){ e.preventDefault(); select(sel - 1); tilt(-1); }
       else if (e.key === 'ArrowDown'){ e.preventDefault(); select(sel + 1); tilt(1); }
       else if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
-      else if (e.key === 'Escape'){ walkBack(); }
+      else if (e.key === 'Escape'){ if (page !== 'main') showPage('main', 1); else walkBack(); }
+      else if (e.key === 'ArrowLeft' && page !== 'main'){ e.preventDefault(); showPage('main', 1); }
     });
 
     // Coming back from a game or the portfolio: stand at the machine again with the menu on, no walk and no coin.
