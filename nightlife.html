@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night out - Jordi's Arcade</title>
+<meta name="description" content="A night out in Prague: the streets, the bars, the clubs and the last tram home. From the street outside Jordi's Arcade.">
+<script>try{var __l=localStorage.getItem('clubbie_lang')||((navigator.language||'').toLowerCase().indexOf('nl')===0?'nl':'en');if(__l==='nl')document.documentElement.lang='nl';}catch(e){}</script>
+<style>
+  :root{--pink:#ff4fb8;--cyan:#4fe6ff;--gold:#ffd24f;--violet:#a85cff;--green:#5dff8a;--bg:#07040f;--text:#efe8ff;--muted:#9a94c0;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:radial-gradient(ellipse at 50% 0,#22104a 0,#0b0620 45%,var(--bg) 80%) fixed;color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  html[lang="nl"] [lang="en"],html[lang="en"] [lang="nl"]{display:none}
+  a{color:var(--cyan)}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  .top{display:flex;align-items:center;gap:12px;padding:18px 0}
+  .top a{font:13px var(--mono);letter-spacing:.15em;text-decoration:none;color:#cfd6ee;border:2px solid #4a4478;padding:8px 12px}
+  .top a:hover{border-color:var(--cyan);color:#fff}
+  .top .sp{flex:1}
+  .lang button{font:12px var(--mono);letter-spacing:.15em;color:#a99ac9;background:rgba(8,5,18,.7);border:2px solid #4a4478;padding:6px 10px;cursor:pointer}
+  .lang button[aria-pressed="true"]{color:#fff;border-color:var(--cyan)}
+  .festoon{height:40px;background:radial-gradient(circle,#ffe4a0 0 3px,transparent 4px) 0 12px/34px 34px repeat-x,radial-gradient(circle,#ff7ad0 0 3px,transparent 4px) 17px 20px/34px 34px repeat-x;filter:drop-shadow(0 0 6px #ffcf80);opacity:.9}
+  header.hero{text-align:center;padding:30px 0 10px}
+  .neon{font:900 clamp(40px,8vw,84px)/1 "Arial Black","Helvetica Neue",Arial,sans-serif;letter-spacing:.02em;margin:0}
+  .neon .p{color:#ffe0f4;text-shadow:0 0 6px var(--pink),0 0 18px var(--pink),0 0 44px var(--pink)}
+  .neon .c{color:#e6feff;text-shadow:0 0 6px var(--cyan),0 0 18px var(--cyan),0 0 44px var(--cyan);animation:flick 5s infinite}
+  @keyframes flick{0%,90%,100%{opacity:1}91%{opacity:.4}93%{opacity:1}94%{opacity:.6}}
+  .lead{max-width:640px;margin:18px auto 0;color:#d6cff0;font-size:18px}
+  .skyline{display:block;width:100%;height:auto;margin-top:26px}
+  section{padding:34px 0;border-top:1px solid #241a46}
+  h2{font:800 13px var(--mono);letter-spacing:.3em;margin:0 0 6px}
+  h3{font:700 26px/1.2 Georgia,"Times New Roman",serif;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+  .card{background:rgba(14,9,34,.82);border:1px solid #2c2058;border-radius:10px;padding:18px 20px;position:relative;overflow:hidden}
+  .card b{display:block;font-size:17px;margin-bottom:4px}
+  .card p{margin:0;color:#c9c2e6;font-size:15px}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--cyan));box-shadow:0 0 14px var(--c,var(--cyan))}
+  .sign{display:inline-block;font:800 20px var(--mono);letter-spacing:.2em;padding:6px 14px;border:3px solid var(--c);color:#fff;text-shadow:0 0 8px var(--c);box-shadow:0 0 16px var(--c),inset 0 0 12px var(--c);margin-bottom:12px}
+  .sign.pulse{animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 16px var(--c),inset 0 0 12px var(--c)}50%{box-shadow:0 0 34px var(--c),inset 0 0 22px var(--c)}}
+  .tram{margin-top:14px;font:13px var(--mono);color:var(--gold);letter-spacing:.1em}
+  footer{padding:30px 0 50px;text-align:center;color:var(--muted);font-size:14px}
+  footer a{font:13px var(--mono);letter-spacing:.15em;text-decoration:none;border:2px solid var(--pink);color:#fff;padding:10px 16px;display:inline-block;margin-bottom:14px;box-shadow:0 0 14px rgba(255,79,184,.4)}
+  :target{scroll-margin-top:16px}
+  section:target .sign{animation:pulse .6s 4}
+  @media (prefers-reduced-motion:reduce){.neon .c,.sign.pulse{animation:none}}
+</style>
+</head>
+<body>
+<div class="festoon" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="top">
+    <a href="index.html">&lsaquo; <span lang="en">BACK TO THE STREET</span><span lang="nl">TERUG NAAR DE STRAAT</span></a>
+    <span class="sp"></span>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-l="nl">NL</button> <button type="button" data-l="en">EN</button></div>
+  </div>
+
+  <header class="hero">
+    <h1 class="neon"><span class="p">NIGHT</span> <span class="c">OUT</span></h1>
+    <p class="lead"><span lang="en">The arcade is only the first stop. I love a night out, and Prague in the evening is the best version of it: cobblestones, warm windows, a tram rattling past and a door with music behind it on every corner.</span><span lang="nl">De arcade is pas de eerste stop. Ik ga graag op stap, en Praag in de avond is daar de mooiste versie van: kinderkopjes, warme ramen, een tram die voorbij ratelt en op elke hoek een deur met muziek erachter.</span></p>
+    <svg class="skyline" viewBox="0 0 980 150" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1a50"/><stop offset="1" stop-color="#0b0620"/></linearGradient></defs>
+      <path fill="url(#g)" d="M0 150V96h40V70h24v26h30V82l14-30 14 30v14h40V60h10V34l8-24 8 24v26h10v36h36V88h28v8h44V54l16-34 16 34v42h20V40l10-30 10 30v56h18V72h40v24h30V84c10-22 34-22 44 0v12h36V58l12-26 12 26v38h30V76h52v20h40V64l18-38 18 38v32h36V86h40v10h36V70h30v26h33v54z"/>
+      <g fill="#ffd08a"><rect x="190" y="70" width="5" height="8"/><rect x="330" y="66" width="5" height="8"/><rect x="520" y="74" width="5" height="8"/><rect x="760" y="80" width="5" height="8"/><rect x="900" y="80" width="5" height="8"/><rect x="60" y="80" width="5" height="8"/></g>
+    </svg>
+  </header>
+
+  <section id="cocktails">
+    <h2 style="color:var(--pink)"><span lang="en">BAR NOVA</span><span lang="nl">BAR NOVA</span></h2>
+    <div class="sign" style="--c:var(--pink)">COCKTAILS</div>
+    <h3><span lang="en">Start slow, with something in a nice glass</span><span lang="nl">Rustig beginnen, met iets in een mooi glas</span></h3>
+    <div class="grid">
+      <div class="card" style="--c:var(--pink)"><b><span lang="en">Old Town</span><span lang="nl">Oude Stad</span></b><p><span lang="en">The lanes around the Old Town Square fill up after dark. Busy, touristy in places, and still the classic first night out.</span><span lang="nl">De straatjes rond het Oudestadsplein lopen na het donker vol. Druk, hier en daar toeristisch, en nog steeds de klassieke eerste avond uit.</span></p></div>
+      <div class="card" style="--c:var(--violet)"><b>Vinohrady</b><p><span lang="en">Wine bars, small cafés and a calmer crowd. Good for a long conversation before the night gets loud.</span><span lang="nl">Wijnbars, kleine cafés en een rustiger publiek. Fijn voor een lang gesprek voordat de avond luid wordt.</span></p></div>
+      <div class="card" style="--c:var(--gold)"><b><span lang="en">The riverside</span><span lang="nl">Langs de rivier</span></b><p><span lang="en">On summer evenings the embankment along the Vltava turns into one long terrace, with boats that are bars.</span><span lang="nl">Op zomeravonden wordt de kade langs de Moldau één lang terras, met boten die bars zijn.</span></p></div>
+    </div>
+  </section>
+
+  <section id="pivo">
+    <h2 style="color:var(--gold)">PIVO</h2>
+    <div class="sign" style="--c:var(--gold)">BEER · 24/7</div>
+    <h3><span lang="en">Pivo means beer, and Prague takes it seriously</span><span lang="nl">Pivo betekent bier, en Praag neemt dat serieus</span></h3>
+    <div class="grid">
+      <div class="card" style="--c:var(--gold)"><b>Žižkov</b><p><span lang="en">Known for having a pub on almost every corner. Unpolished, cheap and full of locals: the real thing.</span><span lang="nl">Bekend om een kroeg op bijna elke hoek. Ongepolijst, betaalbaar en vol locals: het echte werk.</span></p></div>
+      <div class="card" style="--c:var(--green)"><b><span lang="en">Fresh from the tank</span><span lang="nl">Vers uit de tank</span></b><p><span lang="en">Czech lager poured with a thick head of foam. If the glass is empty, a new one tends to arrive by itself.</span><span lang="nl">Tsjechisch pils, getapt met een dikke schuimkraag. Is je glas leeg, dan komt er vaak vanzelf een nieuwe.</span></p></div>
+    </div>
+  </section>
+
+  <section id="club">
+    <h2 style="color:var(--cyan)">CLUB</h2>
+    <div class="sign pulse" style="--c:var(--cyan)">TONIGHT · TECHNO</div>
+    <h3><span lang="en">When the bars close, the basements open</span><span lang="nl">Als de bars sluiten, gaan de kelders open</span></h3>
+    <div class="grid">
+      <div class="card" style="--c:var(--cyan)"><b><span lang="en">Under the old town</span><span lang="nl">Onder de oude stad</span></b><p><span lang="en">Some of the best nights happen in vaulted cellars under centuries-old houses: low ceilings, deep bass, no clocks.</span><span lang="nl">Sommige van de beste avonden gebeuren in gewelfde kelders onder eeuwenoude huizen: lage plafonds, diepe bas, geen klokken.</span></p></div>
+      <div class="card" style="--c:var(--violet)"><b>Karlín &amp; Holešovice</b><p><span lang="en">Old factory districts with newer bars and bigger rooms, for when the night needs more space.</span><span lang="nl">Oude fabriekswijken met nieuwere bars en grotere zalen, voor als de avond meer ruimte nodig heeft.</span></p></div>
+    </div>
+  </section>
+
+  <section id="nonstop">
+    <h2 style="color:var(--green)">NONSTOP</h2>
+    <div class="sign" style="--c:var(--green)">NONSTOP</div>
+    <h3><span lang="en">The end of the night, and the way home</span><span lang="nl">Het einde van de avond, en de weg naar huis</span></h3>
+    <div class="grid">
+      <div class="card" style="--c:var(--green)"><b><span lang="en">The green sign</span><span lang="nl">Het groene bord</span></b><p><span lang="en">A NONSTOP sign means it never closes: a late snack, a last drink, or just somewhere warm at four in the morning.</span><span lang="nl">Een NONSTOP-bord betekent dat het nooit dicht gaat: een late snack, een laatste drankje, of gewoon een warme plek om vier uur 's nachts.</span></p></div>
+      <div class="card" style="--c:var(--gold)"><b><span lang="en">The night tram</span><span lang="nl">De nachttram</span></b><p><span lang="en">Night trams keep running while the city sleeps. Watching the empty streets slide past is part of the night.</span><span lang="nl">Nachttrams blijven rijden terwijl de stad slaapt. De lege straten voorbij zien glijden hoort bij de avond.</span></p></div>
+    </div>
+    <div class="tram">&#9632;&#9632;&#9632; <span lang="en">LAST TRAM HOME. MIND THE GAP BETWEEN THE COBBLES.</span><span lang="nl">LAATSTE TRAM NAAR HUIS. LET OP DE KIEREN TUSSEN DE KINDERKOPJES.</span></div>
+  </section>
+</div>
+<footer>
+  <a href="index.html">&lsaquo; <span lang="en">BACK TO JORDI'S ARCADE</span><span lang="nl">TERUG NAAR JORDI'S ARCADE</span></a>
+  <div><span lang="en">Go out, have fun, and get home safe.</span><span lang="nl">Ga uit, heb plezier, en kom veilig thuis.</span></div>
+</footer>
+<script>
+  (function(){
+    var bs = document.querySelectorAll('.lang button');
+    function set(l, save){ document.documentElement.lang = l; bs.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-l') === l ? 'true' : 'false'); }); if (save) try{ localStorage.setItem('clubbie_lang', l); }catch(e){} }
+    bs.forEach(function(b){ b.addEventListener('click', function(){ set(b.getAttribute('data-l'), true); }); });
+    set(document.documentElement.lang === 'nl' ? 'nl' : 'en', false);
+    try{ sessionStorage.setItem('arcade_at', '0'); }catch(e){}
+  })();
+</script>
+</body>
+</html>
