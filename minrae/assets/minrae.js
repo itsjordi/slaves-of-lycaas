@@ -73,9 +73,9 @@ function renderChrome() {
 /* ---------- Sparkles ----------
    data-sparkles="ring"  : twinkling sparkles orbiting an element (logo)
    data-sparkles="float" : sparkles slowly drifting upward (hero background) */
-function sparkle(layer, css) {
+function sparkle(layer, css, lily = false) {
   const s = document.createElement("i");
-  s.className = "spk";
+  s.className = lily ? "spk lily" : "spk";
   Object.assign(s.style, css);
   layer.appendChild(s);
   return s;
@@ -90,7 +90,8 @@ function initSparkles() {
     host.prepend(layer);
 
     for (let i = 0; i < count; i++) {
-      const size = Math.round(rand(6, i % 5 === 0 ? 26 : 15)) + "px";
+      const lily = i % 3 === 1;
+      const size = Math.round(lily ? rand(12, 20) : rand(6, i % 5 === 0 ? 26 : 15)) + "px";
       if (mode === "ring") {
         // Distribute around an ellipse, with some sparkles drifting inward for depth.
         const a = (i / count) * Math.PI * 2 + rand(-.25, .25);
@@ -100,12 +101,12 @@ function initSparkles() {
           top: `calc(${50 + Math.sin(a) * r * 100}% - ${size} / 2)`,
           width: size, height: size,
           animationDelay: `${rand(-4, 0)}s`, animationDuration: `${rand(2.2, 4.5)}s`,
-        });
+        }, lily);
       } else {
         const s = sparkle(layer, {
           left: `${rand(0, 100)}%`, width: size, height: size,
           animationDelay: `${rand(-18, 0)}s`, animationDuration: `${rand(10, 20)}s`,
-        });
+        }, lily);
         s.classList.add("float");
       }
     }
@@ -185,9 +186,55 @@ function initProduct() {
   $("#related-grid").innerHTML = PRODUCTS.filter((x) => x.slug !== p.slug).slice(0, 4).map(cardHTML).join("");
 }
 
+/* ---------- Border sparkles ----------
+   Every glowing border gets sparkles and lilies that pop up at a random spot on its edge,
+   at random moments. Only borders on screen get them, so it stays light. */
+function initEdgeSparkles() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const onScreen = (el) => {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < innerHeight && r.width > 0;
+  };
+  const spawn = (el) => {
+    if (el.querySelectorAll(".edge-spk").length >= 3) return;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const lily = Math.random() < 0.35;
+    const size = Math.round(lily ? rand(13, 20) : rand(9, 20));
+    // Pick a random point on the perimeter (longer sides are more likely).
+    let d = Math.random() * 2 * (w + h), x, y;
+    if (d < w) { x = d; y = 0; }
+    else if ((d -= w) < h) { x = w; y = d; }
+    else if ((d -= h) < w) { x = w - d; y = h; }
+    else { x = 0; y = h - (d - w); }
+    const s = document.createElement("i");
+    s.className = "spk edge-spk" + (lily ? " lily" : "");
+    s.setAttribute("aria-hidden", "true");
+    Object.assign(s.style, {
+      width: size + "px", height: size + "px",
+      left: x - 1 - size / 2 + "px", top: y - 1 - size / 2 + "px",
+    });
+    s.style.setProperty("--life", rand(1.3, 3).toFixed(2) + "s");
+    s.addEventListener("animationend", () => s.remove());
+    el.appendChild(s);
+  };
+  const tick = () => {
+    if (!document.hidden) {
+      const els = $$(".glow").filter(onScreen);
+      if (els.length) {
+        // One or two pops per tick on random borders.
+        const n = Math.random() < 0.3 ? 2 : 1;
+        for (let i = 0; i < n; i++) spawn(els[Math.floor(Math.random() * els.length)]);
+      }
+    }
+    setTimeout(tick, rand(110, 420));
+  };
+  tick();
+}
+
 renderChrome();
 initTheme();
 initSparkles();
 initHome();
 initCollection();
 initProduct();
+initEdgeSparkles();
