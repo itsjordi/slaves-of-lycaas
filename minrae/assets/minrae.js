@@ -135,8 +135,9 @@ function cardHTML(p) {
 
 /* ---------- Page: home ---------- */
 function initHome() {
-  const grid = $("#all-grid");
-  if (grid) grid.innerHTML = PRODUCTS.map(cardHTML).join("");
+  // Newest avatar is the hero; the three after it are "Latest drops".
+  const grid = $("#latest-grid");
+  if (grid) grid.innerHTML = PRODUCTS.slice(1, 4).map(cardHTML).join("");
   $$("[data-discord]").forEach((a) => (a.href = DISCORD_URL));
 }
 
