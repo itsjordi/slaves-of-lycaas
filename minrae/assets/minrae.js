@@ -23,17 +23,20 @@ const rand = (a, b) => a + Math.random() * (b - a);
 
 /* ---------- Theme (Cherry default, Mono alternate) ---------- */
 function initTheme() {
+  // Cycles Dark -> Light -> Mono. The button shows which theme comes next.
+  const order = ["cherry", "light", "mono"];
+  const names = { cherry: "Dark", light: "Light", mono: "Mono" };
+  const current = () => (order.includes(document.documentElement.dataset.theme) ? document.documentElement.dataset.theme : "cherry");
+  const nextOf = (t) => order[(order.indexOf(t) + 1) % order.length];
   const btns = $$(".theme-toggle");
-  const label = () => (document.documentElement.dataset.theme === "mono" ? "Cherry" : "Mono");
-  btns.forEach((b) => {
-    b.textContent = label();
-    b.addEventListener("click", () => {
-      const next = document.documentElement.dataset.theme === "mono" ? "cherry" : "mono";
-      document.documentElement.dataset.theme = next;
-      try { localStorage.setItem("minrae-v5-theme", next); } catch (e) {}
-      btns.forEach((x) => (x.textContent = label()));
-    });
-  });
+  const paint = () => btns.forEach((b) => (b.textContent = names[nextOf(current())]));
+  btns.forEach((b) => b.addEventListener("click", () => {
+    const next = nextOf(current());
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("minrae-v5-theme", next); } catch (e) {}
+    paint();
+  }));
+  paint();
 }
 
 /* ---------- Shared chrome ---------- */
@@ -108,7 +111,7 @@ function initSparkles() {
     }
     // A few static twinklers on top for "float" mode, so it never looks empty.
     if (mode === "float") {
-      for (let i = 0; i < Math.round(count / 2); i++) {
+      for (let i = 0; i < Math.round(count / 3); i++) {
         const size = Math.round(rand(5, 13)) + "px";
         sparkle(layer, { left: `${rand(2, 98)}%`, top: `${rand(4, 96)}%`, width: size, height: size, animationDelay: `${rand(-4, 0)}s` });
       }
@@ -131,10 +134,8 @@ function cardHTML(p) {
 
 /* ---------- Page: home ---------- */
 function initHome() {
-  const grid = $("#latest-grid");
-  if (grid) grid.innerHTML = PRODUCTS.slice(1, 5).map(cardHTML).join("");
-  const n = $("#avatar-count");
-  if (n) n.textContent = PRODUCTS.length;
+  const grid = $("#all-grid");
+  if (grid) grid.innerHTML = PRODUCTS.map(cardHTML).join("");
   $$("[data-discord]").forEach((a) => (a.href = DISCORD_URL));
 }
 
