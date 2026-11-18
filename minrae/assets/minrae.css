@@ -26,6 +26,7 @@
   --f-body: "Cormorant Garamond", Georgia, serif;
 
   --radius: 14px;
+  --lily-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 12C8.9 9.6 9 4.6 12 0.6C15 4.6 15.1 9.6 12 12Z' transform='rotate%280 12 12%29'/%3E%3Cpath d='M12 12C9.6 9.4 9.7 5.2 12 1.8C14.3 5.2 14.4 9.4 12 12Z' transform='rotate%2860 12 12%29'/%3E%3Cpath d='M12 12C8.9 9.6 9 4.6 12 0.6C15 4.6 15.1 9.6 12 12Z' transform='rotate%28120 12 12%29'/%3E%3Cpath d='M12 12C9.6 9.4 9.7 5.2 12 1.8C14.3 5.2 14.4 9.4 12 12Z' transform='rotate%28180 12 12%29'/%3E%3Cpath d='M12 12C8.9 9.6 9 4.6 12 0.6C15 4.6 15.1 9.6 12 12Z' transform='rotate%28240 12 12%29'/%3E%3Cpath d='M12 12C9.6 9.4 9.7 5.2 12 1.8C14.3 5.2 14.4 9.4 12 12Z' transform='rotate%28300 12 12%29'/%3E%3Cline x1='12' y1='12' x2='16.30' y2='4.55' stroke='black' stroke-width='.55'/%3E%3Cellipse cx='16.30' cy='4.55' rx='1.1' ry='.6' transform='rotate%2830 16.30 4.55%29'/%3E%3Cline x1='12' y1='12' x2='20.60' y2='12.00' stroke='black' stroke-width='.55'/%3E%3Cellipse cx='20.60' cy='12.00' rx='1.1' ry='.6' transform='rotate%2890 20.60 12.00%29'/%3E%3Cline x1='12' y1='12' x2='16.30' y2='19.45' stroke='black' stroke-width='.55'/%3E%3Cellipse cx='16.30' cy='19.45' rx='1.1' ry='.6' transform='rotate%28150 16.30 19.45%29'/%3E%3Cline x1='12' y1='12' x2='7.70' y2='19.45' stroke='black' stroke-width='.55'/%3E%3Cellipse cx='7.70' cy='19.45' rx='1.1' ry='.6' transform='rotate%28210 7.70 19.45%29'/%3E%3Cline x1='12' y1='12' x2='3.40' y2='12.00' stroke='black' stroke-width='.55'/%3E%3Cellipse cx='3.40' cy='12.00' rx='1.1' ry='.6' transform='rotate%28270 3.40 12.00%29'/%3E%3Cline x1='12' y1='12' x2='7.70' y2='4.55' stroke='black' stroke-width='.55'/%3E%3Cellipse cx='7.70' cy='4.55' rx='1.1' ry='.6' transform='rotate%28330 7.70 4.55%29'/%3E%3Ccircle cx='12' cy='12' r='1.5'/%3E%3C/svg%3E");
   --sparkle-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0C12.35 9.2 14.8 11.65 24 12C14.8 12.35 12.35 14.8 12 24C11.65 14.8 9.2 12.35 0 12C9.2 11.65 11.65 9.2 12 0Z'/%3E%3C/svg%3E");
 }
 
@@ -405,3 +406,49 @@ img { display: block; max-width: 100%; }
 .discord-invite .btn { font-size: 13px; }
 .discord-invite .discord-mark { width: 18px; height: 18px; color: currentColor; opacity: 1; }
 .discord-invite + .site-footer { margin-top: 0; }
+
+/* ---------- v5.4: lilies, used the same way as the sparkles ---------- */
+.spk.lily {
+  -webkit-mask-image: var(--lily-svg); mask-image: var(--lily-svg);
+  animation-name: bloom;
+}
+.sparkle-layer .spk.lily.float { animation-name: drift-lily; }
+@keyframes bloom {
+  0%, 100% { opacity: .3; transform: scale(.7) rotate(-12deg); }
+  50%      { opacity: .95; transform: scale(1) rotate(12deg); }
+}
+@keyframes drift-lily {
+  0%   { opacity: 0; transform: translateY(0) rotate(0) scale(.7); }
+  15%  { opacity: .9; }
+  85%  { opacity: .8; }
+  100% { opacity: 0; transform: translateY(-60vh) rotate(120deg) scale(1); }
+}
+/* Cards: sparkle top-right, little lily bottom-left. */
+.glow::after {
+  -webkit-mask-image: var(--lily-svg); mask-image: var(--lily-svg);
+  width: 16px; height: 16px; bottom: -8px; left: -8px;
+  animation-name: bloom;
+}
+.lily-inline {
+  width: 15px; height: 15px; background: currentColor; display: inline-block;
+  -webkit-mask: var(--lily-svg) center / contain no-repeat; mask: var(--lily-svg) center / contain no-repeat;
+}
+
+/* ---------- v5.5: sparkles + lilies pop up at random spots along glowing borders ---------- */
+.glow::before, .glow::after { content: none; }
+.edge-spk {
+  position: absolute; z-index: 4; pointer-events: none;
+  animation: edge-pop var(--life, 2s) ease-in-out forwards;
+}
+.edge-spk.lily { animation-name: edge-bloom; }
+@keyframes edge-pop {
+  0%   { opacity: 0; transform: scale(.2) rotate(0deg); }
+  35%  { opacity: 1; transform: scale(1) rotate(45deg); }
+  100% { opacity: 0; transform: scale(.4) rotate(90deg); }
+}
+@keyframes edge-bloom {
+  0%   { opacity: 0; transform: scale(.3) rotate(-20deg); }
+  40%  { opacity: 1; transform: scale(1) rotate(10deg); }
+  100% { opacity: 0; transform: scale(.5) rotate(30deg); }
+}
+@media (prefers-reduced-motion: reduce) { .edge-spk { display: none; } }
