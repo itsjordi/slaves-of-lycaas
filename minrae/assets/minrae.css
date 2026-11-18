@@ -452,3 +452,7 @@ img { display: block; max-width: 100%; }
   100% { opacity: 0; transform: scale(.5) rotate(30deg); }
 }
 @media (prefers-reduced-motion: reduce) { .edge-spk { display: none; } }
+
+/* ---------- v5.6: latest 3 on home ---------- */
+.grid.three { grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 980px; margin: 0 auto; }
+@media (max-width: 700px) { .grid.three { grid-template-columns: 1fr; max-width: 340px; } }
